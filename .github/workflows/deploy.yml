@@ -124,6 +124,9 @@ jobs:
               ssh-keygen -t ed25519 -f .ssh/term_info_ed25519 -N "" -C "wish-portfolio@habibiahmada.dev"
               chmod 600 .ssh/term_info_ed25519*
             fi
+            cp -f .ssh/term_info_ed25519 /opt/habibiahmada/term_info_ed25519
+            cp -f .ssh/term_info_ed25519.pub /opt/habibiahmada/term_info_ed25519.pub
+            chmod 600 /opt/habibiahmada/term_info_ed25519 /opt/habibiahmada/term_info_ed25519.pub
 
             sudo cp deploy/portfolio-ssh.service /etc/systemd/system/portfolio-ssh.service
             sudo systemctl daemon-reload
@@ -133,9 +136,9 @@ jobs:
             sleep 2
             sudo systemctl --no-pager --lines=20 status portfolio-ssh.service || true
 
-            if sudo ss -ltnp | grep -q ':2222'; then
-              echo "OK: SSH portfolio listening on :2222"
+            if sudo ss -ltnp | grep -q ':22 '; then
+              echo "OK: SSH portfolio listening on :22"
             else
-              echo "ERROR: port 2222 not detected — check systemd logs" >&2
+              echo "ERROR: port 22 not detected — check systemd logs" >&2
               exit 1
             fi

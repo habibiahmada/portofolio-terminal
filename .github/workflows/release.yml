@@ -62,6 +62,16 @@ jobs:
           node-version: "20"
           registry-url: https://registry.npmjs.org
 
+      - name: Verify npm package contents
+        run: |
+          test -f npm/bin/habibiahmada-linux-x64
+          test -f npm/bin/habibiahmada-linux-arm64
+          test -f npm/bin/habibiahmada-darwin-x64
+          test -f npm/bin/habibiahmada-darwin-arm64
+          test -f npm/bin/habibiahmada-win-x64.exe
+          cd npm && npm pack --dry-run | tee /tmp/npm-pack.txt
+          grep 'habibiahmada-linux-x64' /tmp/npm-pack.txt
+
       - name: Test npm wrapper
         run: cd npm && node test/integration.test.js
 

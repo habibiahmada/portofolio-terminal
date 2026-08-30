@@ -1,1 +1,7 @@
-{}
+{
+  "habibiahmada-darwin-arm64": "c5ba068043dd3ff7cb13b00802f0888b79b88c40a9e908aca15acd8043be2b35",
+  "habibiahmada-darwin-x64": "40d44b1a2743452dd82e2c01d506afe2ff3cbcc7abb73e88c38f2651388e5fb2",
+  "habibiahmada-linux-arm64": "4c5a9a725716b7ac9b4173bf0ef4469915837fe1cb2e2183c22b1696445621a5",
+  "habibiahmada-linux-x64": "46f7099b62b752287796f1303950ae34405524b4a99b5c4dbd06c2bcd222200a",
+  "habibiahmada-win-x64.exe": "bea61790acade7890816ef068fe48c35d6d0aaa09cdcae01d394c72065f59929"
+}

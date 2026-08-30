@@ -65,3 +65,10 @@ CHECKSUM_FILE="npm/checksums.json"
   echo "}"
 } > "$CHECKSUM_FILE"
 echo "Checksums written to $CHECKSUM_FILE"
+
+echo ""
+echo "Staging binaries into npm/bin/"
+mkdir -p npm/bin
+cp "$OUTPUT_DIR"/habibiahmada-* npm/bin/
+chmod +x npm/bin/habibiahmada-* 2>/dev/null || true
+ls -lh npm/bin/

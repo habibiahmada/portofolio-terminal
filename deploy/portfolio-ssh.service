@@ -6,10 +6,12 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-# sshd on the host should not claim port 2222; Wish app is the ssh server.
-# If using a privileged port change 2222 -> a value + set AmbientCapabilities.
+User=ubuntu
+Group=ubuntu
 WorkingDirectory=/opt/habibiahmada
 ExecStart=/opt/habibiahmada/habibiahmada-ssh
+Environment=SSH_PORT=22
+Environment=SSH_HOST_KEY_PATH=/opt/habibiahmada/term_info_ed25519
 Environment=SSH_MAX_SESSIONS=64
 Environment=SSH_IDLE_TIMEOUT=30m
 Environment=SSH_MAX_TIMEOUT=2h
@@ -18,13 +20,13 @@ Environment=SSH_RATE_BURST=5
 Restart=always
 RestartSec=5
 
-# Raised soft limit for high concurrency of concurrent SSH sessions.
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+
 LimitNOFILE=65535
 
-# Minimal hardening (a plain user, no special privileges required for port 2222).
-NoNewPrivileges=true
 PrivateTmp=true
-ProtectSystem=full
+ProtectSystem=strict
 ReadWritePaths=/opt/habibiahmada
 
 [Install]

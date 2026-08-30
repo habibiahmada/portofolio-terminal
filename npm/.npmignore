@@ -1,0 +1,2 @@
+# Override repo-root .gitignore (/npm/bin/) so all platform binaries ship.
+# Without this file, npm publish can omit gitignored bin/ entries.
