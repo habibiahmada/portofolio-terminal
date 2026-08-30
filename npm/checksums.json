@@ -1,7 +1,7 @@
 {
-  "habibiahmada-darwin-arm64": "c5ba068043dd3ff7cb13b00802f0888b79b88c40a9e908aca15acd8043be2b35",
-  "habibiahmada-darwin-x64": "40d44b1a2743452dd82e2c01d506afe2ff3cbcc7abb73e88c38f2651388e5fb2",
-  "habibiahmada-linux-arm64": "4c5a9a725716b7ac9b4173bf0ef4469915837fe1cb2e2183c22b1696445621a5",
-  "habibiahmada-linux-x64": "46f7099b62b752287796f1303950ae34405524b4a99b5c4dbd06c2bcd222200a",
-  "habibiahmada-win-x64.exe": "bea61790acade7890816ef068fe48c35d6d0aaa09cdcae01d394c72065f59929"
+  "habibiahmada-darwin-arm64": "508201dd59dfc0989596572d2473593036b2797b32910b831e98d6811cde4432",
+  "habibiahmada-darwin-x64": "2186d9fda79712dfe9a689dd264e1fbbfb9e2c457cf3d6d8518960a867c5a63f",
+  "habibiahmada-linux-amd64": "688c996fb6c056d7219ae9afa9358347e5ba71cbd075b7db451d34ad699fb8ee",
+  "habibiahmada-linux-arm64": "a565533b7d26dc8d5079e8bba4dcdce09713720486c331a1549ae55d535aa7c0",
+  "habibiahmada-win-x64.exe": "1def11957598aaf56bbaf0bcaa8aff00211a415b2d0f5e09f7563483c95b9b52"
 }
