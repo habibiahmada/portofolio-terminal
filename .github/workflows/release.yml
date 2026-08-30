@@ -69,8 +69,10 @@ jobs:
           test -f npm/bin/habibiahmada-darwin-x64
           test -f npm/bin/habibiahmada-darwin-arm64
           test -f npm/bin/habibiahmada-win-x64.exe
-          cd npm && npm pack --dry-run | tee /tmp/npm-pack.txt
-          grep 'habibiahmada-linux-x64' /tmp/npm-pack.txt
+          cd npm
+          PACK="$(npm pack | tail -1)"
+          tar -tzf "$PACK" | grep 'package/bin/habibiahmada-linux-x64'
+          rm -f "$PACK"
 
       - name: Test npm wrapper
         run: cd npm && node test/integration.test.js
