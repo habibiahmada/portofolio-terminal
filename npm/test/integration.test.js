@@ -52,7 +52,14 @@ async function main() {
   }
 
   // 3. With a stub binary present, args must be forwarded and exit 0.
+  // Temporarily clear checksums — the stub is not the release binary.
   cleanup();
+  const checksumsPath = path.join(ROOT, "checksums.json");
+  let savedChecksums = null;
+  if (fs.existsSync(checksumsPath)) {
+    savedChecksums = fs.readFileSync(checksumsPath);
+    fs.writeFileSync(checksumsPath, "{}\n");
+  }
   const stub = path.join(BIN, "habibiahmada-linux-x64");
   fs.writeFileSync(
     stub,
@@ -61,6 +68,9 @@ async function main() {
   );
   const out = runWrapper(["--stub-flag"]);
   assert.match(out, /wrapper-ok:--stub-flag/, "expected stub to forward args");
+  if (savedChecksums) {
+    fs.writeFileSync(checksumsPath, savedChecksums);
+  }
   cleanup();
 
   console.log("all integration checks passed");

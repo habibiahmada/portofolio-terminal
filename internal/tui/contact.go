@@ -84,10 +84,10 @@ func (m *App) renderContactSocials(cw int) string {
 	heading := styles.SectionTitleStyle.Render("▸ Socials")
 
 	socialIcons := map[string]string{
-		"GitHub":   "◈",
-		"LinkedIn": "◆",
-		"Instagram":"◦",
-		"Email":    "@",
+		"GitHub":    "◈",
+		"LinkedIn":  "◆",
+		"Instagram": "◦",
+		"Email":     "@",
 	}
 
 	var rows []string

@@ -49,7 +49,7 @@ func (m *App) renderServicesContent() string {
 	}
 
 	// CTA line
-	cta := styles.PromptStyle.Render("  Inquiries: " + m.profile.Email) + "  ·  " + styles.LinkStyle.Render("https://"+m.profile.Website)
+	cta := styles.PromptStyle.Render("  Inquiries: "+m.profile.Email) + "  ·  " + styles.LinkStyle.Render("https://"+m.profile.Website)
 	for _, wl := range components.WrapText(cta, cw) {
 		lines = append(lines, wl)
 	}
