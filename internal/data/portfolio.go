@@ -59,10 +59,17 @@ type CaseStudySection struct {
 	Body  string
 }
 
-// Skill represents a technical skill. In this project skills are a flat list
-// of tools (no category / no level bars) matching the website marquee.
+// Skill represents a technical skill.
 type Skill struct {
 	Name string
+}
+
+// SkillCategory groups related skills with contextual description.
+type SkillCategory struct {
+	Name        string
+	Icon        string
+	Description string
+	Skills      []string
 }
 
 // ExperienceWork represents a work experience entry.

@@ -12,12 +12,13 @@ import (
 )
 
 // Splash: signature + brand + progress, then hand off to App.
+// Total duration stays short (~200ms) so `make dev` opens the TUI fast.
 var splashDelays = []time.Duration{
-	120 * time.Millisecond,
-	120 * time.Millisecond,
-	120 * time.Millisecond,
-	120 * time.Millisecond,
-	220 * time.Millisecond,
+	40 * time.Millisecond,
+	40 * time.Millisecond,
+	40 * time.Millisecond,
+	40 * time.Millisecond,
+	40 * time.Millisecond,
 }
 
 const (

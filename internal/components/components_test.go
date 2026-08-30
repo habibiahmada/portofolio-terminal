@@ -1,6 +1,7 @@
 package components
 
 import (
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -210,5 +211,28 @@ func TestFigureFiglet(t *testing.T) {
 	// Large-font rendering spreads letters across multiple lines/blocks.
 	if len(out) < len("HABIBI")*4 {
 		t.Errorf("expected substantial figlet output, got %q", out)
+	}
+}
+
+func TestHeroBannerUsesContourShadowsNotAccentBlocks(t *testing.T) {
+	out := HeroBanner("HABIBI", 120)
+	if out == "" {
+		t.Fatal("expected hero banner to render")
+	}
+	plain := regexp.MustCompile("\x1b\\[[0-9;]*m").ReplaceAllString(out, "")
+	if strings.Contains(plain, "▓") {
+		t.Errorf("hero banner must not use solid accent blocks, got %q", plain)
+	}
+	if !strings.Contains(plain, "─") && !strings.Contains(plain, "│") {
+		t.Errorf("hero banner should include contour shadow lines, got %q", plain)
+	}
+	if !strings.Contains(plain, "█") {
+		t.Errorf("hero banner should include white letter fills, got %q", plain)
+	}
+	if strings.Contains(plain, "┼") {
+		t.Errorf("hero banner must not use plus-shaped shadow joints, got %q", plain)
+	}
+	if strings.ContainsAny(plain, "┘┐└┌") {
+		t.Errorf("hero banner must not curl shadow corners into letter fills, got %q", plain)
 	}
 }

@@ -23,6 +23,21 @@ var (
 				Foreground(ColorSecondary).
 				Bold(true)
 
+	// ArtHeroFillStyle renders the thick hero banner letter bodies.
+	ArtHeroFillStyle = lipgloss.NewStyle().
+				Foreground(ColorText).
+				Bold(true)
+
+	// ArtHeroShadowPrimary and ArtHeroShadowSecondary color the orthogonal
+	// contour shadow lines (─ │ ┼) on the hero banner.
+	ArtHeroShadowPrimary = lipgloss.NewStyle().
+				Foreground(ColorPrimary).
+				Bold(true)
+
+	ArtHeroShadowSecondary = lipgloss.NewStyle().
+				Foreground(ColorSecondary).
+				Bold(true)
+
 	// HeroTitleStyle renders the large hero name.
 	HeroTitleStyle = lipgloss.NewStyle().
 			Foreground(ColorPrimary).

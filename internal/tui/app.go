@@ -94,8 +94,9 @@ type App struct {
 	focus Focus
 
 	// Child screen state.
-	selectedProject int
-	projectDetail   data.Project
+	selectedProject  int
+	projectDetail    data.Project
+	selectedFeatured int // highlighted featured card on Home
 
 	// Data.
 	profile      data.Profile
@@ -449,6 +450,14 @@ func (m *App) enterMenuScreen(idx int) (tea.Model, tea.Cmd) {
 // scrollOrSelectUp handles j/k up: list selection or content scroll.
 func (m *App) scrollOrSelectUp() {
 	switch m.currentScreen {
+	case ScreenHome:
+		featured := m.featuredProjects()
+		if len(featured) > 0 {
+			m.selectedFeatured--
+			if m.selectedFeatured < 0 {
+				m.selectedFeatured = len(featured) - 1
+			}
+		}
 	case ScreenProjects:
 		m.selectedProject--
 		if m.selectedProject < 0 {
@@ -462,6 +471,14 @@ func (m *App) scrollOrSelectUp() {
 // scrollOrSelectDown handles j/k down: list selection or content scroll.
 func (m *App) scrollOrSelectDown() {
 	switch m.currentScreen {
+	case ScreenHome:
+		featured := m.featuredProjects()
+		if len(featured) > 0 {
+			m.selectedFeatured++
+			if m.selectedFeatured >= len(featured) {
+				m.selectedFeatured = 0
+			}
+		}
 	case ScreenProjects:
 		m.selectedProject++
 		if m.selectedProject >= len(m.projects) {
@@ -539,6 +556,26 @@ func (m *App) enterContact() tea.Cmd {
 func (m *App) selectItem() (tea.Model, tea.Cmd) {
 	switch m.currentScreen {
 	case ScreenHome:
+		// Enter on a featured card → open its project detail.
+		featured := m.featuredProjects()
+		if len(featured) == 0 {
+			return m, nil
+		}
+		if m.selectedFeatured < 0 || m.selectedFeatured >= len(featured) {
+			m.selectedFeatured = 0
+		}
+		// Find the project index in the full list.
+		fp := featured[m.selectedFeatured]
+		for i, p := range m.projects {
+			if p.Slug == fp.Slug {
+				m.selectedProject = i
+				break
+			}
+		}
+		m.prevScreen = ScreenHome
+		m.projectDetail = fp
+		m.resetScroll()
+		m.currentScreen = ScreenProjectDetail
 		return m, nil
 	case ScreenProjects:
 		if len(m.projects) == 0 {
@@ -556,7 +593,11 @@ func (m *App) selectItem() (tea.Model, tea.Cmd) {
 func (m *App) goBack() (tea.Model, tea.Cmd) {
 	switch m.currentScreen {
 	case ScreenProjectDetail:
-		m.currentScreen = ScreenProjects
+		// Return to wherever we came from (Home or Projects list).
+		m.currentScreen = m.prevScreen
+		if m.currentScreen == ScreenProjectDetail {
+			m.currentScreen = ScreenProjects // safety fallback
+		}
 	case ScreenHome:
 		m.quitting = true
 		return m, tea.Quit

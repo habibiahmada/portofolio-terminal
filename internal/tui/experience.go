@@ -4,60 +4,83 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/charmbracelet/lipgloss"
-
+	"github.com/habibiahmada/habibiahmada-terminal/internal/components"
 	"github.com/habibiahmada/habibiahmada-terminal/internal/styles"
 )
 
 func (m *App) renderExperienceContent() string {
-	lines := []string{styles.SectionTitleStyle.Render("Experience")}
+	cw := m.contentWidth()
+	lines := []string{
+		styles.SectionTitleStyle.Render("▸ Work Experience"),
+		styles.MutedStyle.Render("Roles and engineering programs that shaped my end-to-end development skills."),
+		"",
+	}
 
 	for _, w := range m.work {
 		badge := ""
 		if w.Badge != "" {
-			badge = styles.BadgeAccentStyle.Render(w.Badge)
+			badge = "  " + styles.BadgeAccentStyle.Render("["+w.Badge+"]")
 		}
-		lines = append(lines, renderExpRow(w.Period, w.Role, w.Company, badge, m.contentWidth()))
+
+		role := styles.PrimaryText.Render(w.Role)
+		company := styles.NormalStyle.Render(w.Company)
+		period := styles.MutedStyle.Render("[" + w.Period + "]")
+
+		header := fmt.Sprintf("● %s  %s · %s%s", period, role, company, badge)
+
+		locLine := ""
+		if w.Location != "" {
+			locLine = "  " + styles.MutedStyle.Render("📍 "+w.Location)
+		}
+
+		var detailLines []string
+		for _, d := range w.Details {
+			wrapped := components.WrapText(d, cw-6)
+			if len(wrapped) > 0 {
+				detailLines = append(detailLines, "  ▸ "+styles.NormalStyle.Render(wrapped[0]))
+				for _, dl := range wrapped[1:] {
+					detailLines = append(detailLines, "    "+styles.NormalStyle.Render(dl))
+				}
+			}
+		}
+
+		lines = append(lines, header)
+		if locLine != "" {
+			lines = append(lines, locLine)
+		}
+		if len(detailLines) > 0 {
+			lines = append(lines, detailLines...)
+		}
+		lines = append(lines, "")
 	}
 
-	lines = append(lines, "", styles.MutedStyle.Render("Education"))
-	for _, e := range m.education {
-		lines = append(lines, renderExpRow(e.Period, e.Title, e.School, "", m.contentWidth()))
-	}
-	return strings.Join(lines, "\n")
-}
-
-// renderExpRow lays out one experience/education entry with a fixed-width period
-// column, the role+company on the same row, and the optional badge kept inline
-// when it fits, otherwise wrapped onto an indented continuation line.
-func renderExpRow(period, primary, secondary, badge string, contentWidth int) string {
-	const periodCol = 18
-
-	namePart := primary + " · " + secondary
-
-	if badge == "" {
-		return fmt.Sprintf("%-*s%s",
-			periodCol, styles.MutedStyle.Render(period),
-			styles.NormalStyle.Render(namePart),
-		)
-	}
-
-	// Try to fit role+company and badge on one line.
-	baseWidth := periodCol + lipgloss.Width(namePart)
-	badgeWidth := lipgloss.Width(badge)
-	if baseWidth+2+badgeWidth <= contentWidth {
-		return fmt.Sprintf("%-*s%s  %s",
-			periodCol, styles.MutedStyle.Render(period),
-			styles.NormalStyle.Render(namePart),
-			badge,
-		)
-	}
-
-	// Wrap: keep the badge on its own aligned line.
-	return fmt.Sprintf("%-*s%s\n%s%s",
-		periodCol, styles.MutedStyle.Render(period),
-		styles.NormalStyle.Render(namePart),
-		strings.Repeat(" ", periodCol),
-		badge,
+	lines = append(lines,
+		styles.SectionTitleStyle.Render("▸ Education & Foundations"),
+		styles.MutedStyle.Render("Academic background and formal foundations in software engineering."),
+		"",
 	)
+
+	for _, e := range m.education {
+		title := styles.PrimaryText.Render(e.Title)
+		school := styles.NormalStyle.Render(e.School)
+		period := styles.MutedStyle.Render("[" + e.Period + "]")
+
+		header := fmt.Sprintf("● %s  %s · %s", period, title, school)
+
+		var descLines []string
+		if e.Description != "" {
+			wrapped := components.WrapText(e.Description, cw-4)
+			for _, dl := range wrapped {
+				descLines = append(descLines, "  "+styles.MutedStyle.Render(dl))
+			}
+		}
+
+		lines = append(lines, header)
+		if len(descLines) > 0 {
+			lines = append(lines, descLines...)
+		}
+		lines = append(lines, "")
+	}
+
+	return strings.Join(lines, "\n")
 }

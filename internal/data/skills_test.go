@@ -19,3 +19,18 @@ func TestGetSkills(t *testing.T) {
 		seen[s.Name] = true
 	}
 }
+
+func TestGetSkillCategories(t *testing.T) {
+	cats := GetSkillCategories()
+	if len(cats) == 0 {
+		t.Fatal("expected non-empty skill categories")
+	}
+	for i, c := range cats {
+		if c.Name == "" {
+			t.Errorf("category[%d]: Name must not be empty", i)
+		}
+		if len(c.Skills) == 0 {
+			t.Errorf("category %q has no skills", c.Name)
+		}
+	}
+}

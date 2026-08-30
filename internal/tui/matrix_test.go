@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"strings"
 	"testing"
 	"time"
 )
@@ -41,6 +42,72 @@ func TestMatrixSizes(t *testing.T) {
 			view := m.View()
 			if view == "" {
 				t.Errorf("[%dx%d] screen %v rendered empty", size.w, size.h, s)
+			}
+		}
+	}
+}
+
+// TestScreensContentCompleteness verifies each screen contains its expected rich sections.
+func TestScreensContentCompleteness(t *testing.T) {
+	m := New()
+	m.width, m.height = 100, 35
+
+	checks := []struct {
+		screen   Screen
+		expected []string
+	}{
+		{
+			screen:   ScreenHome,
+			expected: []string{"Featured Work", "Trusted & Supported By", "Quick Actions"},
+		},
+		{
+			screen:   ScreenAbout,
+			expected: []string{"Habibi Ahmad Aziz", "Core Metrics & Accolades", "Engineering Philosophy"},
+		},
+		{
+			screen:   ScreenSkills,
+			expected: []string{"Tools & Technologies", "Frontend & UI Development", "Backend & API Engineering", "Databases & Data Modeling"},
+		},
+		{
+			screen:   ScreenExperience,
+			expected: []string{"Work Experience", "Education & Foundations", "PT Webekspres", "SMK Negeri 1 Karawang"},
+		},
+		{
+			screen:   ScreenCertificates,
+			expected: []string{"Licenses & Certifications", "Featured Honors & Awards", "Professional Certifications"},
+		},
+		{
+			screen:   ScreenServices,
+			expected: []string{"Services & Solutions", "How I Ship", "Web Design & Mobile-First", "Frontend Development"},
+		},
+		{
+			screen:   ScreenContact,
+			expected: []string{"Contact Methods", "Socials", "Email", "Website"},
+		},
+	}
+
+	for _, tc := range checks {
+		m.currentScreen = tc.screen
+		var raw string
+		switch tc.screen {
+		case ScreenHome:
+			raw = m.renderHomeContent()
+		case ScreenAbout:
+			raw = m.renderAboutContent()
+		case ScreenSkills:
+			raw = m.renderSkillsContent()
+		case ScreenExperience:
+			raw = m.renderExperienceContent()
+		case ScreenCertificates:
+			raw = m.renderCertificatesContent()
+		case ScreenServices:
+			raw = m.renderServicesContent()
+		case ScreenContact:
+			raw = m.renderContactContent()
+		}
+		for _, exp := range tc.expected {
+			if !strings.Contains(raw, exp) {
+				t.Errorf("screen %v missing expected content %q", tc.screen, exp)
 			}
 		}
 	}

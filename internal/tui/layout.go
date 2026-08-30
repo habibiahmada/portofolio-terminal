@@ -6,7 +6,7 @@ import (
 	"github.com/habibiahmada/habibiahmada-terminal/internal/components"
 )
 
-const maxContentWidth = 76
+const maxContentWidth = 84
 
 // Cells reserved beside the inner content column so the assembled shell
 // (nav + rule + focus rail + content + scrollbar) never exceeds the terminal.

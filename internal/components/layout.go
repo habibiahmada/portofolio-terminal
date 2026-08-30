@@ -82,6 +82,8 @@ func CenterInViewport(content string, width, height int) string {
 }
 
 // WrapText wraps plain text to the given width using word boundaries.
+// It uses lipgloss.Width (visual cell width) so multi-byte characters like
+// ·, ● and box-drawing glyphs are counted as 1 cell instead of 2–3 bytes.
 func WrapText(text string, width int) []string {
 	if width <= 0 {
 		return []string{text}
@@ -95,7 +97,7 @@ func WrapText(text string, width int) []string {
 	line := words[0]
 	for _, w := range words[1:] {
 		candidate := line + " " + w
-		if len(candidate) > width {
+		if lipgloss.Width(candidate) > width {
 			lines = append(lines, line)
 			line = w
 			continue

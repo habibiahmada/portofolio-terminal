@@ -103,11 +103,16 @@ var (
 			MarginBottom(1)
 
 	TagStyle = lipgloss.NewStyle().
-			Foreground(ColorSecondary).
-			Border(lipgloss.RoundedBorder()).
-			BorderForeground(ColorSecondary).
-			Padding(0, 1).
-			MarginRight(1)
+			Foreground(ColorSecondary)
+
+	// HomeCardTitleStyle and HomeCardMetaStyle fill the Featured Projects card
+	// tiles on the Home screen.
+	HomeCardTitleStyle = lipgloss.NewStyle().
+				Foreground(ColorText).
+				Bold(true)
+
+	HomeCardMetaStyle = lipgloss.NewStyle().
+				Foreground(ColorSecondary)
 )
 
 // Section label ("// Label") and badge variants, per docs/design-system.md.
@@ -128,22 +133,14 @@ var (
 
 	BadgeStyle = lipgloss.NewStyle().
 			Foreground(ColorSuccess).
-			Border(lipgloss.RoundedBorder()).
-			BorderForeground(ColorSuccess).
-			Padding(0, 1)
+			Bold(true)
 
 	BadgeAccentStyle = lipgloss.NewStyle().
 				Foreground(ColorPrimary).
-				Border(lipgloss.RoundedBorder()).
-				BorderForeground(ColorPrimary).
-				Padding(0, 1).
 				Bold(true)
 
 	BadgeNeutralStyle = lipgloss.NewStyle().
-				Foreground(ColorMuted).
-				Border(lipgloss.RoundedBorder()).
-				BorderForeground(ColorBorder).
-				Padding(0, 1)
+				Foreground(ColorMuted)
 
 	PrimaryCardStyle = lipgloss.NewStyle().
 				Border(lipgloss.RoundedBorder()).
