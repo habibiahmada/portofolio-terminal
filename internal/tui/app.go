@@ -65,7 +65,7 @@ var menuItems = []Screen{
 const (
 	mastheadLines = 2 // brand row + separator
 	footerHeight  = 2
-	bodyTopPad    = 1 // breathing room so the body isn't flush against the header
+	bodyTopPad    = 10 // breathing room so the body isn't flush against the header
 )
 
 // Focus identifiers — the top-level interaction zones. When focus is on the
@@ -140,6 +140,15 @@ type App struct {
 	cachedBodyKey string
 	cachedBody    string
 
+	// Mascot interactive state.
+	mascotLeft   int
+	mascotTop    int
+	mascotWidth  int
+	mascotHeight int
+	mascotClicks int
+	mascotState  int // 0: normal, 1: blink/wink, 2: angry
+	mascotTimer  int // ticks remaining in interactive state
+
 	// Flags.
 	quitting bool
 }
@@ -192,6 +201,13 @@ func (m *App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case footerTickMsg:
 		m.footerFrame++
+		if m.mascotTimer > 0 {
+			m.mascotTimer--
+			if m.mascotTimer == 0 {
+				m.mascotClicks = 0
+				m.mascotState = components.MascotStateNormal
+			}
+		}
 		return m, nextFooterTick()
 	}
 
@@ -236,6 +252,23 @@ func (m *App) handleMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 			frac = float64(msg.Y-m.scrollBarTop) / float64(m.scrollBarH-1)
 		}
 		m.setScrollToLineFraction(frac)
+		return m, nil
+	}
+
+	// Click on mascot in the right margin triggers interactive reactions:
+	// 1-2 clicks: eyes blink / happy wink!
+	// 3+ clicks: becomes angry with ╬ vein mark!
+	if msg.Action == tea.MouseActionPress && m.mascotWidth > 0 &&
+		msg.X >= m.mascotLeft && msg.X < m.mascotLeft+m.mascotWidth &&
+		msg.Y >= m.mascotTop && msg.Y < m.mascotTop+m.mascotHeight {
+		m.mascotClicks++
+		if m.mascotClicks >= 3 {
+			m.mascotState = components.MascotStateAngry
+			m.mascotTimer = 10 // ~3.5s
+		} else {
+			m.mascotState = components.MascotStateBlink
+			m.mascotTimer = 5 // ~1.7s
+		}
 		return m, nil
 	}
 
@@ -315,6 +348,19 @@ func (m *App) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, tea.EnableMouseCellMotion
 	}
 
+	// Mascot interaction key (M) — easter egg for keyboard users.
+	if (msg.String() == "m" || msg.String() == "M") && !msg.Alt {
+		m.mascotClicks++
+		if m.mascotClicks >= 3 {
+			m.mascotState = components.MascotStateAngry
+			m.mascotTimer = 10
+		} else {
+			m.mascotState = components.MascotStateBlink
+			m.mascotTimer = 5
+		}
+		return m, nil
+	}
+
 	// CV overlay intercepts keys first.
 	if m.cvModal {
 		if isBack(msg) || isSelect(msg) || isQuit(msg) || isHelp(msg) ||
@@ -339,17 +385,20 @@ func (m *App) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	// Project detail prev/next navigation (`h`/`l`). `←`/Esc returns to list.
+	// Project detail navigation.
+	// ← / h   → previous project
+	// → / l   → next project
+	// Esc     → back to list (NOT ← which now navigates projects)
 	if m.currentScreen == ScreenProjectDetail {
-		if msg.String() == "h" {
+		if msg.Type == tea.KeyLeft || msg.String() == "h" {
 			m.prevProject()
 			return m, nil
 		}
-		if msg.String() == "l" || msg.Type == tea.KeyRight {
+		if msg.Type == tea.KeyRight || msg.String() == "l" {
 			m.nextProject()
 			return m, nil
 		}
-		if isBack(msg) {
+		if msg.Type == tea.KeyEsc {
 			return m.goBack()
 		}
 	}
@@ -722,10 +771,10 @@ func (m *App) renderLayout() string {
 	}
 
 	shell := m.renderBodyCached()
-	body := m.composeBodyFrame(shell, bodyH)
-	body = m.overlayMascot(body, bodyH)
 	m.bodyTop = headerLines
 	m.contentTop = headerLines + bodyTopPad
+	body := m.composeBodyFrame(shell, bodyH)
+	body = m.overlayMascot(body, bodyH)
 	return header + "\n" + body + "\n" + footer
 }
 
@@ -733,8 +782,10 @@ func (m *App) renderLayout() string {
 // never over content. If the shell already fills the terminal, the mascot is
 // skipped so certificate boxes and the scrollbar stay intact.
 func (m *App) overlayMascot(body string, bodyH int) string {
-	figure := components.MascotFigure(m.footerFrame)
+	figure := components.MascotFigure(m.footerFrame, m.mascotState)
 	if figure == "" {
+		m.mascotWidth = 0
+		m.mascotHeight = 0
 		return body
 	}
 	fLines := strings.Split(figure, "\n")
@@ -745,11 +796,15 @@ func (m *App) overlayMascot(body string, bodyH int) string {
 		}
 	}
 	if mascotW == 0 || len(fLines) == 0 || len(fLines) > bodyH {
+		m.mascotWidth = 0
+		m.mascotHeight = 0
 		return body
 	}
 
 	rightStart := m.shellLeft + m.shellWidth + 1
 	if rightStart+mascotW > m.width {
+		m.mascotWidth = 0
+		m.mascotHeight = 0
 		return body
 	}
 
@@ -761,6 +816,11 @@ func (m *App) overlayMascot(body string, bodyH int) string {
 	}
 
 	startRow := bodyH - len(fLines)
+	m.mascotLeft = rightStart
+	m.mascotTop = m.bodyTop + startRow
+	m.mascotWidth = mascotW
+	m.mascotHeight = len(fLines)
+
 	for i, fl := range fLines {
 		row := components.FitLine(bodyLines[startRow+i], rightStart)
 		bodyLines[startRow+i] = components.FitLine(row+fl, m.width)

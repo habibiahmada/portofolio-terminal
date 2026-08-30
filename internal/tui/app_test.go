@@ -100,7 +100,8 @@ func TestProjectDetailNavigation(t *testing.T) {
 		t.Fatalf("expected ProjectDetail, got %v", m.currentScreen)
 	}
 
-	m.Update(keyMsg(tea.KeyLeft))
+	// Esc goes back to the project list (← now navigates prev/next project).
+	m.Update(keyMsg(tea.KeyEsc))
 	if m.currentScreen != ScreenProjects {
 		t.Errorf("expected to go back to Projects, got %v", m.currentScreen)
 	}
@@ -536,5 +537,40 @@ func TestNavigateChipNotOnName(t *testing.T) {
 	}
 	if !strings.Contains(plain, "Habibi Ahmad Aziz") {
 		t.Error("expected full name on one line")
+	}
+}
+
+func TestMascotMouseInteractivity(t *testing.T) {
+	m := newTestApp()
+	m.width = 140
+	m.height = 30
+	_ = m.View() // Render to compute geometry
+
+	if m.mascotWidth == 0 || m.mascotHeight == 0 {
+		t.Fatal("expected mascot to be positioned in right margin")
+	}
+
+	// 1 click: triggers Blink state
+	clickMsg := mousePress(m.mascotLeft+1, m.mascotTop+1)
+	m.Update(clickMsg)
+	if m.mascotState != components.MascotStateBlink {
+		t.Errorf("expected MascotStateBlink after 1 click, got %d", m.mascotState)
+	}
+
+	// 2nd click: remains Blink / refresh timer
+	m.Update(clickMsg)
+	if m.mascotState != components.MascotStateBlink {
+		t.Errorf("expected MascotStateBlink after 2 clicks, got %d", m.mascotState)
+	}
+
+	// 3rd click: triggers Angry state!
+	m.Update(clickMsg)
+	if m.mascotState != components.MascotStateAngry {
+		t.Errorf("expected MascotStateAngry after 3 clicks, got %d", m.mascotState)
+	}
+
+	view := stripANSI(m.View())
+	if !strings.Contains(view, "╬") && !strings.Contains(view, "⑊") {
+		t.Errorf("expected angry anger mark in rendered view when angry, got %q", view)
 	}
 }

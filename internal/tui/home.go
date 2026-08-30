@@ -39,7 +39,7 @@ func (m *App) renderHomeHero(width int) string {
 	meta := styles.MutedStyle.Render(m.profile.Title + " · " + m.profile.Location)
 	bio := styles.NormalStyle.Render(
 		components.WrapTextLine(
-			"Full-stack developer building clear UI and fast APIs. Press P for projects.",
+			"Welcome! You're browsing my portfolio straight from your shell. Every project, skill, and piece of experience I have is accessible right here without a browser.",
 			width-1,
 		),
 	)
@@ -67,8 +67,8 @@ func (m *App) featuredProjects() []data.Project {
 }
 
 // renderHomeFeatured — compact 2-col × 2-row card grid.
-// Height equalization is done on the raw body BEFORE the border is applied
-// so both cards in each row always end up with identical outer dimensions.
+// Each line is FitLine'd to exactly `inner` chars before the border is applied,
+// ensuring no lipgloss re-wrapping. Heights are equalized at the line-slice level.
 func (m *App) renderHomeFeatured(width int) string {
 	heading := styles.SectionTitleStyle.Render("▸ Featured Work")
 	sub := styles.MutedStyle.Render("↑↓ navigate  ·  Enter to open  ·  P for all projects")
@@ -86,64 +86,67 @@ func (m *App) renderHomeFeatured(width int) string {
 		inner = 16
 	}
 
-	// Build raw bodies (no border yet) and selection flags.
-	type cardData struct {
-		body     string
+	type rawCard struct {
+		lines    []string
 		selected bool
 	}
-	cds := make([]cardData, 0, len(featured))
+	raws := make([]rawCard, 0, len(featured))
 	for i, p := range featured {
 		sel := m.focus == FocusContent && m.currentScreen == ScreenHome && i == m.selectedFeatured
-		cds = append(cds, cardData{body: buildCardBody(p, inner, sel), selected: sel})
+		raws = append(raws, rawCard{buildCardLines(p, inner, sel), sel})
 	}
 
-	// Render rows of two cards with equalized heights.
+	// Build rows: equalize line-counts per pair, then apply border.
 	rows := []string{}
-	for i := 0; i < len(cds); i += 2 {
-		if i+1 < len(cds) {
-			a, b := cds[i], cds[i+1]
-			// Equalize body height BEFORE adding border.
-			ha := lipgloss.Height(a.body)
-			hb := lipgloss.Height(b.body)
-			maxH := ha
-			if hb > maxH {
-				maxH = hb
+	blank := strings.Repeat(" ", inner)
+	for i := 0; i < len(raws); i += 2 {
+		if i+1 < len(raws) {
+			a, b := raws[i], raws[i+1]
+			// Equalize heights by appending blank lines to the shorter card.
+			for len(a.lines) < len(b.lines) {
+				a.lines = append(a.lines, blank)
 			}
-			aBody := lipgloss.NewStyle().Height(maxH).Width(inner).Render(a.body)
-			bBody := lipgloss.NewStyle().Height(maxH).Width(inner).Render(b.body)
-			// Now apply border to the height-equalized bodies.
-			cardA := applyCardBorder(aBody, inner, a.selected)
-			cardB := applyCardBorder(bBody, inner, b.selected)
+			for len(b.lines) < len(a.lines) {
+				b.lines = append(b.lines, blank)
+			}
+			cardA := applyCardBorder(strings.Join(a.lines, "\n"), inner, a.selected)
+			cardB := applyCardBorder(strings.Join(b.lines, "\n"), inner, b.selected)
 			rows = append(rows, lipgloss.JoinHorizontal(lipgloss.Top, cardA, " ", cardB))
 		} else {
-			// Odd card at the end: just render as-is.
-			cd := cds[i]
-			rows = append(rows, applyCardBorder(cd.body, inner, cd.selected))
+			cd := raws[i]
+			rows = append(rows, applyCardBorder(strings.Join(cd.lines, "\n"), inner, cd.selected))
 		}
 	}
 
 	return "\n" + heading + "\n" + sub + "\n\n" + strings.Join(rows, "\n")
 }
 
-// buildCardBody returns the unstyled text body (title + meta) for a featured card.
-// inner is the content width (sans border and padding).
-func buildCardBody(p data.Project, inner int, selected bool) string {
-	// Title: always use 2-char prefix so all cards have the same indent.
-	prefix := "  "
+// buildCardLines builds the card content as a slice of lines, each FitLine'd to
+// exactly `inner` visible cells. No JoinVertical → no trailing-space inflation.
+func buildCardLines(p data.Project, inner int, selected bool) []string {
+	// Line 1 — title with selection indicator.
+	prefix := "  " // 2 visible cols, same as "▸ "
 	if selected {
 		prefix = styles.PrimaryText.Render("▸ ")
 	}
-	title := prefix + styles.HomeCardTitleStyle.Render(p.Name)
+	// Render title first, then FitLine the combined line.
+	rawTitle := prefix + styles.HomeCardTitleStyle.Render(
+		components.Truncate(p.Name, inner-2),
+	)
+	line1 := components.FitLine(rawTitle, inner)
 
-	// Meta: hard-truncate tags to fit the content width.
+	// Line 2 — year + tags, truncated then fit to width.
 	tagsStr := p.Year + " · " + strings.Join(p.Tags, " · ")
-	meta := "  " + styles.HomeCardMetaStyle.Render(components.Truncate(tagsStr, inner-2))
+	rawMeta := "  " + styles.HomeCardMetaStyle.Render(
+		components.Truncate(tagsStr, inner-2),
+	)
+	line2 := components.FitLine(rawMeta, inner)
 
-	return lipgloss.JoinVertical(lipgloss.Left, title, meta)
+	return []string{line1, line2}
 }
 
-// applyCardBorder wraps a pre-rendered body with a rounded border.
-// The border color changes to the primary accent when the card is selected.
+// applyCardBorder wraps a pre-built body string with a rounded border.
+// Width(inner) is applied exactly once here; body lines are already FitLine'd.
 func applyCardBorder(body string, inner int, selected bool) string {
 	borderColor := styles.ColorBorder
 	if selected {
@@ -153,7 +156,7 @@ func applyCardBorder(body string, inner int, selected bool) string {
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(borderColor).
 		Padding(0, 1).
-		Width(inner). // outer = inner + border(2) + padding(2)
+		Width(inner). // outer = inner + padding(2) + border(2) = cardOuter
 		Render(body)
 }
 

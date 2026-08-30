@@ -4,6 +4,8 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+
+	"github.com/charmbracelet/lipgloss"
 )
 
 func TestHeader(t *testing.T) {
@@ -200,6 +202,41 @@ func TestMascotFigureAnimates(t *testing.T) {
 	b := MascotFigure(5)
 	if a == b {
 		t.Errorf("expected mascot to change with frame, got identical output")
+	}
+}
+
+func TestMascotFigureInteractiveStates(t *testing.T) {
+	// Blink state (clicked 1-2 times) has blink / happy squint / sparkle
+	blink := MascotFigure(0, MascotStateBlink)
+	if !strings.Contains(blink, "─") && !strings.Contains(blink, "^") && !strings.Contains(blink, "★") {
+		t.Errorf("expected blinking/happy glyphs in blink state, got %q", blink)
+	}
+
+	// Angry state (clicked repeatedly) has anger mark ╬ and angry eyes, no emojis
+	angry := MascotFigure(0, MascotStateAngry)
+	if !strings.Contains(angry, "╬") && !strings.Contains(angry, "⑊") && !strings.Contains(angry, "⁑") {
+		t.Errorf("expected non-emoji anger mark (╬/⑊/⁑) in angry state, got %q", angry)
+	}
+	if !strings.Contains(angry, "◣") && !strings.Contains(angry, "\\") {
+		t.Errorf("expected angry eyes in angry state, got %q", angry)
+	}
+}
+
+func TestMascotFigureDimensionsAndAlignment(t *testing.T) {
+	states := []int{MascotStateNormal, MascotStateBlink, MascotStateAngry}
+	for _, st := range states {
+		for f := 0; f < 20; f++ {
+			fig := MascotFigure(f, st)
+			lines := strings.Split(fig, "\n")
+			if len(lines) != 6 {
+				t.Fatalf("expected 6 lines for state %d frame %d, got %d", st, f, len(lines))
+			}
+			for i, ln := range lines {
+				if w := lipgloss.Width(ln); w != 14 {
+					t.Errorf("state %d frame %d line %d: expected width 14, got %d: %q", st, f, i, w, ln)
+				}
+			}
+		}
 	}
 }
 
