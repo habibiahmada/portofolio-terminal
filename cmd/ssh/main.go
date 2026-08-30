@@ -49,6 +49,8 @@ const (
 )
 
 func main() {
+	styles.ForceTrueColor()
+
 	host := envString("SSH_HOST", defaultHost)
 	port := envInt("SSH_PORT", defaultPort)
 	idleTimeout := envDuration("SSH_IDLE_TIMEOUT", defaultIdleTimeout)

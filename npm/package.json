@@ -1,6 +1,6 @@
 {
   "name": "habibiahmada",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Interactive CLI portfolio built with Go and Bubble Tea",
   "main": "index.js",
   "bin": {

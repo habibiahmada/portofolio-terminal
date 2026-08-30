@@ -5,11 +5,16 @@ import (
 	"github.com/muesli/termenv"
 )
 
+func init() {
+	ForceTrueColor()
+}
+
 // UseRenderer sets the active lipgloss renderer (SSH session or local terminal).
 func UseRenderer(r *lipgloss.Renderer) {
 	if r == nil {
 		return
 	}
+	r.SetColorProfile(termenv.TrueColor)
 	lipgloss.SetDefaultRenderer(r)
 }
 
