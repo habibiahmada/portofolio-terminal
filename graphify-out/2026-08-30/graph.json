@@ -1,0 +1,21 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "id": "docs_foo",
+      "label": "foo.md",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "foo.md",
+      "file_type": "document",
+      "node_kind": "page",
+      "norm_label": "foo.md",
+      "source_file": "docs/foo.md",
+      "source_location": "L1"
+    }
+  ],
+  "links": [],
+  "hyperedges": []
+}
