@@ -59,7 +59,7 @@ func TestInstantScreenSwitchFromHome(t *testing.T) {
 func TestInstantScreenSwitchCycle(t *testing.T) {
 	m := newTestApp()
 	m.currentScreen = ScreenAbout
-	m.selectedMenu = 0
+	m.selectedMenu = 1
 
 	m.Update(keyMsg(tea.KeyDown))
 	if m.currentScreen != ScreenProjects {
@@ -67,25 +67,23 @@ func TestInstantScreenSwitchCycle(t *testing.T) {
 	}
 }
 
-func TestSelectEntersAbout(t *testing.T) {
+func TestSelectFromHomeNoOp(t *testing.T) {
 	m := newTestApp()
 
 	m.Update(keyMsg(tea.KeyEnter))
-	if m.currentScreen != ScreenAbout {
-		t.Errorf("expected to enter About, got %v", m.currentScreen)
+	if m.currentScreen != ScreenHome {
+		t.Errorf("expected Enter on Home to stay on Home, got %v", m.currentScreen)
 	}
 }
 
-func TestSelectEntersProjects(t *testing.T) {
+func TestEnterProjectsShowsList(t *testing.T) {
 	m := newTestApp()
-	m.selectedMenu = 1 // Projects
+	m.currentScreen = ScreenProjectDetail
+	m.projectDetail = m.projects[0]
 
-	m.Update(keyMsg(tea.KeyEnter))
+	_, _ = m.enterMenuScreen(2)
 	if m.currentScreen != ScreenProjects {
-		t.Errorf("expected to enter Projects, got %v", m.currentScreen)
-	}
-	if m.selectedProject != 0 {
-		t.Errorf("expected selectedProject reset to 0, got %d", m.selectedProject)
+		t.Errorf("expected Projects list, got %v", m.currentScreen)
 	}
 }
 
@@ -207,7 +205,6 @@ func TestViewRendersScreens(t *testing.T) {
 		ScreenExperience,
 		ScreenCertificates,
 		ScreenServices,
-		ScreenBlog,
 		ScreenContact,
 	}
 
@@ -232,7 +229,7 @@ func TestViewInitializing(t *testing.T) {
 
 func TestContentHeight(t *testing.T) {
 	m := newTestApp()
-	want := m.height - headerHeight - footerHeight
+	want := m.height - footerHeight - mastheadLines - 2
 	if m.contentHeight() != want {
 		t.Errorf("expected content height %d, got %d", want, m.contentHeight())
 	}
@@ -240,13 +237,13 @@ func TestContentHeight(t *testing.T) {
 
 func TestMenuItemsOrder(t *testing.T) {
 	want := []Screen{
+		ScreenHome,
 		ScreenAbout,
 		ScreenProjects,
 		ScreenSkills,
 		ScreenExperience,
 		ScreenCertificates,
 		ScreenServices,
-		ScreenBlog,
 		ScreenContact,
 	}
 	for i, s := range want {
@@ -256,18 +253,16 @@ func TestMenuItemsOrder(t *testing.T) {
 	}
 }
 
-func TestSelectEntersServicesAndBlog(t *testing.T) {
+func TestSelectEntersServices(t *testing.T) {
 	cases := []struct {
 		index int
 		want  Screen
 	}{
-		{5, ScreenServices},
-		{6, ScreenBlog},
+		{6, ScreenServices},
 	}
 	for _, c := range cases {
 		m := newTestApp()
-		m.selectedMenu = c.index
-		m.Update(keyMsg(tea.KeyEnter))
+		_, _ = m.enterMenuScreen(c.index)
 		if m.currentScreen != c.want {
 			t.Errorf("expected menu index %d to enter %v, got %v", c.index, c.want, m.currentScreen)
 		}

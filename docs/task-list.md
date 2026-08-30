@@ -179,8 +179,7 @@ Visual polish sebelum portfolio parity & deploy production. Lihat [tui-illustrat
 | # | Task | Status | Catatan |
 |---|------|--------|---------|
 | 3.3.1 | Tambah `ScreenServices` ke sidebar | ✅ | `app.go`, `keymap.go` |
-| 3.3.2 | Tambah `ScreenBlog` ke sidebar (placeholder) | ✅ | `app.go` |
-| 3.3.3 | Urutan sidebar: About · Projects · Skills · Experience · Certificates · Services · Blog · Contact | ✅ | Match website nav + Contact |
+| 3.3.3 | Urutan sidebar: About · Projects · Skills · Experience · Certificates · Services · Contact | ✅ | Match website nav + Contact |
 | 3.3.4 | Project detail: prev/next navigasi | ✅ | `h`/`l` di detail |
 | 3.3.5 | Home keyboard shortcuts (P Projects, C Contact, V CV) | ✅ | `home.go`, `keymap.go` |
 
@@ -253,36 +252,26 @@ Visual polish sebelum portfolio parity & deploy production. Lihat [tui-illustrat
 | 3.10.2 | 3 pinned dengan ★ prefix | ✅ | |
 | 3.10.3 | Grid 52 sertifikat scrollable | ✅ | |
 
-### 3.11 — Screen: Blog (Baru, Placeholder)
+### 3.11 — Screen: Contact
 
 | # | Task | Status | Catatan |
 |---|------|--------|---------|
-| 3.11.1 | File `internal/tui/blog.go` | ✅ | Screen baru |
-| 3.11.2 | Header: Blog / Articles & Commentary | ✅ | |
-| 3.11.3 | Kategori filter (6 kategori) — UI only | ✅ | |
-| 3.11.4 | Empty state: "No articles yet" | ✅ | Konten dinamis = Fase 5 |
+| 3.11.1 | Copy CTA: 90 days pitch + 48h reply | ✅ | |
+| 3.11.2 | Email `contact@habibiahmada.dev` prominent | ✅ | |
+| 3.11.3 | 4 social links + availability | ✅ | |
 
-### 3.12 — Screen: Contact
-
-| # | Task | Status | Catatan |
-|---|------|--------|---------|
-| 3.12.1 | Copy CTA: 90 days pitch + 48h reply | ✅ | |
-| 3.12.2 | Email `contact@habibiahmada.dev` prominent | ✅ | |
-| 3.12.3 | 4 social links + availability | ✅ | |
-
-### 3.13 — QA & Testing (Gate Fase 3)
+### 3.12 — QA & Testing (Gate Fase 3)
 
 | # | Task | Status | Catatan |
 |---|------|--------|---------|
-| 3.13.1 | Audit copy: semua screen vs pages.md | ✅ | Checklist manual — verifikasi render dump |
-| 3.13.2 | Update unit test data layer | ✅ | |
-| 3.13.3 | Update TUI model test untuk screen baru | ✅ | Services, Blog |
-| 3.13.4 | Visual QA setelah palette migration | ✅ | matrix_test.go + render dump |
-| 3.13.5 | Manual QA SSH lintas client | ✅ | Lanjutkan 7.5.11 |
-| 3.14 | Footer animasi selalu tampil (`FooterBar`) | ✅ | Brand kiri + hints kanan; equalizer ≥90 cols |
-| 3.15 | UX: layout center, instant ↑↓ nav, j/k scroll | ✅ | `render_cache.go`, `layout.go` |
-| 3.16 | Blog live fetch + markdown TUI formatter | ✅ | `internal/blog/` — butuh API `/api/public/blog` |
-| 3.17 | Performance: layout cache, slow footer tick | ✅ | Cache body; footer 600ms; no lipgloss.Place grid |
+| 3.12.1 | Audit copy: semua screen vs pages.md | ✅ | Checklist manual — verifikasi render dump |
+| 3.12.2 | Update unit test data layer | ✅ | |
+| 3.12.3 | Update TUI model test untuk screen baru | ✅ | Services |
+| 3.12.4 | Visual QA setelah palette migration | ✅ | matrix_test.go + render dump |
+| 3.12.5 | Manual QA SSH lintas client | ✅ | Lanjutkan 7.5.11 |
+| 3.13 | Footer animasi selalu tampil (`FooterBar`) | ✅ | Brand kiri + hints kanan; equalizer ≥90 cols |
+| 3.14 | UX: layout center, instant ↑↓ nav, j/k scroll | ✅ | `render_cache.go`, `layout.go` |
+| 3.15 | Performance: layout cache, slow footer tick | ✅ | Cache body; footer 600ms; no lipgloss.Place grid |
 
 ---
 
@@ -324,11 +313,10 @@ Visual polish sebelum portfolio parity & deploy production. Lihat [tui-illustrat
 | # | Task | Status | Catatan |
 |---|------|--------|---------|
 | 5.1 | Portfolio API (fetch data dari Supabase) | 🔮 | Opsi B di data-strategy.md |
-| 5.2 | Blog section di TUI (konten dinamis) | 🔮 | Ganti placeholder Fase 3.11 |
-| 5.3 | Theme switcher (dark/light) | 🔮 | |
-| 5.4 | Migrasi EC2 → VPS | 🔮 | |
-| 5.5 | Windows SSH native support | 🔮 | |
-| 5.6 | Data dinamis via API/Supabase | 🔮 | Opsi B di data-strategy.md |
+| 5.2 | Theme switcher (dark/light) | 🔮 | |
+| 5.3 | Migrasi EC2 → VPS | 🔮 | |
+| 5.4 | Windows SSH native support | 🔮 | |
+| 5.5 | Data dinamis via API/Supabase | 🔮 | Opsi B di data-strategy.md |
 
 ---
 
@@ -339,9 +327,9 @@ Fase 3 (Portfolio Parity) **selesai**. Urutan task selanjutnya:
 ```
 1. ✅ Fase 3.2 — Sync data layer (profile, projects, experience, skills, certificates)
 2. ✅ Fase 3.1 — Migrasi design system (palette, wordmark, labels)
-3. ✅ Fase 3.3 — Navigasi baru (Services, Blog screens)
-4. ✅ Fase 3.4–3.12 — Implement per-screen content parity
-5. ✅ Fase 3.13 — QA gate (copy audit + tests) + footer animasi
+3. ✅ Fase 3.3 — Navigasi baru (Services screen)
+4. ✅ Fase 3.4–3.11 — Implement per-screen content parity
+5. ✅ Fase 3.12 — QA gate (copy audit + tests) + footer animasi
          │
          ▼  GATE LULUS — lanjut ke bawah
 6. ⬜ Fase 4.1 — First npm publish (tag v1.0.0)

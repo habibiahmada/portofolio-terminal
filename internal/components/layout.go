@@ -50,6 +50,12 @@ func WrapText(text string, width int) []string {
 	return lines
 }
 
+// WrapTextLine wraps a single line of text to fit width (word boundaries).
+func WrapTextLine(text string, width int) string {
+	lines := WrapText(text, width)
+	return strings.Join(lines, "\n")
+}
+
 // clipContent returns a viewport window without mutating external state.
 func ClipContent(content string, offset, maxH int) (clipped string, clampedOffset int) {
 	if maxH <= 0 {

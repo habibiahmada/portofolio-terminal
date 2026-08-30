@@ -19,7 +19,7 @@ CTA global: "Let's Talk" → contact@habibiahmada.dev
 ### Terminal (target)
 
 ```
-Sidebar: Home · About · Projects · Skills · Experience · Certificates · Services · Blog · Contact
+Sidebar: Home · About · Projects · Skills · Experience · Certificates · Services · Contact
 Home sections (scroll): Hero · Companies · Featured Projects · Services · Press · Process · CTA
 ```
 
@@ -32,7 +32,6 @@ Home sections (scroll): Hero · Companies · Featured Projects · Services · Pr
 | `/projects` | `ScreenProjects` | 10 proyek |
 | `/projects/[slug]` | `ScreenProjectDetail` | Case study 4 bagian |
 | `/services` | `ScreenServices` | 5 kartu layanan |
-| `/blog` | `ScreenBlog` | Index + kategori (Fase berikutnya) |
 | CTA / Contact | `ScreenContact` | Email + social + availability |
 | — | `ScreenPress` | 2 spotlight (embedded di Home atau screen terpisah) |
 | — | `ScreenProcess` | 4 langkah (embedded di Home/Services) |
@@ -333,22 +332,6 @@ Narrative lengkap per slug disimpan di `internal/data/case-studies.go` (target i
 
 ---
 
-## Screen: Blog
-
-**Setara dengan:** `/blog` + `/blog/[slug]`
-
-| Elemen | Copy |
-|--------|------|
-| H1 | Blog |
-| H2 | Articles & Commentary |
-| Sub | Technical writing on web development, programming, and the craft of shipping production software. |
-
-**Kategori:** programming · education · web · career · opinion · news-commentary
-
-**Status TUI:** Fase 3.11 placeholder; konten dinamis di Fase 5 (Evolusi).
-
----
-
 ## Screen: Contact
 
 **Setara dengan:** CTA blocks (bukan halaman `/contact` stub)
@@ -388,19 +371,18 @@ Narrative lengkap per slug disimpan di `internal/data/case-studies.go` (target i
  SKILLS   EXPERIENCE  CERT │  PROJECT   │        │
                            │   DETAIL   │        │
                            └─────┬──────┘        │
-                                 │ prev/next     │
+                                  │ prev/next     │
               ┌──────────────────┼───────────────┘
-              ▼                  ▼
-         ┌────────┐        ┌──────────┐
-         │  BLOG  │        │ CONTACT  │
-         └────────┘        └──────────┘
+              ▼
+         ┌──────────┐
+         │ CONTACT  │
+         └──────────┘
 ```
 
 **Journey umum:**
 - **Rekruter:** Home hero → Featured Projects → Project Detail → Contact
 - **Kredibilitas:** About → Experience → Certificates → Press (Home)
 - **Klien:** Services → Process → Contact
-- **Membaca:** Blog → filter kategori → artikel
 
 ---
 
@@ -414,7 +396,6 @@ Narrative lengkap per slug disimpan di `internal/data/case-studies.go` (target i
 | Skills | 12 item, kategori berbeda | 16 tools flat list |
 | Certificates | 1 dummy | 52 + 3 pinned |
 | Services screen | Tidak ada | Screen baru |
-| Blog screen | Tidak ada | Screen baru (placeholder OK) |
 | Home sections | Hero + social only | + Companies, Featured, Press, Process, CTA |
 | Social links | 3 link | + Instagram, email benar |
 | Design colors | #FF6B6B palette | Brand red #ef4444 (lihat design-system.md) |

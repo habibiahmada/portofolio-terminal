@@ -14,9 +14,16 @@ import (
 
 	"github.com/habibiahmada/habibiahmada-terminal/internal/components"
 	"github.com/habibiahmada/habibiahmada-terminal/internal/data"
-	"github.com/habibiahmada/habibiahmada-terminal/internal/blog"
 	"github.com/habibiahmada/habibiahmada-terminal/internal/styles"
 )
+
+// contentOffsetX tracks the horizontal offset of the centered body for mouse
+// click coordinate translation.
+var contentOffsetX int
+
+// contentOffsetY tracks the vertical offset of the centered body for mouse
+// click coordinate translation.
+var contentOffsetY int
 
 // Screen identifiers.
 type Screen int
@@ -30,7 +37,6 @@ const (
 	ScreenExperience
 	ScreenCertificates
 	ScreenServices
-	ScreenBlog
 	ScreenContact
 )
 
@@ -44,28 +50,25 @@ var ScreenNames = map[Screen]string{
 	ScreenExperience:    "Experience",
 	ScreenCertificates:  "Certificates",
 	ScreenServices:      "Services",
-	ScreenBlog:          "Blog",
 	ScreenContact:       "Contact",
 }
 
-// menuItems is the ordered list of screens reachable from the Home sidebar.
-// Ordered to match the website navigation plus Contact.
+// menuItems is the ordered navigation list (Home first, then site sections).
 var menuItems = []Screen{
+	ScreenHome,
 	ScreenAbout,
 	ScreenProjects,
 	ScreenSkills,
 	ScreenExperience,
 	ScreenCertificates,
 	ScreenServices,
-	ScreenBlog,
 	ScreenContact,
 }
 
-// Layout dimensions (best-effort; used for scrolling).
+// Layout dimensions.
 const (
-	headerHeight = 4
-	footerHeight = 2
-	sidebarWidth = 20
+	mastheadLines = 1
+	footerHeight  = 2
 )
 
 // footerTickInterval drives the footer animation. Kept slow to avoid rebuilding
@@ -107,14 +110,6 @@ type App struct {
 
 	// Footer animation frame.
 	footerFrame int
-
-	// Blog (live fetch).
-	blogPosts    []blog.Post
-	blogLoading  bool
-	blogLoaded   bool
-	blogError    string
-	blogSelected int
-	blogDetail   bool
 
 	// Layout cache — excludes footerFrame so animation is cheap.
 	cachedBodyKey string
@@ -166,23 +161,55 @@ func (m *App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		return m.handleKey(msg)
 
+	case tea.MouseMsg:
+		return m.handleMouse(msg)
+
 	case footerTickMsg:
 		m.footerFrame++
 		return m, nextFooterTick()
+	}
 
-	case blogPostsMsg:
-		m.blogLoading = false
-		m.blogLoaded = true
-		if msg.err != nil {
-			m.blogError = msg.err.Error()
-			return m, nil
-		}
-		m.blogPosts = msg.posts
-		m.blogError = ""
-		if m.blogSelected >= len(m.blogPosts) {
-			m.blogSelected = 0
-		}
+	return m, nil
+}
+
+// handleMouse processes mouse click and scroll events.
+func (m *App) handleMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
+	// Only handle left-click press and wheel scroll.
+	if msg.Action != tea.MouseActionPress && msg.Button != tea.MouseButtonWheelUp && msg.Button != tea.MouseButtonWheelDown {
 		return m, nil
+	}
+
+	// Help overlay intercepts clicks.
+	if m.showHelp {
+		m.showHelp = false
+		return m, nil
+	}
+
+	// CV modal intercepts clicks.
+	if m.cvModal {
+		m.cvModal = false
+		return m, nil
+	}
+
+	// Translate click coordinates relative to the centered body.
+	_ = msg.X - contentOffsetX
+	y := msg.Y - contentOffsetY
+
+	// Wheel scroll.
+	if msg.Button == tea.MouseButtonWheelUp {
+		m.scrollOrSelectUp()
+		return m, nil
+	}
+	if msg.Button == tea.MouseButtonWheelDown {
+		m.scrollOrSelectDown()
+		return m, nil
+	}
+
+	// Click content to open detail on list screens.
+	if msg.Action == tea.MouseActionPress {
+		if y >= 0 && m.currentScreen == ScreenProjects {
+			return m.selectItem()
+		}
 	}
 
 	return m, nil
@@ -246,13 +273,6 @@ func (m *App) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	// Blog detail: back to list without leaving the screen.
-	if m.currentScreen == ScreenBlog && m.blogDetail && isBack(msg) {
-		m.blogDetail = false
-		m.resetScroll()
-		return m, nil
-	}
-
 	// Screen switch (↑↓) — instant, no Enter required.
 	if isNavigateUp(msg) {
 		return m.switchScreen(-1)
@@ -284,57 +304,40 @@ func (m *App) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-// switchScreen moves to the next/previous sidebar screen immediately.
+// switchScreen moves to the next/previous nav item immediately.
 func (m *App) switchScreen(delta int) (tea.Model, tea.Cmd) {
-	if m.currentScreen == ScreenProjectDetail {
-		m.currentScreen = ScreenProjects
+	idx := m.navSelectedIndex()
+	idx += delta
+	if idx < 0 {
+		idx = len(menuItems) - 1
 	}
-
-	if m.currentScreen == ScreenHome {
-		if delta > 0 {
-			return m.enterMenuScreen(m.selectedMenu)
-		}
-		return m.enterMenuScreen(len(menuItems) - 1)
+	if idx >= len(menuItems) {
+		idx = 0
 	}
-
-	m.syncMenuFromScreen()
-
-	m.selectedMenu += delta
-	if m.selectedMenu < 0 {
-		m.selectedMenu = len(menuItems) - 1
-	}
-	if m.selectedMenu >= len(menuItems) {
-		m.selectedMenu = 0
-	}
-	return m.enterMenuScreen(m.selectedMenu)
+	m.selectedMenu = idx
+	return m.enterMenuScreen(idx)
 }
 
 // syncMenuFromScreen aligns selectedMenu with the current screen.
 func (m *App) syncMenuFromScreen() {
-	if m.currentScreen == ScreenHome || m.currentScreen == ScreenProjectDetail {
-		return
-	}
-	for i, s := range menuItems {
-		if s == m.currentScreen {
-			m.selectedMenu = i
-			return
-		}
-	}
+	m.selectedMenu = m.navSelectedIndex()
 }
 
 // enterMenuScreen activates the screen at menuItems[idx].
 func (m *App) enterMenuScreen(idx int) (tea.Model, tea.Cmd) {
 	m.prevScreen = ScreenHome
 	m.resetScroll()
-	m.blogDetail = false
-	m.currentScreen = menuItems[idx]
-	if m.currentScreen == ScreenProjects {
+
+	screen := menuItems[idx]
+	m.selectedMenu = idx
+	m.currentScreen = screen
+
+	// Always land on the projects list — never auto-open detail when switching screens.
+	if screen == ScreenProjects {
+		m.currentScreen = ScreenProjects
 		m.selectedProject = 0
 	}
-	if m.currentScreen == ScreenBlog && !m.blogLoaded && !m.blogLoading {
-		m.blogLoading = true
-		return m, m.fetchBlogCmd()
-	}
+
 	return m, nil
 }
 
@@ -345,15 +348,6 @@ func (m *App) scrollOrSelectUp() {
 		m.selectedProject--
 		if m.selectedProject < 0 {
 			m.selectedProject = len(m.projects) - 1
-		}
-	case ScreenBlog:
-		if !m.blogDetail && len(m.blogPosts) > 0 {
-			m.blogSelected--
-			if m.blogSelected < 0 {
-				m.blogSelected = len(m.blogPosts) - 1
-			}
-		} else {
-			m.scrollUp()
 		}
 	default:
 		m.scrollUp()
@@ -367,15 +361,6 @@ func (m *App) scrollOrSelectDown() {
 		m.selectedProject++
 		if m.selectedProject >= len(m.projects) {
 			m.selectedProject = 0
-		}
-	case ScreenBlog:
-		if !m.blogDetail && len(m.blogPosts) > 0 {
-			m.blogSelected++
-			if m.blogSelected >= len(m.blogPosts) {
-				m.blogSelected = 0
-			}
-		} else {
-			m.scrollDown()
 		}
 	default:
 		m.scrollDown()
@@ -445,11 +430,11 @@ func (m *App) enterContact() tea.Cmd {
 	return cmd
 }
 
-// selectItem opens a drill-down view (project detail, blog article).
+// selectItem opens a drill-down view (e.g. project detail).
 func (m *App) selectItem() (tea.Model, tea.Cmd) {
 	switch m.currentScreen {
 	case ScreenHome:
-		return m.enterMenuScreen(m.selectedMenu)
+		return m, nil
 	case ScreenProjects:
 		if len(m.projects) == 0 {
 			return m, nil
@@ -458,12 +443,6 @@ func (m *App) selectItem() (tea.Model, tea.Cmd) {
 		m.projectDetail = m.projects[m.selectedProject]
 		m.resetScroll()
 		m.currentScreen = ScreenProjectDetail
-	case ScreenBlog:
-		if m.blogDetail || len(m.blogPosts) == 0 || m.blogLoading {
-			return m, nil
-		}
-		m.blogDetail = true
-		m.resetScroll()
 	}
 	return m, nil
 }
@@ -473,13 +452,6 @@ func (m *App) goBack() (tea.Model, tea.Cmd) {
 	switch m.currentScreen {
 	case ScreenProjectDetail:
 		m.currentScreen = ScreenProjects
-	case ScreenBlog:
-		if m.blogDetail {
-			m.blogDetail = false
-			m.resetScroll()
-			return m, nil
-		}
-		m.currentScreen = ScreenHome
 	case ScreenHome:
 		m.quitting = true
 		return m, tea.Quit
@@ -490,9 +462,14 @@ func (m *App) goBack() (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-// contentHeight returns the number of visible lines available for content.
+// contentHeight returns visible lines for page content beside the sidebar.
 func (m *App) contentHeight() int {
-	return m.height - headerHeight - footerHeight
+	bodyH := m.height - footerHeight
+	h := bodyH - mastheadLines - 2
+	if h < 6 {
+		h = 6
+	}
+	return h
 }
 
 // resetScroll resets the content scroll offset to the top.
@@ -543,80 +520,81 @@ func (m *App) View() string {
 	return layout
 }
 
-// renderLayout composes header, sidebar, content, and footer. The main body is
-// cached; only the footer re-renders on animation ticks.
+// renderLayout pins footer to the bottom; body fills remaining height with ambient gutters.
 func (m *App) renderLayout() string {
-	body := m.renderBodyCached()
 	footer := m.renderFooter()
-	return lipgloss.JoinVertical(lipgloss.Left, body, footer)
+	footerLines := strings.Count(footer, "\n") + 1
+	bodyH := m.height - footerLines
+	if bodyH < 1 {
+		bodyH = 1
+	}
+
+	shell := m.renderBodyCached()
+	body := m.composeBodyFrame(shell, bodyH)
+	return body + "\n" + footer
 }
 
-// renderBodyCached returns header + sidebar + content, using a cache key that
-// ignores footerFrame so animation does not rebuild heavy screen content.
+// renderBodyCached builds sidebar + content column (cached, no footer frame).
 func (m *App) renderBodyCached() string {
 	key := m.layoutCacheKey()
 	if key == m.cachedBodyKey && m.cachedBody != "" {
 		return m.cachedBody
 	}
 
-	header := components.Header("habibiahmada", m.profile.Title, m.width)
-	sidebar := m.renderSidebar()
+	w := m.contentWidth()
+	masthead := components.Masthead("habibiahmada", m.profile.Title, w)
 	content := m.renderContentRaw()
-	contentWidth := m.width - sidebarWidth - 1
-	if contentWidth < 1 {
-		contentWidth = 1
-	}
+	contentCol := lipgloss.JoinVertical(lipgloss.Left, masthead, content)
 
-	mainContent := lipgloss.JoinHorizontal(
-		lipgloss.Top,
-		sidebar,
-		lipgloss.NewStyle().Width(contentWidth).Render(content),
-	)
+	rail := m.renderNavRail()
+	shellLines := maxLineCount(rail, contentCol)
+	block := components.JoinShell(rail, contentCol, shellLines)
 
-	m.cachedBody = lipgloss.JoinVertical(lipgloss.Left, header, mainContent)
+	m.cachedBody = block
 	m.cachedBodyKey = key
 	return m.cachedBody
 }
 
-// renderSidebar renders the navigation sidebar.
-func (m *App) renderSidebar() string {
+// renderNavRail renders the vertical side navigation.
+func (m *App) renderNavRail() string {
 	items := make([]components.SidebarItem, 0, len(menuItems))
 	for _, screen := range menuItems {
 		items = append(items, components.SidebarItem{
 			Key:  ScreenNames[screen],
-			Name: ScreenNames[screen],
+			Name: navLabel(screen),
 		})
 	}
+	return components.NavRail(items, m.navSelectedIndex(), components.NavRailWidth())
+}
 
-	selectedIndex := m.selectedMenu
-	activeKey := ""
+// navLabel returns short nav text (skip "Project Detail").
+func navLabel(s Screen) string {
+	if s == ScreenProjectDetail {
+		return "Projects"
+	}
+	return ScreenNames[s]
+}
+
+// navSelectedIndex returns the highlighted nav index for the current screen.
+func (m *App) navSelectedIndex() int {
 	if m.currentScreen == ScreenProjectDetail {
-		activeKey = ScreenNames[ScreenProjects]
 		for i, s := range menuItems {
 			if s == ScreenProjects {
-				selectedIndex = i
-				break
-			}
-		}
-	} else if m.currentScreen != ScreenHome {
-		for i, s := range menuItems {
-			if s == m.currentScreen {
-				selectedIndex = i
-				break
+				return i
 			}
 		}
 	}
-
-	sidebarH := m.contentHeight()
-	if sidebarH < 1 {
-		sidebarH = m.height - headerHeight - footerHeight
+	for i, s := range menuItems {
+		if s == m.currentScreen {
+			return i
+		}
 	}
-	return components.Sidebar(items, selectedIndex, activeKey, sidebarH)
+	return m.selectedMenu
 }
 
 // renderFooter renders brand (left) and keyboard hints (right) on one row.
 func (m *App) renderFooter() string {
-	return components.FooterBar(m.footerFrame, m.width-2, footerHints())
+	return components.FooterBar(m.footerFrame, m.width, footerHints())
 }
 
 // footerHints returns the context-sensitive key hints.
@@ -624,6 +602,7 @@ func footerHints() []components.FooterHint {
 	return []components.FooterHint{
 		{Key: "↑↓", Label: "Screens"},
 		{Key: "j/k", Label: "Scroll"},
+		{Key: "Click", Label: "Navigate"},
 		{Key: "Enter", Label: "Open"},
 		{Key: "←", Label: "Back"},
 		{Key: "?", Label: "Help"},
@@ -649,8 +628,6 @@ func (m *App) renderContentRaw() string {
 		content = m.renderCertificatesContent()
 	case ScreenServices:
 		content = m.renderServicesContent()
-	case ScreenBlog:
-		content = m.renderBlogContent()
 	case ScreenContact:
 		content = m.renderContactContent()
 	default:
@@ -659,25 +636,16 @@ func (m *App) renderContentRaw() string {
 	return m.applyViewport(content)
 }
 
-// applyViewport clips long content, centers short content, and respects width.
+// applyViewport clips long content to the visible area (top-aligned, stable layout).
 func (m *App) applyViewport(content string) string {
-	contentWidth := m.width - sidebarWidth - 2
+	contentWidth := m.contentWidth()
 	if contentWidth < 1 {
 		contentWidth = m.width
 	}
 
 	maxH := m.contentHeight()
-	clipped, offset := components.ClipContent(content, m.contentOffset, maxH)
-	_ = offset // display-only clamp; contentOffset corrected on next scroll
-
-	if m.currentScreen == ScreenHome {
-		return clipped
-	}
-
-	lines := strings.Split(clipped, "\n")
-	if len(lines) < maxH && maxH > 0 {
-		return components.CenterInViewport(clipped, contentWidth, maxH)
-	}
+	clipped, _ := components.ClipContent(content, m.contentOffset, maxH)
+	_ = contentWidth
 	return clipped
 }
 
@@ -697,6 +665,12 @@ func (m *App) renderHelpOverlay(layout string) string {
 		"j / k       Scroll / select in list",
 		"Enter       Open detail",
 		"← / Esc       Back",
+		"",
+		"Mouse",
+		"──────",
+		"Click         Open / select item",
+		"Click nav     Switch screen",
+		"Scroll        Scroll content",
 		"",
 		"Screens",
 		"───────",
@@ -736,4 +710,13 @@ func (m *App) renderCVOverlay(layout string) string {
 		styles.MutedStyle.Render("(V opens this viewer · ← / Esc closes)"),
 	}
 	return components.Modal("Resume", lines, m.width, m.height)
+}
+
+func maxLineCount(a, b string) int {
+	na := strings.Count(a, "\n") + 1
+	nb := strings.Count(b, "\n") + 1
+	if na > nb {
+		return na
+	}
+	return nb
 }

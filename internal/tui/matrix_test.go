@@ -26,7 +26,6 @@ func TestMatrixSizes(t *testing.T) {
 		ScreenExperience,
 		ScreenCertificates,
 		ScreenServices,
-		ScreenBlog,
 		ScreenContact,
 	}
 

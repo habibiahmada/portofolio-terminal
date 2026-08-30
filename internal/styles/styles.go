@@ -77,8 +77,7 @@ var (
 			Foreground(ColorMuted)
 
 	FooterStyle = lipgloss.NewStyle().
-			Foreground(ColorMuted).
-			PaddingTop(1)
+			Foreground(ColorMuted)
 
 	SidebarItemStyle = lipgloss.NewStyle().
 				PaddingLeft(1).
@@ -95,8 +94,7 @@ var (
 				Bold(true).
 				PaddingLeft(1)
 
-	ContentStyle = lipgloss.NewStyle().
-			PaddingLeft(2)
+	ContentStyle = lipgloss.NewStyle()
 
 	CardStyle = lipgloss.NewStyle().
 			Border(lipgloss.RoundedBorder()).
@@ -156,6 +154,13 @@ var (
 
 	RuleStyle = lipgloss.NewStyle().
 			Foreground(ColorBorder)
+
+	NavActiveStyle = lipgloss.NewStyle().
+			Foreground(ColorPrimary).
+			Bold(true)
+
+	NavItemStyle = lipgloss.NewStyle().
+			Foreground(ColorMuted)
 )
 
 // Footer animation styles — the always-present animated illustration.

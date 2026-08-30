@@ -65,5 +65,6 @@ func teaHandler(sess ssh.Session) (tea.Model, []tea.ProgramOption) {
 
 	return model, []tea.ProgramOption{
 		tea.WithAltScreen(),
+		tea.WithMouseCellMotion(),
 	}
 }

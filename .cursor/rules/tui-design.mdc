@@ -1,6 +1,6 @@
 ---
-description: TUI layout, navigation, responsiveness, blog display — habibiahmada-terminal
-globs: internal/tui/**/*.go,internal/components/**/*.go,internal/styles/**/*.go,internal/blog/**/*.go
+description: TUI layout, navigation, responsiveness — habibiahmada-terminal
+globs: internal/tui/**/*.go,internal/components/**/*.go,internal/styles/**/*.go
 alwaysApply: false
 ---
 
@@ -8,20 +8,27 @@ alwaysApply: false
 
 Referensi lengkap: `docs/design-system.md`, `docs/pages.md`.
 
-## Layout — Center, Not Top-Crammed
+## Layout — Side Rail + Ambient Gutters
 
-- Konten **vertikal di tengah** viewport jika lebih pendek dari `contentHeight()`.
-- Gunakan `components.CenterInViewport(content, width, height)` — jangan manual padding newline.
-- Home (multi-section) **tidak** di-center; pakai scroll `j/k`.
-- Header + sidebar + footer tetap fixed; hanya area konten yang di-center.
+- **Nav vertikal kiri** (`NavRail`) — `[Screen]` aktif + hints; **garis `│`** memisahkan nav dari konten (satu garis kontinu, bukan kotak per baris).
+- Nav rail **di-center vertikal** dalam tinggi shell; konten **top-aligned** (scrollable, tidak bergeser saat ganti screen).
+- Konten pendek **di-center vertikal** di viewport via `composeBodyFrame`; jika lebih panjang dari `contentHeight()`, scroll `j/k`.
+- Margin sisi: bersih (no ambient 01 pattern); shell di-center horizontal sebagai satu blok.
 
 ```go
-// ✅ GOOD — center short screens
-view := components.CenterInViewport(clipped, contentWidth, m.contentHeight())
+// ✅ GOOD — sidebar | content, ambient margins, pinned footer
+shell := lipgloss.JoinHorizontal(Top, rail, rule, gap, contentCol)
+body := composeBodyFrame(shell, bodyH)
+return body + "\n" + footer
 
-// ❌ BAD — content menempel atas saat viewport besar
-return styles.ContentStyle.Render(content)
+// ❌ BAD — horizontal nav di atas, footer mengambang di tengah
 ```
+
+## Halaman — Ringkas, Tanpa Duplikasi
+
+- Satu screen = info esensial saja; **tanpa** `// Label`, intro panjang, atau section duplikat (CTA/services di Home, dll.).
+- Projects: list satu baris meta; detail scroll `j/k`.
+- Jangan ulang nav hint yang sudah ada di footer.
 
 ## Responsiveness
 
@@ -35,9 +42,9 @@ return styles.ContentStyle.Render(content)
 
 | Key | Aksi |
 |-----|------|
-| `↑` / `↓` | **Langsung ganti screen** (sidebar tabs) — tanpa Enter |
-| `j` / `k` | Scroll konten, atau pilih item di list (Projects, Blog) |
-| `Enter` | Drill-down: project detail, artikel blog |
+| `↑` / `↓` | **Langsung ganti screen** (nav vertikal kiri) — tanpa Enter |
+| `j` / `k` | Scroll konten, atau pilih item di list (Projects) |
+| `Enter` | Drill-down: project detail (Home: no-op) |
 | `←` / `Esc` | Back: detail → list, screen → Home, Home → quit |
 
 - `↑↓` **bukan** scroll — scroll hanya `j/k` atau PgUp/PgDn.
@@ -56,20 +63,12 @@ habibiahmada.          ↑↓ Screens · j/k Scroll · Enter Open · ← Back ·
 - Jangan stack artline di atas hints — brand + hints **satu row** via `FooterBar`.
 - Equalizer/cursor opsional hanya jika `width ≥ 70` dan muat di sisi kiri setelah brand.
 
-## Blog — Live Fetch + TUI Format
-
-- Fetch `GET {base}/api/public/blog` saat masuk screen Blog (Bubble Tea `tea.Cmd`).
-- Base URL: env `HABIBIAHMADA_API_BASE` → default `https://www.habibiahmada.dev`.
-- **Jangan** render markdown mentah — parse ke format TUI via `blog.FormatMarkdown(body, width)`.
-- Tampilkan: title, category badge, date, read time, tags, body terformat.
-- List: judul + meta satu baris; detail: section headers + body scroll `j/k`.
-- Loading / error / empty state wajib — jangan blank screen.
-
 ## Styling
 
 - Palette brand: primary `#ef4444`, secondary `#3b82f6` — lihat `docs/design-system.md`.
-- Section label: `// Label` via `styles.LabelStyle`.
+- Section label: hindari `// Label` kecuali benar-benar perlu — judul section cukup.
 - Semua styling di `internal/styles/` — no raw ANSI di screen files.
+- ASCII art/border: setiap baris harus sama lebar sehingga kotak sejajar (gunakan `│`/`╭╮╰╯` sejajar).
 
 ## QA Checklist (setiap screen baru)
 

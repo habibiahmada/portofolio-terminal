@@ -4,144 +4,82 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/charmbracelet/lipgloss"
-
-	"github.com/habibiahmada/habibiahmada-terminal/internal/components"
 	"github.com/habibiahmada/habibiahmada-terminal/internal/data"
 	"github.com/habibiahmada/habibiahmada-terminal/internal/styles"
 )
 
-// renderProjectsContent renders the projects archive: all 10 projects with
-// year + tags, navigable with ↑↓.
 func (m *App) renderProjectsContent() string {
-	title := styles.SectionTitleStyle.Render("All Projects")
-	sub := styles.MutedStyle.Render(
-		"Web projects by Habibi Ahmad Aziz. Production and capstone work across school systems, AI products, payments, and fullstack apps. Each project links to a detailed case study.",
-	)
-
-	cards := make([]string, 0, len(m.projects))
+	lines := []string{
+		styles.SectionTitleStyle.Render("Projects"),
+		styles.MutedStyle.Render(fmt.Sprintf("%d shipped · j/k select · Enter detail", len(m.projects))),
+		"",
+	}
 	for i, p := range m.projects {
-		selected := i == m.selectedProject
-		card := renderProjectCard(p, m.width, selected)
-		cards = append(cards, card)
+		lines = append(lines, renderProjectListRow(p, i == m.selectedProject))
 	}
-
-	hint := styles.MutedStyle.Render("j/k browse · Enter view case study · ← back")
-
-	content := lipgloss.JoinVertical(
-		lipgloss.Left,
-		title,
-		sub,
-		"",
-		strings.Join(cards, "\n"),
-		"",
-		hint,
-	)
-
-	return styles.ContentStyle.Render(content)
+	return strings.Join(lines, "\n")
 }
 
-// renderProjectCard renders a single project row card. When selected the title
-// is highlighted and a "▸" marker is added.
-func renderProjectCard(p data.Project, width int, selected bool) string {
-	nameStyle := styles.SectionTitleStyle
-	marker := ""
+func renderProjectListRow(p data.Project, selected bool) string {
+	prefix := "  "
+	nameStyle := styles.NormalStyle
 	if selected {
+		prefix = "> "
 		nameStyle = styles.ListSelectedStyle
-		marker = "▸ "
 	}
-
-	meta := styles.MutedStyle.Render(p.Year)
-	tags := components.TagList(p.Tags)
-
-	head := lipgloss.JoinHorizontal(lipgloss.Left, marker+nameStyle.Render(p.Name), "   "+meta)
-	body := styles.NormalStyle.Render(p.Description)
-
-	inner := lipgloss.JoinVertical(
-		lipgloss.Left,
-		head,
-		"",
-		body,
-		"",
-		tags,
-	)
-
-	cardStyle := styles.CardStyle
-	if selected {
-		cardStyle = styles.PrimaryCardStyle
+	meta := p.Year
+	if len(p.Tags) > 0 {
+		meta += " · " + strings.Join(p.Tags[:min(3, len(p.Tags))], ", ")
 	}
-	return cardStyle.Render(inner)
+	return prefix + nameStyle.Render(p.Name) + "  " + styles.MutedStyle.Render(meta)
 }
 
-// renderProjectDetailContent renders the case study for the open project.
+func renderProjectCard(p data.Project, width int, selected bool) string {
+	return renderProjectListRow(p, selected)
+}
+
 func (m *App) renderProjectDetailContent() string {
 	p := m.projectDetail
-
-	back := styles.MutedStyle.Render("← All projects")
-
-	title := styles.SectionTitleStyle.Render(p.Name)
-	year := styles.MutedStyle.Render(p.Year)
-	desc := styles.NormalStyle.Render(p.Description)
-
-	tags := components.TagList(p.Tags)
-
-	// Links.
-	links := make([]string, 0, 2)
-	if p.Live != "" {
-		links = append(links, styles.LinkStyle.Render("Live site: "+p.Live))
-	}
-	if p.GitHub != "" {
-		links = append(links, styles.LinkStyle.Render("Source: "+p.GitHub))
+	lines := []string{
+		styles.MutedStyle.Render("← back to list"),
+		styles.SectionTitleStyle.Render(p.Name),
+		styles.MutedStyle.Render(p.Year + " · " + strings.Join(p.Tags, ", ")),
 	}
 
-	// Case study sections.
-	var sections []string
 	cs := data.GetCaseStudy(p.Slug)
-	if cs != nil && len(cs.Sections) > 0 {
-		blocks := make([]string, 0, len(cs.Sections)*2)
+	if cs != nil && cs.Hero != "" {
+		lines = append(lines, "", styles.NormalStyle.Render(componentsWrap(cs.Hero, m.contentWidth())))
+	} else if p.Description != "" {
+		lines = append(lines, "", styles.NormalStyle.Render(componentsWrap(p.Description, m.contentWidth())))
+	}
+
+	if cs != nil {
 		for _, sec := range cs.Sections {
-			blocks = append(blocks,
-				styles.LabelStyle.Render("── "+sec.Label+" ──"),
-				styles.NormalStyle.Render(sec.Body),
-				"",
+			body := componentsWrap(sec.Body, m.contentWidth())
+			lines = append(lines, "",
+				styles.PrimaryText.Render(sec.Label),
+				styles.NormalStyle.Render(body),
 			)
 		}
-		sections = append(sections, strings.Join(blocks, "\n"))
 	}
 
-	// Prev / Next navigation hints.
+	if len(p.Stack) > 0 {
+		lines = append(lines, "", styles.MutedStyle.Render("Stack: "+strings.Join(p.Stack, ", ")))
+	}
+	if p.Live != "" {
+		lines = append(lines, styles.LinkStyle.Render("Live: "+p.Live))
+	}
+	if p.GitHub != "" {
+		lines = append(lines, styles.LinkStyle.Render("Source: "+p.GitHub))
+	}
+
 	prev, next := m.projectNeighbors()
-	nav := fmt.Sprintf("%s   %s",
-		styles.MutedStyle.Render("← "+prev),
-		styles.MutedStyle.Render(" "+next+" →"),
+	lines = append(lines, "",
+		styles.MutedStyle.Render(fmt.Sprintf("h/l %s · %s · ← list", prev, next)),
 	)
-
-	footer := styles.MutedStyle.Render("h / l prev·next · ← back to projects")
-
-	content := lipgloss.JoinVertical(
-		lipgloss.Left,
-		back,
-		"",
-		title,
-		year,
-		"",
-		desc,
-		"",
-		tags,
-		"",
-		strings.Join(links, "\n"),
-	)
-
-	if len(sections) > 0 {
-		content = lipgloss.JoinVertical(lipgloss.Left, content, "", strings.Join(sections, "\n"))
-	}
-
-	content = lipgloss.JoinVertical(lipgloss.Left, content, "", nav, footer)
-
-	return styles.ContentStyle.Render(content)
+	return strings.Join(lines, "\n")
 }
 
-// projectNeighbors returns the display names of the previous and next projects.
 func (m *App) projectNeighbors() (prev, next string) {
 	if len(m.projects) == 0 {
 		return "", ""
@@ -156,4 +94,11 @@ func (m *App) projectNeighbors() (prev, next string) {
 		nIdx = 0
 	}
 	return m.projects[pIdx].Name, m.projects[nIdx].Name
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }

@@ -91,31 +91,28 @@ ColorMuted     → #71717a  (zinc-500)
 
 | Web token | Nilai | TUI equivalent |
 |-----------|-------|----------------|
-| `max-w-7xl` | 90rem | `contentWidth = terminalWidth - sidebar - padding` |
-| Section `py-16 md:py-24` | 64–96px | `\n\n` antara section + `MarginBottom(1)` |
-| Nav `h-18` | 72px | `headerHeight = 4` lines |
-| Horizontal pad | `px-4 … lg:px-12` | `ContentStyle.PaddingLeft(2)` |
-| Card gap | `gap-6` | `CardStyle.MarginBottom(1)` |
+| `max-w-7xl` | 90rem | `contentWidth()` max 76 cols, sidebar + divider + margin |
+| Nav | vertical rail kiri | `NavRail` — `[Screen]` aktif + hints, di-center vertikal |
+| Border nav↔konten | — | `VerticalRule` — satu garis `│` kontinu |
+| Footer | bottom bar | `height - footerLines` body zone, footer baris terakhir |
 
 ### Layout struktur
 
 ```
-┌─────────────────────────────────────────────┐
-│ HEADER  habibiahmada. · Fullstack Developer │  4 lines
-├──────────┬──────────────────────────────────┤
-│ SIDEBAR  │ CONTENT                          │
-│ 20 cols  │ scroll viewport                  │
-│          │                                  │
-├──────────┴──────────────────────────────────┤
-│ FOOTER  ↑↓ Navigate · Enter · ← · ? · q   │  2 lines
-└─────────────────────────────────────────────┘
+│ [Home]  │ habibiahmada. · title          │
+│  About  │ page content                   │
+│  ...    │                                │
+│ ↑↓ hint │                                │
+├──────────────────────────────────────────┤
+│ habibiahmada.          ↑↓ Screens · j/k · … │
+└──────────────────────────────────────────┘
 ```
 
 | Konstanta | Nilai | File |
 |-----------|-------|------|
-| `headerHeight` | 4 | `internal/tui/app.go` |
+| `NavRailWidth` | 16 | `internal/components/sidebar.go` |
 | `footerHeight` | 2 | `internal/tui/app.go` |
-| `sidebarWidth` | 20 | `internal/tui/app.go` |
+| `maxContentWidth` | 76 | `internal/tui/layout.go` |
 
 ---
 
@@ -289,10 +286,6 @@ Konten pendek di-center vertikal via newline padding (`components.CenterInViewpo
 ### Footer
 
 Satu baris: `>_ habibiahmada.` kiri · hints kanan. Tick animasi **600ms**. Equalizer hanya jika `width ≥ 90`.
-
-### Blog
-
-Fetch `GET /api/public/blog` saat masuk Blog. Markdown diformat via `blog.FormatMarkdown` (max 32KB body).
 
 ---
 

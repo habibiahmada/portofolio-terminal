@@ -64,16 +64,15 @@ func TestSidebarHighlights(t *testing.T) {
 		{Key: "Skills", Name: "Skills"},
 	}
 
-	// selectedIndex renders ">", activeKey renders "▸".
-	out := Sidebar(items, 1, "Skills", 10)
-	if !strings.Contains(out, "> Projects") {
-		t.Errorf("expected selected item to be marked with '>', got %q", out)
-	}
-	if !strings.Contains(out, "▸ Skills") {
-		t.Errorf("expected active item to be marked with '▸', got %q", out)
+	out := NavRail(items, 1, navRailWidth)
+	if !strings.Contains(out, "[Projects]") {
+		t.Errorf("expected selected item in brackets, got %q", out)
 	}
 	if !strings.Contains(out, "About") {
 		t.Errorf("expected unselected item to still render, got %q", out)
+	}
+	if !strings.Contains(out, "↑↓ screen") {
+		t.Errorf("expected nav hints, got %q", out)
 	}
 }
 
