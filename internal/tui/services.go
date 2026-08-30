@@ -12,7 +12,7 @@ func (m *App) renderServicesContent() string {
 	cw := m.contentWidth()
 	lines := []string{
 		styles.SectionTitleStyle.Render("▸ Services & Solutions"),
-		styles.MutedStyle.Render("End-to-end web engineering offerings for products, startups, and teams."),
+		styles.MutedStyle.Render("End-to-end web engineering for products, startups, and teams - from discovery through production deployment."),
 		"",
 	}
 
@@ -22,20 +22,21 @@ func (m *App) renderServicesContent() string {
 		title := styles.PrimaryText.Render(sv.Title)
 
 		header := fmt.Sprintf("  %s %s %s", numBadge, catBadge, title)
-
-		descLines := components.WrapText(sv.Description, cw-6)
-		var indentedDesc []string
-		for _, dl := range descLines {
-			indentedDesc = append(indentedDesc, "     "+styles.NormalStyle.Render(dl))
+		for _, hl := range components.WrapText(header, cw) {
+			lines = append(lines, hl)
 		}
 
-		lines = append(lines, header, strings.Join(indentedDesc, "\n"), "")
+		descLines := components.WrapText(sv.Description, cw-6)
+		for _, dl := range descLines {
+			lines = append(lines, "     "+styles.NormalStyle.Render(dl))
+		}
+		lines = append(lines, "")
 	}
 
 	// 4-step operating process
 	lines = append(lines,
 		styles.SectionTitleStyle.Render("▸ How I Ship (4-Step Process)"),
-		styles.MutedStyle.Render("The systematic workflow applied across all projects and client work:"),
+		styles.MutedStyle.Render("The repeatable workflow I apply across client work and personal projects:"),
 		"",
 	)
 
@@ -48,8 +49,10 @@ func (m *App) renderServicesContent() string {
 	}
 
 	// CTA line
-	cta := styles.PromptStyle.Render("  ✉ Inquiries: " + m.profile.Email) + "  ·  " + styles.LinkStyle.Render("https://"+m.profile.Website)
-	lines = append(lines, cta)
+	cta := styles.PromptStyle.Render("  Inquiries: " + m.profile.Email) + "  ·  " + styles.LinkStyle.Render("https://"+m.profile.Website)
+	for _, wl := range components.WrapText(cta, cw) {
+		lines = append(lines, wl)
+	}
 
 	return strings.Join(lines, "\n")
 }

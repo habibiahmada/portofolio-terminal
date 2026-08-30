@@ -20,29 +20,75 @@ var cursorFrames = []string{"▊", " "}
 // FooterBar renders a single footer row: brand on the left, keyboard hints on
 // the right. Animation is minimal to keep CPU/RAM usage low.
 func FooterBar(frame, width int, hints []FooterHint) string {
-	if width < 20 {
-		width = 20
+	if width < 1 {
+		width = 1
 	}
 
 	left := footerBrand(frame, width)
-
-	parts := make([]string, 0, len(hints))
-	for _, h := range hints {
-		parts = append(parts, h.Key+" "+h.Label)
-	}
-	right := styles.FooterStyle.Render(strings.Join(parts, "  ·  "))
+	right := footerHintsLine(hints, width)
 
 	leftW := lipgloss.Width(left)
 	rightW := lipgloss.Width(right)
 	gap := width - leftW - rightW
-	if gap < 2 {
-		// Stack on tiny widths: brand then hints.
-		return lipgloss.JoinVertical(lipgloss.Left, left, right)
+	if gap < 2 || rightW > width {
+		lines := []string{FitLine(left, width)}
+		if right != "" {
+			lines = append(lines, FitLine(right, width))
+		}
+		return strings.Join(lines, "\n")
 	}
 
 	spacer := strings.Repeat(" ", gap)
-	row := left + spacer + right
-	return styles.FooterStyle.Width(width).Render(row)
+	return FitLine(left+spacer+right, width)
+}
+
+func footerHintsLine(hints []FooterHint, width int) string {
+	parts := make([]string, 0, len(hints))
+	for _, h := range hints {
+		label := h.Label
+		if width < 50 {
+			label = footerHintShort(h)
+		}
+		parts = append(parts, h.Key+" "+label)
+	}
+	line := styles.FooterStyle.Render(strings.Join(parts, " · "))
+	if lipgloss.Width(line) > width && width < 70 {
+		// Ultra-compact: keys only.
+		keys := make([]string, 0, len(hints))
+		for _, h := range hints {
+			keys = append(keys, h.Key)
+		}
+		line = styles.FooterStyle.Render(strings.Join(keys, " · "))
+	}
+	return line
+}
+
+func footerHintShort(h FooterHint) string {
+	switch h.Label {
+	case "Screens":
+		return "Scr"
+	case "Focus screen":
+		return "Focus"
+	case "Scroll":
+		return "Scr"
+	case "Select text":
+		return "Sel"
+	case "Open":
+		return "Open"
+	case "Nav":
+		return "Nav"
+	case "Help":
+		return "?"
+	case "Quit":
+		return "Quit"
+	case "Page":
+		return "Pg"
+	default:
+		if len(h.Label) > 6 {
+			return Truncate(h.Label, 6)
+		}
+		return h.Label
+	}
 }
 
 // footerBrand renders the left-side brand mark with an animated >_ prompt and

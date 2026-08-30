@@ -272,7 +272,7 @@ func TestProjectRowClickOpensDetail(t *testing.T) {
 	m.shellLeft = 2
 	m.contentOffset = 0
 
-	textLeft := m.shellLeft + bodyFrameChrome - components.ScrollbarWidth
+	textLeft := m.shellLeft + m.bodyFrameChrome() - components.ScrollbarWidth
 	i := 1
 	m.Update(mousePress(textLeft+10, m.bodyTop+m.bodyTopPad()+4+i))
 
@@ -502,6 +502,8 @@ func TestFooterShowsBrandAndHints(t *testing.T) {
 
 func TestViewLinesFitTerminal(t *testing.T) {
 	sizes := []struct{ w, h int }{
+		{40, 12},
+		{60, 20},
 		{80, 24},
 		{100, 30},
 		{120, 40},

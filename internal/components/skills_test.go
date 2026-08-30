@@ -18,6 +18,42 @@ func TestSkillGridWraps(t *testing.T) {
 	}
 }
 
+func TestReflowBlockWrapsLongLines(t *testing.T) {
+	long := "This is a long sentence that should wrap across multiple terminal columns when the width is narrow."
+	out := ReflowBlock(long, 20)
+	lines := strings.Split(out, "\n")
+	if len(lines) < 2 {
+		t.Errorf("expected wrapped lines, got %q", out)
+	}
+	for i, ln := range lines {
+		if w := lipgloss.Width(ln); w > 20 {
+			t.Errorf("line %d width %d > 20: %q", i, w, ln)
+		}
+	}
+}
+
+func TestNavRailWidthFor(t *testing.T) {
+	cases := []struct {
+		w, want int
+	}{
+		{30, 8},
+		{39, 8},
+		{40, 10},
+		{50, 10},
+		{59, 10},
+		{60, 13},
+		{70, 13},
+		{79, 13},
+		{80, 16},
+		{100, 16},
+	}
+	for _, c := range cases {
+		if got := NavRailWidthFor(c.w); got != c.want {
+			t.Errorf("NavRailWidthFor(%d) = %d, want %d", c.w, got, c.want)
+		}
+	}
+}
+
 func TestFitLinePadsAndClips(t *testing.T) {
 	if got := FitLine("ab", 4); got != "ab  " {
 		t.Errorf("pad: got %q", got)

@@ -8,6 +8,7 @@ import (
 
 	"github.com/habibiahmada/habibiahmada-terminal/internal/components"
 	"github.com/habibiahmada/habibiahmada-terminal/internal/data"
+	"github.com/habibiahmada/habibiahmada-terminal/internal/sanitize"
 	"github.com/habibiahmada/habibiahmada-terminal/internal/styles"
 )
 
@@ -17,7 +18,7 @@ func (m *App) renderProjectsContent() string {
 	// ── Header ────────────────────────────────────────────────────────────
 	title := styles.SectionTitleStyle.Render("▸ Projects Archive")
 	hint := styles.MutedStyle.Render(
-		fmt.Sprintf("%d projects · ↑/↓ select · Enter open · ← back", len(m.projects)),
+		fmt.Sprintf("%d projects in the archive. Use j/k or arrow keys to browse, Enter to open a case study, and Esc to go back.", len(m.projects)),
 	)
 
 	lines := []string{title, hint, ""}
@@ -89,18 +90,13 @@ func renderProjectListRow(p data.Project, idx int, selected, contentFocused bool
 
 	// ── Layout with selection indicator ───────────────────────────────────
 	if selected && contentFocused {
-		// Full-width highlight bar for active selection.
-		// The ">" is required for test assertions (TestProjectsListFocusExclusive).
 		indicator := styles.PrimaryText.Render("> ")
 		topRendered := indicator + topLine
 		metaRendered := "  " + metaLine
 
-		// Clamp to content width.
-		topRendered = components.FitLine(topRendered, cw)
-		metaRendered = components.FitLine(metaRendered, cw)
-
-		// Wrap with a thick left border accent.
-		body := lipgloss.JoinVertical(lipgloss.Left, topRendered, metaRendered)
+		topLines := strings.Split(components.ReflowBlock(topRendered, cw), "\n")
+		metaLines := strings.Split(components.ReflowBlock(metaRendered, cw), "\n")
+		body := lipgloss.JoinVertical(lipgloss.Left, append(topLines, metaLines...)...)
 		return lipgloss.NewStyle().
 			BorderLeft(true).
 			BorderStyle(lipgloss.ThickBorder()).
@@ -110,20 +106,22 @@ func renderProjectListRow(p data.Project, idx int, selected, contentFocused bool
 	}
 
 	if selected {
-		// Soft selection — muted left accent.
 		indicator := styles.MutedStyle.Render("│ ")
 		topRendered := indicator + topLine
 		metaRendered := "  " + metaLine
-		body := lipgloss.JoinVertical(lipgloss.Left, topRendered, metaRendered)
+		topLines := strings.Split(components.ReflowBlock(topRendered, cw), "\n")
+		metaLines := strings.Split(components.ReflowBlock(metaRendered, cw), "\n")
+		body := lipgloss.JoinVertical(lipgloss.Left, append(topLines, metaLines...)...)
 		return lipgloss.NewStyle().
 			PaddingLeft(1).
 			Render(body)
 	}
 
-	// Unselected row — compact single line with meta inline.
 	rowLine := "   " + topLine
 	metaInline := "    " + metaLine
-	return lipgloss.JoinVertical(lipgloss.Left, rowLine, metaInline)
+	topLines := strings.Split(components.ReflowBlock(rowLine, cw), "\n")
+	metaLines := strings.Split(components.ReflowBlock(metaInline, cw), "\n")
+	return lipgloss.JoinVertical(lipgloss.Left, append(topLines, metaLines...)...)
 }
 
 // renderProjectCard is kept for backward-compat (used by mouse hit-testing).
@@ -145,7 +143,6 @@ func (m *App) renderProjectDetailContent() string {
 	if len(p.Tags) > 0 {
 		yearTags += "  ·  " + strings.Join(p.Tags, " · ")
 	}
-	metaLine := styles.SubtitleStyle.Render(yearTags)
 
 	// ── Featured marker ───────────────────────────────────────────────────
 	var featLine string
@@ -153,7 +150,10 @@ func (m *App) renderProjectDetailContent() string {
 		featLine = styles.BadgeStyle.Render("★ Featured Project")
 	}
 
-	lines := []string{backHint, "", titleLine, metaLine}
+	lines := []string{backHint, "", titleLine}
+	for _, wl := range components.WrapText(yearTags, cw) {
+		lines = append(lines, styles.SubtitleStyle.Render(wl))
+	}
 	if featLine != "" {
 		lines = append(lines, featLine)
 	}
@@ -161,6 +161,10 @@ func (m *App) renderProjectDetailContent() string {
 
 	// ── Hero / description ────────────────────────────────────────────────
 	cs := data.GetCaseStudy(p.Slug)
+	if cs != nil {
+		sanitized := sanitize.CaseStudy(*cs)
+		cs = &sanitized
+	}
 	if cs != nil && cs.Hero != "" {
 		wrapped := strings.Join(components.WrapText(cs.Hero, cw), "\n")
 		lines = append(lines, styles.NormalStyle.Render(wrapped), "")

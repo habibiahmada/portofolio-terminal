@@ -23,8 +23,8 @@ func TestGetCertificates(t *testing.T) {
 
 func TestGetPinnedCertificates(t *testing.T) {
 	pinned := GetPinnedCertificates()
-	if len(pinned) != 3 {
-		t.Fatalf("expected 3 pinned certificates, got %d", len(pinned))
+	if len(pinned) != 4 {
+		t.Fatalf("expected 4 pinned certificates, got %d", len(pinned))
 	}
 
 	for _, c := range pinned {

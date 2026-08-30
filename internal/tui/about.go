@@ -45,7 +45,7 @@ func (m *App) renderAboutHero(cw int) string {
 func (m *App) renderAboutStats(cw int) string {
 	heading := styles.SectionTitleStyle.Render("▸ Core Metrics & Accolades")
 
-	// Stats pills
+	// Stats pills — wrap on narrow terminals.
 	stats := make([]string, 0, len(m.profile.Stats))
 	for _, s := range m.profile.Stats {
 		stats = append(stats,
@@ -53,6 +53,10 @@ func (m *App) renderAboutStats(cw int) string {
 		)
 	}
 	statsLine := "  " + strings.Join(stats, "   ·   ")
+	var statsRows []string
+	for _, wl := range components.WrapText(statsLine, cw) {
+		statsRows = append(statsRows, wl)
+	}
 
 	// Key Awards / Milestones
 	milestones := []struct {
@@ -62,12 +66,12 @@ func (m *App) renderAboutStats(cw int) string {
 	}{
 		{
 			badge: "[Top 15 Capstone]",
-			title: "Best Capstone Project — Coding Camp powered by DBS Foundation (2025)",
+			title: "Best Capstone Project - Coding Camp powered by DBS Foundation (2025)",
 			desc:  "CultureConnect platform selected among top 15 capstone teams nationally.",
 		},
 		{
 			badge: "[Country Winner]",
-			title: "Intel AI for Youth — National Award Winner (2025)",
+			title: "Intel AI for Youth - National Award Winner (2025)",
 			desc:  "Smartfarm AI (Agrify) recognized for real-world impact in agricultural intelligence.",
 		},
 	}
@@ -94,7 +98,9 @@ func (m *App) renderAboutStats(cw int) string {
 		rows = append(rows, strings.Join(blockLines, "\n"))
 	}
 
-	lines := []string{heading, statsLine, ""}
+	lines := []string{heading}
+	lines = append(lines, statsRows...)
+	lines = append(lines, "")
 	lines = append(lines, rows...)
 	return strings.Join(lines, "\n")
 }
@@ -133,7 +139,7 @@ func (m *App) renderAboutPhilosophy(cw int) string {
 
 // renderAboutGuide — hints directing to detailed sections.
 func (m *App) renderAboutGuide(cw int) string {
-	guideLines := components.WrapText("▸ Explore Experience for career timeline, Skills for full tech stack, and Projects for in-depth case studies.", cw-2)
+	guideLines := components.WrapText("▸ For more detail, visit Experience for my full career timeline, Skills for the complete tech stack, and Projects for in-depth case studies with architecture notes and outcomes.", cw-2)
 	var rendered []string
 	for _, gl := range guideLines {
 		rendered = append(rendered, styles.MutedStyle.Render(gl))

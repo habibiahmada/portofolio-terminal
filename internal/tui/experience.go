@@ -12,7 +12,7 @@ func (m *App) renderExperienceContent() string {
 	cw := m.contentWidth()
 	lines := []string{
 		styles.SectionTitleStyle.Render("▸ Work Experience"),
-		styles.MutedStyle.Render("Roles and engineering programs that shaped my end-to-end development skills."),
+		styles.MutedStyle.Render("Professional roles and engineering programs that shaped my full-stack development skills, from internships to production work."),
 		"",
 	}
 
@@ -30,7 +30,7 @@ func (m *App) renderExperienceContent() string {
 
 		locLine := ""
 		if w.Location != "" {
-			locLine = "  " + styles.MutedStyle.Render("📍 "+w.Location)
+			locLine = "  " + styles.MutedStyle.Render("Location: "+w.Location)
 		}
 
 		var detailLines []string
@@ -56,7 +56,7 @@ func (m *App) renderExperienceContent() string {
 
 	lines = append(lines,
 		styles.SectionTitleStyle.Render("▸ Education & Foundations"),
-		styles.MutedStyle.Render("Academic background and formal foundations in software engineering."),
+		styles.MutedStyle.Render("Formal education and foundations in software engineering, systems, and applied development."),
 		"",
 	)
 

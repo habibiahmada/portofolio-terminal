@@ -111,7 +111,7 @@ func (s *Splash) View() string {
 	pulse := styles.FooterBarStyle.Render(animation.New(animation.BlockPulse).Frame(s.frame))
 
 	brand := styles.HeaderWordmark.Render("habibiahmada") + styles.HeaderDot.Render(".")
-	sub := styles.MutedStyle.Render("interactive terminal CV")
+	sub := styles.MutedStyle.Render("An interactive portfolio, right in your terminal")
 
 	block := lipgloss.JoinVertical(
 		lipgloss.Center,
@@ -122,7 +122,7 @@ func (s *Splash) View() string {
 	)
 
 	if progress >= 100 {
-		block = lipgloss.JoinVertical(lipgloss.Center, block, styles.SuccessStyle.Render("ready — any key to continue"))
+		block = lipgloss.JoinVertical(lipgloss.Center, block, styles.SuccessStyle.Render("Ready - press any key to continue"))
 	}
 
 	bodyH := s.height

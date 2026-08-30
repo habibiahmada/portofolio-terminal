@@ -11,27 +11,36 @@ const maxContentWidth = 84
 // Cells reserved beside the inner content column so the assembled shell
 // (nav + rule + focus rail + content + scrollbar) never exceeds the terminal.
 const (
-	focusRailCells  = 2 // "· " / "▎ "
-	minBodyMargin   = 2
-	bodyFrameChrome = 16 + 1 + 1 + focusRailCells + components.ScrollbarWidth // nav + │ + gap + rail + bar
+	focusRailCells = 2 // "· " / "▎ "
+	minBodyMargin  = 2
 )
+
+// navRailWidth returns the responsive side-rail column width.
+func (m *App) navRailWidth() int {
+	return components.NavRailWidthFor(m.width)
+}
+
+// bodyFrameChrome is nav + │ + gap + focus rail + scrollbar (excluding content).
+func (m *App) bodyFrameChrome() int {
+	return m.navRailWidth() + 1 + 1 + focusRailCells + components.ScrollbarWidth
+}
 
 // contentWidth returns the inner text column (right of sidebar, focus rail,
 // and scrollbar gutter). Capped so the full shell stays on-screen.
 func (m *App) contentWidth() int {
-	w := m.width - 2*minBodyMargin - bodyFrameChrome
+	w := m.width - 2*minBodyMargin - m.bodyFrameChrome()
 	if w > maxContentWidth {
 		return maxContentWidth
 	}
-	if w < 12 {
-		return 12
+	if w < 8 {
+		return 8
 	}
 	return w
 }
 
 // frameWidth is nav + rule + focus rail + content + scrollbar (before centering).
 func (m *App) frameWidth() int {
-	return bodyFrameChrome + m.contentWidth()
+	return m.bodyFrameChrome() + m.contentWidth()
 }
 
 // composeBodyFrame lays the nav+content shell into the body region. The shell is

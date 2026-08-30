@@ -14,6 +14,7 @@ import (
 
 	"github.com/habibiahmada/habibiahmada-terminal/internal/components"
 	"github.com/habibiahmada/habibiahmada-terminal/internal/data"
+	"github.com/habibiahmada/habibiahmada-terminal/internal/sanitize"
 	"github.com/habibiahmada/habibiahmada-terminal/internal/styles"
 )
 
@@ -179,17 +180,17 @@ func New() *App {
 		currentScreen: ScreenHome,
 		selectedMenu:  0,
 		focus:         FocusNav,
-		profile:       data.GetProfile(),
-		projects:      data.GetProjects(),
-		skills:        data.GetSkills(),
-		work:          data.GetWorkExperience(),
-		education:     data.GetEducation(),
-		certificates:  data.GetCertificates(),
-		socials:       data.GetSocials(),
-		companies:     data.GetCompanies(),
-		services:      data.GetServices(),
-		process:       data.GetProcessSteps(),
-		press:         data.GetPress(),
+		profile:       sanitize.Profile(data.GetProfile()),
+		projects:      sanitize.Projects(data.GetProjects()),
+		skills:        sanitize.Skills(data.GetSkills()),
+		work:          sanitize.WorkExperience(data.GetWorkExperience()),
+		education:     sanitize.Education(data.GetEducation()),
+		certificates:  sanitize.Certificates(data.GetCertificates()),
+		socials:       sanitize.Socials(data.GetSocials()),
+		companies:     sanitize.Companies(data.GetCompanies()),
+		services:      sanitize.Services(data.GetServices()),
+		process:       sanitize.ProcessSteps(data.GetProcessSteps()),
+		press:         sanitize.PressItems(data.GetPress()),
 	}
 }
 
@@ -296,7 +297,7 @@ func (m *App) handleMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 	// to that screen. Rows map 1:1 to menuItems (NavRail renders one line per
 	// item starting at the top of the shell), so hit-testing is exact.
 	if msg.Action == tea.MouseActionPress && msg.X >= m.shellLeft &&
-		msg.X <= m.shellLeft+components.NavRailWidth()-1 && msg.Y >= m.bodyTop {
+		msg.X <= m.shellLeft+m.navRailWidth()-1 && msg.Y >= m.bodyTop {
 		m.focus = FocusNav
 		if row := msg.Y - m.bodyTop - m.bodyTopPad(); row >= 0 && row < len(menuItems) {
 			m.selectedMenu = row
@@ -312,7 +313,7 @@ func (m *App) handleMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 	// scroll offset is subtracted.
 	if msg.Action == tea.MouseActionPress && m.currentScreen == ScreenProjects &&
 		msg.Y >= m.bodyTop+m.bodyTopPad() && len(m.projects) > 0 {
-		textLeft := m.shellLeft + bodyFrameChrome - components.ScrollbarWidth
+		textLeft := m.shellLeft + m.bodyFrameChrome() - components.ScrollbarWidth
 		textRight := textLeft + m.contentWidth() - 1
 		if textRight > m.width-1 {
 			textRight = m.width - 1
@@ -924,16 +925,52 @@ func (m *App) renderNavRail() string {
 	for _, screen := range menuItems {
 		items = append(items, components.SidebarItem{
 			Key:  ScreenNames[screen],
-			Name: navLabel(screen),
+			Name: navLabel(screen, m.width),
 		})
 	}
-	return components.NavRail(items, m.navSelectedIndex(), components.NavRailWidth(), m.footerFrame, m.focus == FocusNav)
+	return components.NavRail(items, m.navSelectedIndex(), m.navRailWidth(), m.footerFrame, m.focus == FocusNav)
 }
 
-// navLabel returns short nav text (skip "Project Detail").
-func navLabel(s Screen) string {
+// navLabel returns nav text, shortened on compact terminals.
+func navLabel(s Screen, termWidth int) string {
 	if s == ScreenProjectDetail {
-		return "Projects"
+		return navLabel(ScreenProjects, termWidth)
+	}
+	switch {
+	case termWidth < 40:
+		switch s {
+		case ScreenHome:
+			return "Ho"
+		case ScreenAbout:
+			return "Ab"
+		case ScreenProjects:
+			return "Pr"
+		case ScreenSkills:
+			return "Sk"
+		case ScreenExperience:
+			return "Ex"
+		case ScreenCertificates:
+			return "Ce"
+		case ScreenServices:
+			return "Sv"
+		case ScreenContact:
+			return "Ct"
+		}
+	case termWidth < 60:
+		switch s {
+		case ScreenProjects:
+			return "Proj"
+		case ScreenSkills:
+			return "Skill"
+		case ScreenExperience:
+			return "Work"
+		case ScreenCertificates:
+			return "Cert"
+		case ScreenServices:
+			return "Svc"
+		case ScreenContact:
+			return "Talk"
+		}
 	}
 	return ScreenNames[s]
 }
@@ -1005,7 +1042,7 @@ func (m *App) renderContentRaw() string {
 	default:
 		content = m.renderHomeContent()
 	}
-	return m.applyViewport(content)
+	return m.applyViewport(components.ReflowBlock(content, m.contentWidth()))
 }
 
 // applyViewport clips long content to the visible area (top-aligned, stable
@@ -1111,7 +1148,7 @@ func (m *App) renderCVOverlay(layout string) string {
 		styles.NormalStyle.Render("Web:   " + styles.LinkStyle.Render(m.profile.Website)),
 		"",
 		styles.SubtitleStyle.Render("Recent role"),
-		styles.NormalStyle.Render("Web Developer — " + m.profile.Employer),
+		styles.NormalStyle.Render("Web Developer at " + m.profile.Employer),
 		"",
 		styles.MutedStyle.Render("(V opens this viewer · ← / Esc closes)"),
 	}

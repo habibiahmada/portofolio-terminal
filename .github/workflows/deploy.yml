@@ -1,5 +1,18 @@
 name: Deploy SSH Server
 
+# Deploys the Wish SSH portfolio server to EC2.
+#
+# Required repository secrets (Settings → Secrets → Actions):
+#   EC2_HOST     — public IP or hostname
+#   EC2_USER     — SSH user (e.g. ubuntu)
+#   EC2_SSH_KEY  — private key (public key must be in ~/.ssh/authorized_keys)
+#   EC2_PORT     — optional, default 22 (admin SSH port, not Wish :2222)
+#
+# Triggers:
+#   - push to main (paths below)
+#   - push tag v* (production release, same commit as npm publish)
+#   - manual workflow_dispatch
+
 on:
   workflow_dispatch:
     inputs:
@@ -13,15 +26,8 @@ on:
   push:
     branches:
       - main
-    paths:
-      - "cmd/ssh/**"
-      - "internal/tui/**"
-      - "internal/components/**"
-      - "internal/styles/**"
-      - "internal/data/**"
-      - "go.mod"
-      - "go.sum"
-      - ".github/workflows/deploy.yml"
+    tags:
+      - "v*"
 
 concurrency:
   group: deploy-ssh-${{ github.ref }}
@@ -31,7 +37,7 @@ jobs:
   deploy:
     name: Build & Deploy to EC2
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
 
     steps:
       - name: Checkout code
@@ -39,24 +45,43 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Check EC2 secrets
+        id: ec2
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+        run: |
+          if [ -n "$EC2_HOST" ] && [ -n "$EC2_SSH_KEY" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+            echo "EC2 deploy target is configured."
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=EC2 deploy skipped::Add EC2_HOST, EC2_USER, and EC2_SSH_KEY repository secrets to enable SSH server deploy."
+          fi
+
       - name: Set up Go
+        if: steps.ec2.outputs.configured == 'true'
         uses: actions/setup-go@v5
         with:
           go-version: "1.24"
           cache: true
 
       - name: Run tests
+        if: steps.ec2.outputs.configured == 'true'
         run: go test ./...
 
       - name: Run vet
+        if: steps.ec2.outputs.configured == 'true'
         run: go vet ./...
 
       - name: Build SSH server binary
+        if: steps.ec2.outputs.configured == 'true'
         run: |
           CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o habibiahmada-ssh ./cmd/ssh
           ls -lh habibiahmada-ssh
 
       - name: Copy artifacts to EC2
+        if: steps.ec2.outputs.configured == 'true'
         uses: appleboy/scp-action@v1
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -68,6 +93,7 @@ jobs:
           strip_components: 0
 
       - name: Deploy & restart service on EC2
+        if: steps.ec2.outputs.configured == 'true'
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -78,26 +104,26 @@ jobs:
             set -e
             cd /opt/habibiahmada
 
-            # Ensure the runtime directory and SSH host key location exist.
             mkdir -p .ssh
             chmod 755 habibiahmada-ssh
 
-            # Install the systemd unit.
+            if [ ! -f .ssh/term_info_ed25519 ]; then
+              echo "Generating Wish SSH host key"
+              ssh-keygen -t ed25519 -f .ssh/term_info_ed25519 -N "" -C "wish-portfolio@habibiahmada.dev"
+              chmod 600 .ssh/term_info_ed25519*
+            fi
+
             sudo cp deploy/portfolio-ssh.service /etc/systemd/system/portfolio-ssh.service
             sudo systemctl daemon-reload
-
-            # (Re)start the service.
             sudo systemctl enable portfolio-ssh.service || true
             sudo systemctl restart portfolio-ssh.service
 
-            # Report status.
             sleep 2
             sudo systemctl --no-pager --lines=20 status portfolio-ssh.service || true
 
-            # Sanity: confirm the Wish SSH port is listening.
             if sudo ss -ltnp | grep -q ':2222'; then
               echo "OK: SSH portfolio listening on :2222"
             else
-              echo "WARN: port 2222 not detected — check systemd logs" >&2
+              echo "ERROR: port 2222 not detected — check systemd logs" >&2
               exit 1
             fi

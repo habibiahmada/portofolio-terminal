@@ -44,3 +44,24 @@ done
 echo ""
 echo "Build complete. Binaries in $OUTPUT_DIR/:"
 ls -lh "$OUTPUT_DIR/"
+
+echo ""
+echo "Generating npm/checksums.json"
+CHECKSUM_FILE="npm/checksums.json"
+{
+  echo "{"
+  first=true
+  for f in "$OUTPUT_DIR"/*; do
+    name=$(basename "$f")
+    hash=$(sha256sum "$f" | awk '{print $1}')
+    if [ "$first" = true ]; then
+      first=false
+    else
+      echo ","
+    fi
+    printf '  "%s": "%s"' "$name" "$hash"
+  done
+  echo ""
+  echo "}"
+} > "$CHECKSUM_FILE"
+echo "Checksums written to $CHECKSUM_FILE"

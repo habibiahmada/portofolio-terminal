@@ -114,6 +114,28 @@ func WrapTextLine(text string, width int) string {
 	return strings.Join(lines, "\n")
 }
 
+// ReflowBlock re-wraps every line in a multiline block so no visible line
+// exceeds width cells. Preserves ANSI styling via lipgloss.MaxWidth.
+func ReflowBlock(content string, width int) string {
+	if width <= 0 || content == "" {
+		return content
+	}
+	var out []string
+	for _, ln := range strings.Split(content, "\n") {
+		if lipgloss.Width(ln) <= width {
+			out = append(out, ln)
+			continue
+		}
+		wrapped := lipgloss.NewStyle().Width(width).Render(ln)
+		for _, wl := range strings.Split(wrapped, "\n") {
+			if wl != "" {
+				out = append(out, wl)
+			}
+		}
+	}
+	return strings.Join(out, "\n")
+}
+
 // ClipResult describes a clipped viewport window.
 type ClipResult struct {
 	Text   string

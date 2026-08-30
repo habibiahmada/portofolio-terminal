@@ -8,6 +8,7 @@ import (
 
 	"github.com/habibiahmada/habibiahmada-terminal/internal/components"
 	"github.com/habibiahmada/habibiahmada-terminal/internal/data"
+	"github.com/habibiahmada/habibiahmada-terminal/internal/sanitize"
 	"github.com/habibiahmada/habibiahmada-terminal/internal/styles"
 )
 
@@ -15,11 +16,11 @@ func (m *App) renderSkillsContent() string {
 	cw := m.contentWidth()
 	lines := []string{
 		styles.SectionTitleStyle.Render("▸ Tools & Technologies"),
-		styles.MutedStyle.Render("Technologies, frameworks, and infrastructure used to build production-ready systems."),
+		styles.MutedStyle.Render("Languages, frameworks, and infrastructure I use to design, build, and ship production-ready web applications."),
 		"",
 	}
 
-	categories := data.GetSkillCategories()
+	categories := sanitize.SkillCategories(data.GetSkillCategories())
 	for _, cat := range categories {
 		icon := styles.BadgeAccentStyle.Render("[" + cat.Icon + "]")
 		title := styles.PrimaryText.Render(cat.Name)
@@ -53,7 +54,7 @@ func (m *App) renderSkillsContent() string {
 		lines = append(lines, header, chipBlock, descBlock, "")
 	}
 
-	overview := styles.MutedStyle.Render("● 16+ core technologies · End-to-end fullstack capability from UI to Cloud.")
+	overview := styles.MutedStyle.Render("● 16+ core technologies across the stack - from responsive UI through APIs, databases, and cloud deployment.")
 	lines = append(lines, overview)
 
 	return strings.Join(lines, "\n")

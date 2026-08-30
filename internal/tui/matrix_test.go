@@ -4,6 +4,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/charmbracelet/lipgloss"
 )
 
 // TestMatrixSizes renders every screen across the QA matrix from
@@ -13,7 +15,18 @@ func TestMatrixSizes(t *testing.T) {
 		w, h int
 	}{
 		{40, 12},
+		{40, 20},
+		{40, 30},
+		{60, 12},
+		{60, 20},
+		{60, 30},
+		{80, 12},
+		{80, 20},
 		{80, 24},
+		{80, 30},
+		{120, 12},
+		{120, 20},
+		{120, 30},
 		{120, 40},
 		{200, 50},
 	}
@@ -159,11 +172,39 @@ func TestSplashSkip(t *testing.T) {
 	}
 }
 
-// TestSplashResizePreservesSize verifies the window size is forwarded to App.
-func TestSplashResizePreservesSize(t *testing.T) {
-	s := NewSplash()
-	model, _ := s.Update(teaMsgWindow(200, 50))
-	if _, ok := model.(*Splash); !ok {
-		t.Fatalf("expected splash to continue on large terminal, got %T", model)
+// TestMatrixNoHorizontalOverflow ensures no line exceeds the terminal width.
+func TestMatrixNoHorizontalOverflow(t *testing.T) {
+	sizes := []struct{ w, h int }{
+		{40, 12}, {60, 20}, {80, 24}, {120, 30},
+	}
+	screens := []Screen{
+		ScreenAbout, ScreenProjects, ScreenProjectDetail,
+		ScreenServices, ScreenContact,
+	}
+	for _, size := range sizes {
+		for _, s := range screens {
+			m := New()
+			m.width, m.height = size.w, size.h
+			m.currentScreen = s
+			if len(m.projects) > 0 {
+				m.projectDetail = m.projects[0]
+			}
+			view := m.View()
+			for i, ln := range strings.Split(stripANSI(view), "\n") {
+				if w := lipgloss.Width(ln); w > size.w {
+					t.Errorf("[%dx%d] screen %v line %d width %d > %d", size.w, size.h, s, i, w, size.w)
+				}
+			}
+		}
+	}
+}
+
+// TestCompactNavLabels verifies abbreviated nav labels on narrow terminals.
+func TestCompactNavLabels(t *testing.T) {
+	m := New()
+	m.width, m.height = 40, 20
+	view := stripANSI(m.View())
+	if !strings.Contains(view, "Ho") || !strings.Contains(view, "Ab") {
+		t.Errorf("expected compact nav labels at 40 cols, got excerpt: %q", view[:min(200, len(view))])
 	}
 }

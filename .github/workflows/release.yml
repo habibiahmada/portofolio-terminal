@@ -5,15 +5,26 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: write
+
 jobs:
   build-and-release:
+    name: Build, publish npm, GitHub Release
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Resolve version from tag
+        id: version
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          VERSION="${TAG#v}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Publishing version $VERSION (tag $TAG)"
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -30,7 +41,7 @@ jobs:
       - name: Build all platforms
         run: bash scripts/build.sh
 
-      - name: Copy binaries to npm/bin
+      - name: Stage npm package
         run: |
           mkdir -p npm/bin
           cp dist/habibiahmada-linux-x64 npm/bin/
@@ -38,6 +49,21 @@ jobs:
           cp dist/habibiahmada-darwin-x64 npm/bin/
           cp dist/habibiahmada-darwin-arm64 npm/bin/
           cp dist/habibiahmada-win-x64.exe npm/bin/
+          node -e "
+            const fs = require('fs');
+            const p = require('./npm/package.json');
+            p.version = '${{ steps.version.outputs.version }}';
+            fs.writeFileSync('./npm/package.json', JSON.stringify(p, null, 2) + '\n');
+          "
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: https://registry.npmjs.org
+
+      - name: Test npm wrapper
+        run: cd npm && node test/integration.test.js
 
       - name: Publish to npm
         run: cd npm && npm publish --access public
@@ -47,5 +73,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ${{ steps.version.outputs.tag }}
           files: dist/*
           generate_release_notes: true

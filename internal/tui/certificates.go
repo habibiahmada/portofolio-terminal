@@ -13,7 +13,7 @@ func (m *App) renderCertificatesContent() string {
 	cw := m.contentWidth()
 	lines := []string{
 		styles.SectionTitleStyle.Render("▸ Licenses & Certifications"),
-		styles.MutedStyle.Render(fmt.Sprintf("%d verified credentials across cloud, fullstack engineering, and AI systems.", len(m.certificates))),
+		styles.MutedStyle.Render(fmt.Sprintf("%d verified credentials spanning cloud platforms, full-stack engineering, and applied AI systems.", len(m.certificates))),
 		"",
 	}
 
@@ -51,7 +51,7 @@ func (m *App) renderCertificatesContent() string {
 	// All Certifications list
 	lines = append(lines,
 		styles.SectionTitleStyle.Render("▸ Professional Certifications"),
-		styles.MutedStyle.Render("Verified courses, technical assessments, and accreditations:"),
+		styles.MutedStyle.Render("Courses, technical assessments, and accreditations earned through hands-on training and formal evaluation:"),
 		"",
 	)
 

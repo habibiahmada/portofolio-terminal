@@ -10,6 +10,21 @@ import (
 
 const navRailWidth = 16
 
+// NavRailWidthFor returns a responsive nav column width for the terminal.
+// Breakpoints align with docs/design-system.md and tui-design.mdc.
+func NavRailWidthFor(termWidth int) int {
+	switch {
+	case termWidth < 40:
+		return 8
+	case termWidth < 60:
+		return 10
+	case termWidth < 80:
+		return 13
+	default:
+		return navRailWidth
+	}
+}
+
 // SidebarItem is a single navigation entry shown in the side rail.
 type SidebarItem struct {
 	Key  string
@@ -30,14 +45,19 @@ func NavRail(items []SidebarItem, selectedIndex int, width, frame int, navFocuse
 	}
 
 	lines := make([]string, 0, len(items)+5)
+	compactHints := width < 12
 	for i, it := range items {
 		if it.Name == "" {
 			continue
 		}
+		name := it.Name
+		if lipgloss.Width(name) > width-2 {
+			name = Truncate(name, width-2)
+		}
 		if i == selectedIndex {
 			if navFocused {
 				marker := navCursor[frame%len(navCursor)]
-				label := styles.NavActiveStyle.Bold(true).Render(marker + " " + it.Name)
+				label := styles.NavActiveStyle.Bold(true).Render(marker + " " + name)
 				pad := width - lipgloss.Width(label)
 				if pad < 0 {
 					pad = 0
@@ -45,17 +65,23 @@ func NavRail(items []SidebarItem, selectedIndex int, width, frame int, navFocuse
 				bar := styles.NavActiveStyle.Bold(true).Render(strings.Repeat(" ", pad))
 				lines = append(lines, label+bar)
 			} else {
-				label := styles.NavSelectedInactive.Render("  " + it.Name)
+				label := styles.NavSelectedInactive.Render("  " + name)
 				lines = append(lines, label)
 			}
 		} else {
-			label := styles.NavItemStyle.Render("  " + it.Name + " ")
+			label := styles.NavItemStyle.Render("  " + name + " ")
 			lines = append(lines, label)
 		}
 	}
 
 	lines = append(lines, "")
-	if navFocused {
+	if compactHints {
+		if navFocused {
+			lines = append(lines, styles.MutedStyle.Render("↑↓"))
+		} else {
+			lines = append(lines, styles.MutedStyle.Render("j/k"))
+		}
+	} else if navFocused {
 		lines = append(lines,
 			styles.NavZoneHighlight.Render("◤ NAV"),
 			styles.MutedStyle.Render("↑↓ screen"),

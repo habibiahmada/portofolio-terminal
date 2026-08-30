@@ -10,6 +10,11 @@ Type=simple
 # If using a privileged port change 2222 -> a value + set AmbientCapabilities.
 WorkingDirectory=/opt/habibiahmada
 ExecStart=/opt/habibiahmada/habibiahmada-ssh
+Environment=SSH_MAX_SESSIONS=64
+Environment=SSH_IDLE_TIMEOUT=30m
+Environment=SSH_MAX_TIMEOUT=2h
+Environment=SSH_RATE_LIMIT=1
+Environment=SSH_RATE_BURST=5
 Restart=always
 RestartSec=5
 

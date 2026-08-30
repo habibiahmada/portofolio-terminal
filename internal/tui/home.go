@@ -39,7 +39,7 @@ func (m *App) renderHomeHero(width int) string {
 	meta := styles.MutedStyle.Render(m.profile.Title + " · " + m.profile.Location)
 	bio := styles.NormalStyle.Render(
 		components.WrapTextLine(
-			"Welcome! You're browsing my portfolio straight from your shell. Every project, skill, and piece of experience I have is accessible right here without a browser.",
+			"Welcome - glad you stopped by. This is my interactive portfolio, built for the terminal. Browse projects, skills, experience, and more without leaving your shell. Use the arrow keys to explore, or jump straight to featured work below.",
 			width-1,
 		),
 	)
@@ -66,24 +66,24 @@ func (m *App) featuredProjects() []data.Project {
 	return out
 }
 
-// renderHomeFeatured — compact 2-col × 2-row card grid.
-// Each line is FitLine'd to exactly `inner` chars before the border is applied,
-// ensuring no lipgloss re-wrapping. Heights are equalized at the line-slice level.
+// renderHomeFeatured — compact card grid (2-col on wide, stacked on narrow).
 func (m *App) renderHomeFeatured(width int) string {
 	heading := styles.SectionTitleStyle.Render("▸ Featured Work")
-	sub := styles.MutedStyle.Render("↑↓ navigate  ·  Enter to open  ·  P for all projects")
+	sub := styles.MutedStyle.Render("Select a card with arrow keys, press Enter to read the full case study, or press P to browse all projects.")
 
 	featured := m.featuredProjects()
 	if len(featured) == 0 {
 		return ""
 	}
 
-	// cardOuter: each card's total outer width (border + padding included).
-	// Two cards + 1-col gutter must fit in `width`.
-	cardOuter := (width - 1) / 2
-	inner := cardOuter - 4
-	if inner < 16 {
-		inner = 16
+	twoCol := width >= 60
+	inner := width - 4
+	if twoCol {
+		cardOuter := (width - 1) / 2
+		inner = cardOuter - 4
+	}
+	if inner < 8 {
+		inner = 8
 	}
 
 	type rawCard struct {
@@ -96,53 +96,51 @@ func (m *App) renderHomeFeatured(width int) string {
 		raws = append(raws, rawCard{buildCardLines(p, inner, sel), sel})
 	}
 
-	// Build rows: equalize line-counts per pair, then apply border.
 	rows := []string{}
 	blank := strings.Repeat(" ", inner)
-	for i := 0; i < len(raws); i += 2 {
-		if i+1 < len(raws) {
-			a, b := raws[i], raws[i+1]
-			// Equalize heights by appending blank lines to the shorter card.
-			for len(a.lines) < len(b.lines) {
-				a.lines = append(a.lines, blank)
-			}
-			for len(b.lines) < len(a.lines) {
-				b.lines = append(b.lines, blank)
-			}
-			cardA := applyCardBorder(strings.Join(a.lines, "\n"), inner, a.selected)
-			cardB := applyCardBorder(strings.Join(b.lines, "\n"), inner, b.selected)
-			rows = append(rows, lipgloss.JoinHorizontal(lipgloss.Top, cardA, " ", cardB))
-		} else {
-			cd := raws[i]
+
+	if !twoCol {
+		for _, cd := range raws {
 			rows = append(rows, applyCardBorder(strings.Join(cd.lines, "\n"), inner, cd.selected))
+		}
+	} else {
+		for i := 0; i < len(raws); i += 2 {
+			if i+1 < len(raws) {
+				a, b := raws[i], raws[i+1]
+				for len(a.lines) < len(b.lines) {
+					a.lines = append(a.lines, blank)
+				}
+				for len(b.lines) < len(a.lines) {
+					b.lines = append(b.lines, blank)
+				}
+				cardA := applyCardBorder(strings.Join(a.lines, "\n"), inner, a.selected)
+				cardB := applyCardBorder(strings.Join(b.lines, "\n"), inner, b.selected)
+				rows = append(rows, lipgloss.JoinHorizontal(lipgloss.Top, cardA, " ", cardB))
+			} else {
+				cd := raws[i]
+				rows = append(rows, applyCardBorder(strings.Join(cd.lines, "\n"), inner, cd.selected))
+			}
 		}
 	}
 
-	return "\n" + heading + "\n" + sub + "\n\n" + strings.Join(rows, "\n")
+	subLines := components.WrapText(sub, width)
+	return "\n" + heading + "\n" + strings.Join(subLines, "\n") + "\n\n" + strings.Join(rows, "\n")
 }
 
-// buildCardLines builds the card content as a slice of lines, each FitLine'd to
-// exactly `inner` visible cells. No JoinVertical → no trailing-space inflation.
+// buildCardLines builds card content lines, wrapping to inner width.
 func buildCardLines(p data.Project, inner int, selected bool) []string {
-	// Line 1 — title with selection indicator.
-	prefix := "  " // 2 visible cols, same as "▸ "
+	prefix := "  "
 	if selected {
 		prefix = styles.PrimaryText.Render("▸ ")
 	}
-	// Render title first, then FitLine the combined line.
-	rawTitle := prefix + styles.HomeCardTitleStyle.Render(
-		components.Truncate(p.Name, inner-2),
-	)
-	line1 := components.FitLine(rawTitle, inner)
+	rawTitle := prefix + styles.HomeCardTitleStyle.Render(p.Name)
+	titleLines := strings.Split(components.ReflowBlock(rawTitle, inner), "\n")
 
-	// Line 2 — year + tags, truncated then fit to width.
 	tagsStr := p.Year + " · " + strings.Join(p.Tags, " · ")
-	rawMeta := "  " + styles.HomeCardMetaStyle.Render(
-		components.Truncate(tagsStr, inner-2),
-	)
-	line2 := components.FitLine(rawMeta, inner)
+	rawMeta := "  " + styles.HomeCardMetaStyle.Render(tagsStr)
+	metaLines := strings.Split(components.ReflowBlock(rawMeta, inner), "\n")
 
-	return []string{line1, line2}
+	return append(titleLines, metaLines...)
 }
 
 // applyCardBorder wraps a pre-built body string with a rounded border.
@@ -183,5 +181,9 @@ func (m *App) renderHomeTrusted(width int) string {
 // renderHomeShortcuts renders a concise bottom keyboard hint strip.
 func (m *App) renderHomeShortcuts(width int) string {
 	hints := styles.MutedStyle.Render("Quick Actions: [P] All Projects  ·  [C] Contact  ·  [V] View CV  ·  [?] Help")
-	return "\n" + components.CenterText(hints, width)
+	var centered []string
+	for _, ln := range components.WrapText(hints, width) {
+		centered = append(centered, components.CenterText(ln, width))
+	}
+	return "\n" + strings.Join(centered, "\n")
 }
