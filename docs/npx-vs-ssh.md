@@ -4,7 +4,7 @@ Perbandingan dua jalur akses terminal portfolio.
 
 ## Ringkasan
 
-| | `npx habibiahmada` | `ssh habibiahmada.dev` |
+| | `npx habibiahmada` | `ssh ssh.habibiahmada.dev` |
 |---|-------------------|------------------------|
 | Label UX | **LOCAL EXPERIENCE** | **REMOTE EXPERIENCE** |
 | TUI berjalan di | Laptop user | AWS EC2 |
@@ -130,5 +130,5 @@ INTERACTIVE PORTFOLIO
 
   Or, connect remotely:
 
-  $ ssh habibiahmada.dev
+  $ ssh ssh.habibiahmada.dev
 ```

@@ -15,7 +15,7 @@ Satu ekosistem portfolio dengan tiga interface:
              ▼                  ▼                  ▼
           WEBSITE              CLI                SSH
              │                  │                  │
-     habibiahmada.dev    npx habibiahmada    ssh habibiahmada.dev
+     habibiahmada.dev    npx habibiahmada    ssh ssh.habibiahmada.dev
              │                  │                  │
              ▼                  │                  ▼
           Cloudflare            │                AWS EC2
@@ -44,7 +44,7 @@ Satu ekosistem portfolio dengan tiga interface:
 |-----------|-------|------------|
 | Pengguna biasa | `https://habibiahmada.dev` | Website portfolio modern |
 | Developer | `npx habibiahmada` | TUI lokal |
-| Developer/Linux enthusiast | `ssh habibiahmada.dev` | TUI melalui SSH |
+| Developer/Linux enthusiast | `ssh ssh.habibiahmada.dev` | TUI melalui SSH |
 
 ## Website Stack
 

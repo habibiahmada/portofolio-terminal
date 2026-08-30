@@ -9,7 +9,7 @@ Cara mengakses portfolio **Habibi Ahmad Aziz** di terminal Anda — tanpa perlu 
 npx habibiahmada
 
 # Atau hubungkan ke server (remote)
-ssh habibiahmada.dev
+ssh ssh.habibiahmada.dev
 ```
 
 Kedua perintah di atas menampilkan **TUI portfolio interaktif yang sama**.
@@ -62,7 +62,7 @@ Sekitar ~10–20 MB (tergantung platform).
 
 ---
 
-## Opsi 2: ssh habibiahmada.dev (Remote Experience)
+## Opsi 2: ssh ssh.habibiahmada.dev (Remote Experience)
 
 TUI berjalan di server AWS EC2. Laptop Anda hanya mengirim input keyboard dan menerima output tampilan.
 
@@ -75,10 +75,16 @@ TUI berjalan di server AWS EC2. Laptop Anda hanya mengirim input keyboard dan me
 ### Cara Menjalankan
 
 ```bash
-ssh habibiahmada.dev
+ssh ssh.habibiahmada.dev
 ```
 
 Setelah terhubung, TUI portfolio langsung terbuka — tidak perlu mengetik perintah tambahan.
+
+### Hostname
+
+Perintah publik: **`ssh ssh.habibiahmada.dev`**
+
+Apex `habibiahmada.dev` dipakai website (Vercel), jadi SSH memakai subdomain `ssh.` yang mengarah langsung ke EC2. Lihat `docs/deployment.md` untuk setup DNS Cloudflare.
 
 ### Kapan Memilih SSH?
 
@@ -171,7 +177,7 @@ Website dan terminal portfolio menampilkan informasi yang sama, dengan presentat
 
 | | npx | SSH | Website |
 |---|-----|-----|---------|
-| Perintah | `npx habibiahmada` | `ssh habibiahmada.dev` | Browser → `habibiahmada.dev` |
+| Perintah | `npx habibiahmada` | `ssh ssh.habibiahmada.dev` | Browser → `habibiahmada.dev` |
 | Butuh Node.js | Ya | Tidak | Tidak |
 | Butuh SSH client | Tidak | Ya | Tidak |
 | Butuh browser | Tidak | Tidak | Ya |
@@ -231,7 +237,7 @@ Tiga cara cepat melihat portfolio:
 npx habibiahmada
 
 # Terminal (remote) — demo server-side
-ssh habibiahmada.dev
+ssh ssh.habibiahmada.dev
 
 # Web
 open https://habibiahmada.dev

@@ -7,7 +7,7 @@ Panduan untuk AI coding assistant yang bekerja pada proyek terminal portfolio in
 Membangun **satu Go TUI** (Bubble Tea + Lip Gloss) yang dijalankan melalui:
 
 1. **`npx habibiahmada`** — TUI berjalan di laptop user (local experience)
-2. **`ssh habibiahmada.dev`** — TUI berjalan di AWS EC2 via Wish (remote experience)
+2. **`ssh ssh.habibiahmada.dev`** — TUI berjalan di AWS EC2 via Wish (remote experience)
 
 Jangan membuat dua TUI terpisah. Satu TUI core, dua transport/runtime.
 
@@ -33,7 +33,7 @@ Jangan membuat dua TUI terpisah. Satu TUI core, dua transport/runtime.
 
 ```
 cmd/portfolio/main.go  →  npx habibiahmada  →  internal/tui
-cmd/ssh/main.go        →  ssh habibiahmada.dev  →  internal/tui (sama)
+cmd/ssh/main.go        →  ssh ssh.habibiahmada.dev  →  internal/tui (sama)
 ```
 
 ## Screens TUI

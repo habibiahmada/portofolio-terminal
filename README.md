@@ -8,7 +8,7 @@ Proyek ini adalah **satu Go TUI** (Bubble Tea + Lip Gloss) yang dijalankan melal
 
 ```bash
 npx habibiahmada          # local experience (Go binary via npm wrapper)
-ssh habibiahmada.dev      # remote experience (EC2 via Wish server)
+ssh ssh.habibiahmada.dev      # remote experience (EC2 via Wish server)
 ```
 
 Website portfolio (`https://habibiahmada.dev`) dan terminal portfolio berbagi identitas visual yang sama, namun merupakan presentation layer terpisah.
@@ -20,7 +20,7 @@ Website portfolio (`https://habibiahmada.dev`) dan terminal portfolio berbagi id
 | Pengguna | Perintah | Keterangan |
 |---|---|---|
 | **Pengguna** | `npx habibiahmada` | Jalankan langsung di laptop Anda (local binary) |
-| **Pengguna** | `ssh habibiahmada.dev` | TUI interaktif via SSH (remote server) |
+| **Pengguna** | `ssh ssh.habibiahmada.dev` | TUI interaktif via SSH (remote server) |
 | **Developer** | `make dev` | Jalankan development mode |
 | **Developer** | `make test` | Jalankan unit test |
 
@@ -86,7 +86,7 @@ Website portfolio (`https://habibiahmada.dev`) dan terminal portfolio berbagi id
 |---|---|---|---|
 | **Website** | `https://habibiahmada.dev` | Browser → Cloudflare → Vercel → Next.js | Supabase |
 | **CLI (local)** | `npx habibiahmada` | Laptop user → Go binary → Bubble Tea | Node.js (hanya wrapper unduhan) |
-| **SSH (remote)** | `ssh habibiahmada.dev` | EC2 → Wish → Go TUI | Server EC2 |
+| **SSH (remote)** | `ssh ssh.habibiahmada.dev` | EC2 → Wish → Go TUI | Server EC2 |
 
 ---
 

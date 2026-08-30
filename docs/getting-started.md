@@ -9,7 +9,7 @@ Satu aplikasi TUI (Terminal User Interface) portfolio interaktif yang dibuat den
 | Jalur | Perintah | Keterangan |
 |-------|----------|------------|
 | **Local** | `npx habibiahmada` | Binary Go dijalankan di laptop Anda |
-| **Remote** | `ssh habibiahmada.dev` | TUI yang sama berjalan di server EC2 |
+| **Remote** | `ssh ssh.habibiahmada.dev` | TUI yang sama berjalan di server EC2 |
 
 Kedua jalur memakai **TUI core yang sama** (`internal/tui/`). Perbedaannya hanya di transport layer.
 

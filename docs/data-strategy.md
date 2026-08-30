@@ -8,7 +8,7 @@ Ekosistem portfolio mencakup:
 
 - **Website** (`habibiahmada.dev`) — Next.js di Vercel, data dari Supabase
 - **CLI** (`npx habibiahmada`) — Go TUI, data lokal
-- **SSH** (`ssh habibiahmada.dev`) — Go TUI yang sama, data di server
+- **SSH** (`ssh ssh.habibiahmada.dev`) — Go TUI yang sama, data di server
 
 ## Opsi yang Dibahas
 

@@ -100,7 +100,7 @@ Systemd menjalankan SSH application (Wish + Go TUI).
 
 | File | Isi |
 |------|-----|
-| `.github/workflows/deploy.yml` | CI: build `cmd/ssh` → scp ke EC2 → install unit → restart (+ cek port 2222) |
+| `.github/workflows/deploy.yml` | CI: build `cmd/ssh` → scp ke EC2 → install unit → restart (+ cek port 22) |
 | `deploy/portfolio-ssh.service` | systemd unit (WorkingDirectory `/opt/habibiahmada`) |
 | `scripts/deploy-ssh.sh` | Deploy manual dari mesin lokal (tanpa GitHub Actions) |
 
@@ -111,9 +111,28 @@ Systemd menjalankan SSH application (Wish + Go TUI).
 | `EC2_HOST` | IP / hostname EC2 |
 | `EC2_USER` | SSH username (mis. `ubuntu`) |
 | `EC2_SSH_KEY` | Isi private key SSH (pastikan public key ada di `~/.ssh/authorized_keys` server) |
-| `EC2_PORT` | (opsional) port SSH, default `22` |
+| `EC2_PORT` | Port SSH **admin** (bukan Wish). Default workflow: `2223` (admin sshd). Wish portfolio listen di `:22`. |
 
-Deploy dipicu otomatis saat push ke `main` yang menyentuh kode TUI/core, atau manual via **Actions → Deploy SSH Server → Run workflow**.
+Deploy dipicu otomatis saat push ke `main` atau tag `v*`, atau manual via **Actions → Deploy SSH Server → Run workflow**.
+
+### DNS — subdomain SSH (`ssh.habibiahmada.dev`)
+
+Apex `habibiahmada.dev` dipakai website (Cloudflare → Vercel). SSH publik memakai **subdomain terpisah** agar port 22 tidak bentrok dengan proxy Cloudflare.
+
+Tambahkan di **Cloudflare DNS** (zone `habibiahmada.dev`):
+
+| Type | Name | Content | Proxy |
+|------|------|---------|-------|
+| A | `ssh` | `52.55.210.120` (EC2 public IP) | **DNS only** (grey cloud) |
+
+Verifikasi:
+
+```bash
+dig +short ssh.habibiahmada.dev A    # harus mengembalikan IP EC2, bukan 104.x/172.x Cloudflare
+ssh ssh.habibiahmada.dev             # langsung masuk TUI portfolio
+```
+
+Perintah publik: `ssh ssh.habibiahmada.dev` (tanpa username — Wish menangani session).
 
 ### Host Key Wish
 
@@ -129,7 +148,7 @@ ssh-keygen -t ed25519 -f .ssh/term_info_ed25519 -N "" -C "wish-portfolio@habibia
 ### Wish Stack
 
 ```
-User → ssh habibiahmada.dev → EC2 → SSH Server → Wish → Bubble Tea → Go TUI
+User → ssh ssh.habibiahmada.dev → EC2 :22 → Wish → Bubble Tea → Go TUI
 ```
 
 TUI identik dengan versi npx.
@@ -173,6 +192,6 @@ DNS di Cloudflare diarahkan ke Vercel.
 |---------|---------|
 | Website | `https://habibiahmada.dev` |
 | Terminal (local) | `npx habibiahmada` |
-| Terminal (remote) | `ssh habibiahmada.dev` |
+| Terminal (remote) | `ssh ssh.habibiahmada.dev` |
 
 Portfolio project ini sendiri dapat menjadi entry portfolio: *"Interactive CLI Portfolio built with Go/Bubble Tea"*.

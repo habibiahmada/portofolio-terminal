@@ -283,8 +283,8 @@ Visual polish sebelum portfolio parity & deploy production. Lihat [tui-illustrat
 
 | # | Task | Status | Catatan |
 |---|------|--------|---------|
-| 4.1 | First npm publish | ⬜ | Tag v1.0.0 + NPM_TOKEN |
-| 4.2 | Verifikasi `npx habibiahmada` post-publish | ⬜ | Smoke test |
+| 4.1 | First npm publish | ✅ | `habibiahmada@0.0.2` |
+| 4.2 | Verifikasi `npx habibiahmada` post-publish | ✅ | linux-x64 fix v0.0.2 |
 
 ### SSH Server (EC2)
 
@@ -293,16 +293,16 @@ Visual polish sebelum portfolio parity & deploy production. Lihat [tui-illustrat
 | 4.3 | Deploy workflow (`deploy.yml`) | ✅ | `.github/workflows/deploy.yml` (build → scp → systemd) |
 | 4.4 | systemd service (`portfolio-ssh.service`) | ✅ | `deploy/portfolio-ssh.service` |
 | 4.5 | Layout server `/opt/habibiahmada/` | ✅ | `scripts/deploy-ssh.sh` (build + host key + pipa install) |
-| 4.6 | SSH host key management (production) | ⬜ | Butuh akses EC2 (auto-generate di deploy script) |
-| 4.7 | DNS `habibiahmada.dev` → EC2 SSH | ⬜ | Butuh akses Cloudflare/AWS |
+| 4.6 | SSH host key management (production) | ✅ | Auto-generate di deploy script |
+| 4.7 | DNS `ssh.habibiahmada.dev` → EC2 (grey cloud) | ⬜ | Cloudflare A record → `52.55.210.120` |
 | 4.8 | Monitoring & health check | 🔮 | |
 
 ### Distribusi & CTA
 
 | # | Task | Status | Catatan |
 |---|------|--------|---------|
-| 4.9 | CTA `npx habibiahmada` di website | ⬜ | Koordinasi terpisah |
-| 4.10 | CTA `ssh habibiahmada.dev` di website | ⬜ | Koordinasi terpisah |
+| 4.9 | CTA `npx habibiahmada` di website | ✅ | Hero + floating widget |
+| 4.10 | CTA `ssh ssh.habibiahmada.dev` di website | ✅ | Hero + floating widget |
 
 > **Untuk melengkapi Fase 4** dibutuhkan akses eksternal: `NPM_TOKEN` (npm publish), SSH key + `EC2_*` secrets (deploy nyata), dan akses Cloudflare untuk DNS. Artefak CI/konfigurasi sudah disiapkan.
 
@@ -332,9 +332,10 @@ Fase 3 (Portfolio Parity) **selesai**. Urutan task selanjutnya:
 5. ✅ Fase 3.12 — QA gate (copy audit + tests) + footer animasi
          │
          ▼  GATE LULUS — lanjut ke bawah
-6. ⬜ Fase 4.1 — First npm publish (tag v1.0.0)
-7. ⬜ Fase 4.3–4.7 — Deploy SSH ke EC2
-8. ⬜ Fase 4.9–4.10 — CTA publik di website
+6. ✅ Fase 4.1 — npm publish (`habibiahmada@0.0.2`)
+7. ✅ Fase 4.3–4.6 — Deploy SSH ke EC2 (Wish :22, admin sshd :2223)
+8. ✅ Fase 4.9–4.10 — CTA publik di website
+9. ⬜ Fase 4.7 — DNS Cloudflare `ssh` → EC2
 ```
 
 ---

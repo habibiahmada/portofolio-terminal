@@ -43,7 +43,7 @@ Indeks dokumentasi resmi proyek habibiahmada-terminal.
 ```bash
 # Pengguna — akses portfolio
 npx habibiahmada
-ssh habibiahmada.dev
+ssh ssh.habibiahmada.dev
 
 # Developer — jalankan lokal
 go run ./cmd/portfolio
