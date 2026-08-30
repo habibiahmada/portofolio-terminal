@@ -1,0 +1,79 @@
+---
+description: TUI layout, navigation, responsiveness, blog display — habibiahmada-terminal
+globs: internal/tui/**/*.go,internal/components/**/*.go,internal/styles/**/*.go,internal/blog/**/*.go
+alwaysApply: false
+---
+
+# TUI Design & UX Rules
+
+Referensi lengkap: `docs/design-system.md`, `docs/pages.md`.
+
+## Layout — Center, Not Top-Crammed
+
+- Konten **vertikal di tengah** viewport jika lebih pendek dari `contentHeight()`.
+- Gunakan `components.CenterInViewport(content, width, height)` — jangan manual padding newline.
+- Home (multi-section) **tidak** di-center; pakai scroll `j/k`.
+- Header + sidebar + footer tetap fixed; hanya area konten yang di-center.
+
+```go
+// ✅ GOOD — center short screens
+view := components.CenterInViewport(clipped, contentWidth, m.contentHeight())
+
+// ❌ BAD — content menempel atas saat viewport besar
+return styles.ContentStyle.Render(content)
+```
+
+## Responsiveness
+
+- Semua render function terima `width` / `height`; jangan asumsikan 80×24.
+- Breakpoints: `<40` tiny · `<60` compact · `<80` normal · `≥80` full.
+- Tiny: sembunyikan marquee, FIGlet, equalizer; tampilkan wordmark saja.
+- Wrap teks dengan `lipgloss.Width()`; jangan biarkan line overflow.
+- Card/list: stack vertikal di `<60` cols; inline tags di `≥60`.
+
+## Navigation — Instant Screen Switch
+
+| Key | Aksi |
+|-----|------|
+| `↑` / `↓` | **Langsung ganti screen** (sidebar tabs) — tanpa Enter |
+| `j` / `k` | Scroll konten, atau pilih item di list (Projects, Blog) |
+| `Enter` | Drill-down: project detail, artikel blog |
+| `←` / `Esc` | Back: detail → list, screen → Home, Home → quit |
+
+- `↑↓` **bukan** scroll — scroll hanya `j/k` atau PgUp/PgDn.
+- Saat ganti screen: `resetScroll()`, sync `selectedMenu` dengan screen aktif.
+- Footer hint harus reflect: `↑↓ Screens` · `j/k Scroll` · `Enter Open`.
+
+## Footer — Brand Kiri, Nav Kanan
+
+Satu baris di paling bawah:
+
+```
+habibiahmada.          ↑↓ Screens · j/k Scroll · Enter Open · ← Back · ? Help · q Quit
+```
+
+- Brand (`habibiahmada.`) **selalu kiri**, hints **kanan**, spacer responsif di tengah.
+- Jangan stack artline di atas hints — brand + hints **satu row** via `FooterBar`.
+- Equalizer/cursor opsional hanya jika `width ≥ 70` dan muat di sisi kiri setelah brand.
+
+## Blog — Live Fetch + TUI Format
+
+- Fetch `GET {base}/api/public/blog` saat masuk screen Blog (Bubble Tea `tea.Cmd`).
+- Base URL: env `HABIBIAHMADA_API_BASE` → default `https://www.habibiahmada.dev`.
+- **Jangan** render markdown mentah — parse ke format TUI via `blog.FormatMarkdown(body, width)`.
+- Tampilkan: title, category badge, date, read time, tags, body terformat.
+- List: judul + meta satu baris; detail: section headers + body scroll `j/k`.
+- Loading / error / empty state wajib — jangan blank screen.
+
+## Styling
+
+- Palette brand: primary `#ef4444`, secondary `#3b82f6` — lihat `docs/design-system.md`.
+- Section label: `// Label` via `styles.LabelStyle`.
+- Semua styling di `internal/styles/` — no raw ANSI di screen files.
+
+## QA Checklist (setiap screen baru)
+
+- [ ] 40×12, 60×20, 80×24, 120×40 — tidak overflow/clip aneh
+- [ ] Konten pendek ter-center
+- [ ] `↑↓` ganti screen tanpa Enter
+- [ ] Footer brand kiri + hints kanan

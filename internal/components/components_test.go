@@ -16,24 +16,24 @@ func TestHeader(t *testing.T) {
 }
 
 func TestFooterArtlineRenders(t *testing.T) {
-	out := FooterArtline(0, 80, "habibiahmada.dev")
+	out := FooterArtline(0, 90, "habibiahmada.dev")
 	if out == "" {
-		t.Fatal("expected footer artline to render")
+		t.Fatal("expected footer brand to render")
 	}
 	if !strings.Contains(out, ">_") {
-		t.Errorf("expected footer artline to contain the >_ prompt, got %q", out)
+		t.Errorf("expected footer brand to contain the >_ prompt, got %q", out)
 	}
-	if !strings.Contains(out, "habibiahmada.dev") {
-		t.Errorf("expected footer artline to show the website, got %q", out)
+	if !strings.Contains(out, "habibiahmada") {
+		t.Errorf("expected footer brand to show wordmark, got %q", out)
 	}
 	if !strings.Contains(out, "▁") {
-		t.Errorf("expected footer artline to include the equalizer wave, got %q", out)
+		t.Errorf("expected footer brand to include the equalizer wave, got %q", out)
 	}
 }
 
 func TestFooterArtlineAnimates(t *testing.T) {
-	a := FooterArtline(0, 80, "habibiahmada.dev")
-	b := FooterArtline(3, 80, "habibiahmada.dev")
+	a := FooterArtline(0, 90, "habibiahmada.dev")
+	b := FooterArtline(3, 90, "habibiahmada.dev")
 	if a == b {
 		t.Errorf("expected footer artline to change with frame (got identical output %q)", a)
 	}
@@ -41,8 +41,19 @@ func TestFooterArtlineAnimates(t *testing.T) {
 
 func TestFooterArtlineTinyDegrades(t *testing.T) {
 	out := FooterArtline(3, 30, "habibiahmada.dev")
-	if !strings.Contains(out, ">_") {
-		t.Errorf("expected tiny footer to keep the >_ prompt, got %q", out)
+	if !strings.Contains(out, "habibiahmada") {
+		t.Errorf("expected tiny footer to keep the wordmark, got %q", out)
+	}
+}
+
+func TestFooterBarBrandAndHints(t *testing.T) {
+	hints := []FooterHint{{Key: "↑↓", Label: "Screens"}}
+	out := FooterBar(0, 80, hints)
+	if !strings.Contains(out, "habibiahmada") {
+		t.Errorf("expected brand on the left, got %q", out)
+	}
+	if !strings.Contains(out, "Screens") {
+		t.Errorf("expected hints on the right, got %q", out)
 	}
 }
 

@@ -268,6 +268,34 @@ Selaras dengan footer hints website CTAs:
 
 ---
 
+## Layout & Performance
+
+### Center content
+
+Konten pendek di-center vertikal via newline padding (`components.CenterInViewport`) — **bukan** `lipgloss.Place` full grid (mahal di RAM/CPU).
+
+### Layout cache
+
+`renderBodyCached()` menyimpan header + sidebar + content. Key **tidak** memasukkan `footerFrame` — animasi footer tidak rebuild seluruh Home/About/projects.
+
+### Navigation
+
+| Key | Aksi |
+|-----|------|
+| `↑↓` | Ganti screen langsung |
+| `j/k` | Scroll / pilih item list |
+| `Enter` | Buka detail |
+
+### Footer
+
+Satu baris: `>_ habibiahmada.` kiri · hints kanan. Tick animasi **600ms**. Equalizer hanya jika `width ≥ 90`.
+
+### Blog
+
+Fetch `GET /api/public/blog` saat masuk Blog. Markdown diformat via `blog.FormatMarkdown` (max 32KB body).
+
+---
+
 ## Checklist Parity Desain
 
 | # | Item | Status |

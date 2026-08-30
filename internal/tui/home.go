@@ -53,7 +53,7 @@ func (m *App) renderHeroSection(width int) string {
 	)
 
 	hints := []string{
-		"[ ENTER ] Explore",
+		"[ ↑↓ ] Explore",
 		"[ P ] Projects",
 		"[ C ] Contact",
 		"[ V ] CV",

@@ -47,26 +47,23 @@ func TestNew(t *testing.T) {
 	}
 }
 
-func TestNavigateMenu(t *testing.T) {
+func TestInstantScreenSwitchFromHome(t *testing.T) {
 	m := newTestApp()
 
 	m.Update(keyMsg(tea.KeyDown))
-	if m.selectedMenu != 1 {
-		t.Errorf("expected selectedMenu 1 after down, got %d", m.selectedMenu)
+	if m.currentScreen != ScreenAbout {
+		t.Errorf("expected About after ↓ from Home, got %v", m.currentScreen)
 	}
+}
 
-	// Wraps to the last item.
+func TestInstantScreenSwitchCycle(t *testing.T) {
+	m := newTestApp()
+	m.currentScreen = ScreenAbout
 	m.selectedMenu = 0
-	m.Update(keyMsg(tea.KeyUp))
-	if m.selectedMenu != len(menuItems)-1 {
-		t.Errorf("expected up at top to wrap to %d, got %d", len(menuItems)-1, m.selectedMenu)
-	}
 
-	// Wraps to the first item.
-	m.selectedMenu = len(menuItems) - 1
 	m.Update(keyMsg(tea.KeyDown))
-	if m.selectedMenu != 0 {
-		t.Errorf("expected down at bottom to wrap to 0, got %d", m.selectedMenu)
+	if m.currentScreen != ScreenProjects {
+		t.Errorf("expected Projects after ↓ from About, got %v", m.currentScreen)
 	}
 }
 
@@ -95,19 +92,12 @@ func TestSelectEntersProjects(t *testing.T) {
 func TestProjectDetailNavigation(t *testing.T) {
 	m := newTestApp()
 
-	// Go to Projects then select the first project.
-	m.selectedMenu = 1
-	m.Update(keyMsg(tea.KeyEnter))
-	if m.currentScreen != ScreenProjects {
-		t.Fatalf("expected Projects, got %v", m.currentScreen)
-	}
-
+	m.currentScreen = ScreenProjects
 	m.Update(keyMsg(tea.KeyEnter))
 	if m.currentScreen != ScreenProjectDetail {
 		t.Fatalf("expected ProjectDetail, got %v", m.currentScreen)
 	}
 
-	// Back to the list.
 	m.Update(keyMsg(tea.KeyLeft))
 	if m.currentScreen != ScreenProjects {
 		t.Errorf("expected to go back to Projects, got %v", m.currentScreen)
@@ -118,14 +108,14 @@ func TestNavigateProjectsList(t *testing.T) {
 	m := newTestApp()
 	m.currentScreen = ScreenProjects
 
-	m.Update(keyMsg(tea.KeyDown))
+	m.Update(keyRunes('j'))
 	if m.selectedProject != 1 {
-		t.Errorf("expected selectedProject 1 after down, got %d", m.selectedProject)
+		t.Errorf("expected selectedProject 1 after j, got %d", m.selectedProject)
 	}
 
-	m.Update(keyMsg(tea.KeyUp))
+	m.Update(keyRunes('k'))
 	if m.selectedProject != 0 {
-		t.Errorf("expected selectedProject 0 after up, got %d", m.selectedProject)
+		t.Errorf("expected selectedProject 0 after k, got %d", m.selectedProject)
 	}
 }
 
@@ -162,7 +152,6 @@ func TestHelpToggle(t *testing.T) {
 		t.Error("expected help to be shown after '?'")
 	}
 
-	// '?' or Esc closes it.
 	m.Update(keyRunes('?'))
 	if m.showHelp {
 		t.Error("expected help to be closed after second '?'")
@@ -178,20 +167,18 @@ func TestHelpToggle(t *testing.T) {
 func TestScrollContent(t *testing.T) {
 	m := newTestApp()
 
-	// Force a long clip window so the offset is meaningful.
 	m.currentScreen = ScreenAbout
-	m.scrollDown()
+	m.Update(keyRunes('j'))
 	if m.contentOffset != 1 {
-		t.Errorf("expected offset 1 after scrollDown, got %d", m.contentOffset)
+		t.Errorf("expected offset 1 after j, got %d", m.contentOffset)
 	}
 
-	m.scrollUp()
+	m.Update(keyRunes('k'))
 	if m.contentOffset != 0 {
-		t.Errorf("expected offset 0 after scrollUp, got %d", m.contentOffset)
+		t.Errorf("expected offset 0 after k, got %d", m.contentOffset)
 	}
 
-	// Up at top stays at 0.
-	m.scrollUp()
+	m.Update(keyRunes('k'))
 	if m.contentOffset != 0 {
 		t.Errorf("expected offset to stay 0 at top, got %d", m.contentOffset)
 	}
@@ -338,5 +325,16 @@ func TestFooterTickAdvances(t *testing.T) {
 	}
 	if cmd == nil {
 		t.Error("expected a follow-up tick command after footerTickMsg")
+	}
+}
+
+func TestFooterShowsBrandAndHints(t *testing.T) {
+	m := newTestApp()
+	view := m.View()
+	if !strings.Contains(view, "habibiahmada") {
+		t.Error("expected footer brand in view")
+	}
+	if !strings.Contains(view, "Screens") {
+		t.Error("expected footer screen hint in view")
 	}
 }

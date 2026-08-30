@@ -279,7 +279,10 @@ Visual polish sebelum portfolio parity & deploy production. Lihat [tui-illustrat
 | 3.13.3 | Update TUI model test untuk screen baru | ✅ | Services, Blog |
 | 3.13.4 | Visual QA setelah palette migration | ✅ | matrix_test.go + render dump |
 | 3.13.5 | Manual QA SSH lintas client | ✅ | Lanjutkan 7.5.11 |
-| 3.14 | Footer animasi selalu tampil (`footer_animation.go` + `FooterArtline`) | ✅ | Equalizer wave + blinking cursor, degradasi progresif |
+| 3.14 | Footer animasi selalu tampil (`FooterBar`) | ✅ | Brand kiri + hints kanan; equalizer ≥90 cols |
+| 3.15 | UX: layout center, instant ↑↓ nav, j/k scroll | ✅ | `render_cache.go`, `layout.go` |
+| 3.16 | Blog live fetch + markdown TUI formatter | ✅ | `internal/blog/` — butuh API `/api/public/blog` |
+| 3.17 | Performance: layout cache, slow footer tick | ✅ | Cache body; footer 600ms; no lipgloss.Place grid |
 
 ---
 

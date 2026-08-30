@@ -26,7 +26,7 @@ func (m *App) renderProjectsContent() string {
 		cards = append(cards, card)
 	}
 
-	hint := styles.MutedStyle.Render("↑↓ browse · Enter view case study · ← back")
+	hint := styles.MutedStyle.Render("j/k browse · Enter view case study · ← back")
 
 	content := lipgloss.JoinVertical(
 		lipgloss.Left,

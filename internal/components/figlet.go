@@ -16,6 +16,8 @@ var (
 	figletCache = map[string]string{}
 )
 
+const maxFigletCacheEntries = 12
+
 // figletFontFor picks a FIGlet font based on available width.
 func figletFontFor(width int) string {
 	switch {
@@ -51,6 +53,13 @@ func Figlet(text string, width int) string {
 	}
 
 	figletMu.Lock()
+	if len(figletCache) >= maxFigletCacheEntries {
+		// Drop one arbitrary entry — cache is tiny.
+		for k := range figletCache {
+			delete(figletCache, k)
+			break
+		}
+	}
 	figletCache[key] = out
 	figletMu.Unlock()
 	return out

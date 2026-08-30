@@ -9,14 +9,24 @@ func isQuit(msg tea.KeyMsg) bool {
 		(msg.String() == "Q" && !msg.Alt)
 }
 
-// isNavigateUp returns true if the key press navigates up.
+// isNavigateUp returns true if the key switches the active screen up.
 func isNavigateUp(msg tea.KeyMsg) bool {
-	return msg.Type == tea.KeyUp || msg.String() == "k"
+	return msg.Type == tea.KeyUp
 }
 
-// isNavigateDown returns true if the key press navigates down.
+// isNavigateDown returns true if the key switches the active screen down.
 func isNavigateDown(msg tea.KeyMsg) bool {
-	return msg.Type == tea.KeyDown || msg.String() == "j"
+	return msg.Type == tea.KeyDown
+}
+
+// isScrollUp returns true if the key scrolls content or moves list selection up.
+func isScrollUp(msg tea.KeyMsg) bool {
+	return msg.String() == "k"
+}
+
+// isScrollDown returns true if the key scrolls content or moves list selection down.
+func isScrollDown(msg tea.KeyMsg) bool {
+	return msg.String() == "j"
 }
 
 // isSelect returns true if the key press selects an item.

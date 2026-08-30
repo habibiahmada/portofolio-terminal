@@ -2,6 +2,7 @@ package tui
 
 import (
 	"testing"
+	"time"
 )
 
 // TestMatrixSizes renders every screen across the QA matrix from
@@ -53,7 +54,11 @@ func TestSplashProgress(t *testing.T) {
 	s.width, s.height = 120, 40
 
 	frames := 0
+	deadline := time.Now().Add(5 * time.Second)
 	for frames <= len(splashDelays) {
+		if time.Now().After(deadline) {
+			t.Fatal("splash progress timed out — possible infinite loop")
+		}
 		view := s.View()
 		if view == "" {
 			t.Fatalf("splash frame %d rendered empty", frames)
