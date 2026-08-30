@@ -63,6 +63,7 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - name: Verify npm package contents
+        id: npm_pack
         run: |
           test -f npm/bin/habibiahmada-linux-amd64
           test -f npm/bin/habibiahmada-linux-arm64
@@ -71,14 +72,15 @@ jobs:
           test -f npm/bin/habibiahmada-win-x64.exe
           cd npm
           PACK="$(npm pack | tail -1)"
+          test -f "$PACK"
           tar -tzf "$PACK" | grep 'package/bin/habibiahmada-linux-amd64'
-          echo "pack=$PACK" >> "$GITHUB_ENV"
+          echo "path=$(pwd)/$PACK" >> "$GITHUB_OUTPUT"
 
       - name: Test npm wrapper
         run: cd npm && node test/integration.test.js
 
       - name: Publish to npm
-        run: cd npm && npm publish "$PACK" --access public
+        run: npm publish "${{ steps.npm_pack.outputs.path }}" --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
