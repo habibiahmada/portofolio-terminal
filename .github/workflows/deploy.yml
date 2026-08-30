@@ -80,6 +80,18 @@ jobs:
           CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o habibiahmada-ssh ./cmd/ssh
           ls -lh habibiahmada-ssh
 
+      - name: Provision deploy directory on EC2
+        if: steps.ec2.outputs.configured == 'true'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_PORT || '22' }}
+          script: |
+            sudo mkdir -p /opt/habibiahmada
+            sudo chown "$USER":"$USER" /opt/habibiahmada
+
       - name: Copy artifacts to EC2
         if: steps.ec2.outputs.configured == 'true'
         uses: appleboy/scp-action@v1
