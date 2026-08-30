@@ -34,14 +34,14 @@ npx habibiahmada
 
 ```
 dist/
-├── linux-amd64
-├── linux-arm64
-├── darwin-amd64
-├── darwin-arm64
-└── windows-amd64.exe
+├── habibiahmada-linux-x64
+├── habibiahmada-linux-arm64
+├── habibiahmada-darwin-x64
+├── habibiahmada-darwin-arm64
+└── habibiahmada-win-x64.exe
 ```
 
-`scripts/release.sh` memasukkan binary ke npm package.
+`scripts/release.sh` memasukkan binary dari `dist/` ke `npm/bin/`.
 
 ## CI/CD — GitHub Actions
 

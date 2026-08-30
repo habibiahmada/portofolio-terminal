@@ -135,5 +135,6 @@ TUI di `internal/tui` identik untuk local dan SSH. Wish hanya transport — tida
 
 ## Referensi Proyek
 
+- Ilustrasi & signature art: `docs/tui-illustration.md`
 - Struktur folder: `docs/folder-structure.md`
 - UX local vs remote: `docs/npx-vs-ssh.md`

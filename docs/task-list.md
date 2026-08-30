@@ -29,7 +29,7 @@ Daftar task proyek **habibiahmada-terminal** dengan status terkini.
 | 2.1 | Struct data (Profile, Project, Skill, Experience, Certificate) | ✅ | `internal/data/portfolio.go` |
 | 2.2 | Data portfolio awal (4 project) | ✅ | Renshuu, SmartFarm AI, CultureConnect, Spacelab |
 | 2.3 | Getter functions (GetProfile, GetProjects, dll.) | ✅ | |
-| 2.4 | Pisah data ke file terpisah (profile.go, projects.go, dll.) | 🔮 | Fase 2 |
+| 2.4 | Pisah data ke file terpisah (profile.go, projects.go, dll.) | ✅ | Selesai di Fase 2 |
 
 ### TUI Core
 
@@ -71,21 +71,21 @@ Daftar task proyek **habibiahmada-terminal** dengan status terkini.
 
 | # | Task | Status | Catatan |
 |---|------|--------|---------|
-| 5.1 | Pecah `app.go` → file per screen | ⬜ | home.go, about.go, projects.go, dll. |
-| 5.2 | Komponen reusable | ⬜ | `internal/components/` (header, sidebar, footer, card, list) |
+| 5.1 | Pecah `app.go` → file per screen | ✅ | home.go, about.go, projects.go, dll. |
+| 5.2 | Komponen reusable | ✅ | `internal/components/` (header, sidebar, footer, card, list, modal) |
 | 5.3 | Project detail — navigasi Enter dari list | ✅ | Selesai di Fase 1 |
-| 5.4 | Scrollable content (halaman panjang) | ⬜ | |
-| 5.5 | Keymap help screen (? untuk bantuan) | ⬜ | |
+| 5.4 | Scrollable content (halaman panjang) | ✅ | Offset-based, indikator ▼ |
+| 5.5 | Keymap help screen (? untuk bantuan) | ✅ | Modal overlay, `?`/F1 toggle |
 | 5.6 | Animasi transisi antar screen | 🔮 | Opsional |
 
 ### Testing
 
 | # | Task | Status | Catatan |
 |---|------|--------|---------|
-| 6.1 | Unit test data layer | ⬜ | |
-| 6.2 | TUI model test (Update/View) | ⬜ | Bubble Tea testing pattern |
-| 6.3 | Integration test npm wrapper | ⬜ | |
-| 6.4 | CI: test gate di PR | ⬜ | Tambah workflow selain release |
+| 6.1 | Unit test data layer | ✅ | Per-domain test files |
+| 6.2 | TUI model test (Update/View) | ✅ | `internal/tui/app_test.go` + components test |
+| 6.3 | Integration test npm wrapper | ✅ | `npm/test/integration.test.js`, bisa di CI |
+| 6.4 | CI: test gate di PR | ✅ | `.github/workflows/ci.yml` |
 
 ### Release & Distribution
 
@@ -93,8 +93,41 @@ Daftar task proyek **habibiahmada-terminal** dengan status terkini.
 |---|------|--------|---------|
 | 7.1 | First npm publish | ⬜ | Tag v1.0.0 + NPM_TOKEN |
 | 7.2 | GitHub Release dengan binary | ✅ | Workflow sudah ada |
-| 7.3 | `scripts/release.sh` | ⬜ | Disebut di docs, belum dibuat |
-| 7.4 | Semantic versioning guide | ⬜ | |
+| 7.3 | `scripts/release.sh` | ✅ | Build + stage ke npm/bin |
+| 7.4 | Semantic versioning guide | ✅ | `docs/versioning.md` |
+
+---
+
+## Fase 2.5 — Ilustrasi & Visual Identity
+
+Visual polish sebelum deploy production. Lihat [tui-illustration.md](tui-illustration.md).
+
+### Signature & Assets
+
+| # | Task | Status | Catatan |
+|---|------|--------|---------|
+| 7.5.1 | Dokumentasi ilustrasi TUI | ✅ | `docs/tui-illustration.md` |
+| 7.5.2 | Signature art — variant wide / compact / mini | ✅ | `internal/assets/art/` (go:embed) |
+| 7.5.3 | Komponen `illustration.go` (variant picker + render) | ✅ | `internal/components/illustration.go`, breakpoint per docs |
+| 7.5.4 | Styles ilustrasi terpisah | ✅ | `internal/styles/illustration.go` |
+
+### Screens & Animasi
+
+| # | Task | Status | Catatan |
+|---|------|--------|---------|
+| 7.5.5 | Home hero dengan signature illustration | ✅ | `internal/tui/home.go` + `components/hero.go`, center via Place |
+| 7.5.6 | Splash screen + progress bar (≤ 2 detik) | ✅ | `internal/tui/splash.go`, Tea.Tick, skip <40×20 |
+| 7.5.7 | FIGlet integration (go-figure) untuk judul besar | ✅ | `internal/components/figlet.go`, font adaptif + cache |
+| 7.5.8 | Micro-illustration About (terminal mini) | ✅ | `AboutTerminal()` side-by-side bio |
+| 7.5.9 | Skill bar / experience timeline visual | ✅ | Bar + %, timeline data-driven |
+
+### QA Visual
+
+| # | Task | Status | Catatan |
+|---|------|--------|---------|
+| 7.5.10 | Test matrix ukuran terminal (40×12 → 200×50) | ✅ | `internal/tui/matrix_test.go` |
+| 7.5.11 | Test SSH — Windows Terminal, macOS Terminal, Linux | ⬜ | Manual QA lintas client |
+| 7.5.12 | Graceful degradation — tiny mode tanpa art | ✅ | VariantHidden, skip splash, FIGlet fallback |
 
 ---
 
@@ -133,18 +166,22 @@ Daftar task proyek **habibiahmada-terminal** dengan status terkini.
 
 ---
 
-## Prioritas Berikutnya (Fase 2)
+## Prioritas Berikutnya (Fase 2 → 2.5)
 
 Urutan task yang disarankan:
 
 ```
-1. Pecah app.go ke file per screen
-2. Buat internal/components/ (header, sidebar, footer)
-3. Unit tests untuk data layer
-4. First npm publish (tag v1.0.0)
-5. Scrollable content untuk halaman panjang
-6. Deploy SSH ke EC2 (deploy.yml + systemd)
+1. ✅ Pecah app.go ke file per screen (selesai)
+2. ✅ Buat internal/components/ (header, sidebar, footer, dll.) (selesai)
+3. ✅ Unit tests untuk data layer + TUI model (selesai)
+4. ⬜ Signature illustration + home hero (Fase 2.5)
+5. ⬜ Splash screen startup
+6. ⬜ Test matrix visual (terminal sizes + SSH)
+7. ⬜ First npm publish (tag v1.0.0) — butuh NPM_TOKEN
+8. ⬜ Deploy SSH ke EC2 (deploy.yml + systemd)
 ```
+
+> Ilustrasi (Fase 2.5) selesai **sebelum** npm publish dan deploy EC2.
 
 ---
 
@@ -152,7 +189,8 @@ Urutan task yang disarankan:
 
 ```
 Fase 1 — Foundation     ████████████████████  100%
-Fase 2 — Polish         ████░░░░░░░░░░░░░░░░  ~20%
+Fase 2 — Polish         ██████████████████░░  ~90%
+Fase 2.5 — Ilustrasi    ████████████████░░░░  ~80%
 Fase 3 — Deployment     ██░░░░░░░░░░░░░░░░░░  ~10%
 Fase 4 — Evolusi        ░░░░░░░░░░░░░░░░░░░░   0%
 ```

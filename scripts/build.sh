@@ -2,19 +2,21 @@
 set -euo pipefail
 
 # Cross-compile Go binaries for all supported platforms.
-# Output: dist/<os>-<arch>[.exe]
+# Binary names follow the npm wrapper convention used by npm/index.js:
+#   habibiahmada-<os>-<arch>[.exe]  with os in {linux, darwin, win}
+# Output: dist/<binary-name>[.exe]
 
 MODULE="github.com/habibiahmada/habibiahmada-terminal"
 OUTPUT_DIR="dist"
 BINARY_NAME="habibiahmada"
 
-# Build targets: OS-ARCH
+# Build targets: <goos>:<goarch>:<output-suffix>
 TARGETS=(
-  "linux-amd64"
-  "linux-arm64"
-  "darwin-amd64"
-  "darwin-arm64"
-  "windows-amd64"
+  "linux:amd64:linux-x64"
+  "linux:arm64:linux-arm64"
+  "darwin:amd64:darwin-x64"
+  "darwin:arm64:darwin-arm64"
+  "windows:amd64:win-x64"
 )
 
 echo "Building $BINARY_NAME for ${#TARGETS[@]} targets..."
@@ -24,20 +26,16 @@ rm -rf "$OUTPUT_DIR"
 mkdir -p "$OUTPUT_DIR"
 
 for target in "${TARGETS[@]}"; do
-  IFS='-' read -r os arch <<< "$target"
+  IFS=':' read -r goos goarch suffix <<< "$target"
 
-  # Map target naming to Go GOOS/GOARCH.
-  goos="$os"
-  goarch="$arch"
   ext=""
-
-  if [ "$os" = "windows" ]; then
+  if [ "$goos" = "windows" ]; then
     ext=".exe"
   fi
 
-  output="$OUTPUT_DIR/$BINARY_NAME-$target$ext"
+  output="$OUTPUT_DIR/$BINARY_NAME-$suffix$ext"
 
-  echo "  Building $target -> $output"
+  echo "  Building $suffix ($goos/$goarch) -> $output"
 
   GOOS="$goos" GOARCH="$goarch" CGO_ENABLED=0 \
     go build -trimpath -ldflags="-s -w" -o "$output" "./cmd/portfolio"

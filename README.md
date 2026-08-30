@@ -20,7 +20,7 @@ Website portfolio (`https://habibiahmada.dev`) dan terminal portfolio berbagi id
 | Developer | `go run ./cmd/portfolio` | Development mode |
 | Developer | `make dev` | Sama, via Makefile |
 
-Navigasi TUI: `↑↓` Navigate · `Enter` Select · `←` Back · `Q` Quit
+Navigasi TUI: `↑↓` Navigate · `Enter` Select · `←` Back · `?` Help · `Q` Quit
 
 ## Ekosistem Portfolio
 
@@ -64,10 +64,11 @@ habibiahmada-terminal/
 │   └── ssh/main.go           # entry point SSH server
 ├── internal/
 │   ├── tui/                  # TUI core (screens & navigation)
+│   ├── components/           # reusable UI (header, sidebar, footer, card, list, modal)
 │   ├── styles/               # Lip Gloss styles
-│   └── data/                 # portfolio data (bundled)
+│   └── data/                 # portfolio data (bundled, per-domain files)
 ├── npm/                      # npm package wrapper
-├── scripts/                  # build scripts
+├── scripts/                  # build.sh, release.sh
 ├── docs/                     # dokumentasi
 ├── go.mod
 └── Makefile
@@ -104,6 +105,8 @@ habibiahmada-terminal/
 | [docs/npx-vs-ssh.md](docs/npx-vs-ssh.md) | Perbandingan local vs remote |
 | [docs/data-strategy.md](docs/data-strategy.md) | Strategi data TUI vs website |
 | [docs/deployment.md](docs/deployment.md) | Deployment EC2, npm, CI/CD |
+| [docs/versioning.md](docs/versioning.md) | Semantic versioning guide |
+| [docs/tui-illustration.md](docs/tui-illustration.md) | Visual identity & ASCII art (Fase 2.5) |
 | [AGENTS.md](AGENTS.md) | Panduan untuk AI coding assistant |
 
 ## Development

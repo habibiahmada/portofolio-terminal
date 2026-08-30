@@ -18,8 +18,10 @@ Indeks dokumentasi resmi proyek habibiahmada-terminal.
 | [architecture.md](architecture.md) | Arsitektur platform, layer, CI/CD, isolation |
 | [tech-stack.md](tech-stack.md) | Teknologi per layer |
 | [folder-structure.md](folder-structure.md) | Struktur repo, fase 1 vs target |
+| [tui-illustration.md](tui-illustration.md) | Ilustrasi ASCII, signature art, animasi splash, responsive |
 | [npx-vs-ssh.md](npx-vs-ssh.md) | Perbandingan local vs remote experience |
 | [data-strategy.md](data-strategy.md) | Bundled data v1, Supabase untuk website |
+| [versioning.md](versioning.md) | Semantic versioning guide |
 
 ## Deployment & Ops
 

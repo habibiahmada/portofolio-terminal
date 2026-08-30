@@ -89,3 +89,16 @@ Pendekatan alternatif yang dibahas tapi tidak dipilih sebagai core:
 - SSH portfolio sebagai satu-satunya interface
 
 Keputusan: **npx (local) + SSH (remote)**, keduanya menjalankan Go TUI yang sama.
+
+## Ilustrasi TUI
+
+Visual identity dan ASCII art: [tui-illustration.md](tui-illustration.md).
+
+Stack visual:
+
+| Layer | Teknologi |
+|-------|-----------|
+| Typography besar | go-figure (FIGlet) |
+| Signature art | Custom ASCII (wide / compact / mini) |
+| Animasi startup | Bubble Tea tick + Bubbles spinner |
+| Layout ilustrasi | Lip Gloss `Place`, `MaxWidth` |

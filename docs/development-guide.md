@@ -35,15 +35,21 @@ ssh -p 2222 localhost
 
 ## Mengubah Data Portfolio
 
-Data v1 **dibundel di Go** — tidak ada API call. Semua data ada di:
+Data v1 **dibundel di Go** — tidak ada API call. Data dipecah per domain:
 
 ```
-internal/data/portfolio.go
+internal/data/portfolio.go    # Struktur (struct definitions)
+internal/data/profile.go     # Profile
+internal/data/projects.go    # Projects
+internal/data/skills.go      # Skills
+internal/data/experience.go  # Experience
+internal/data/certificates.go # Certificates
+internal/data/socials.go     # Social links
 ```
 
 ### Menambah / mengubah project
 
-Edit struct dan slice di `portfolio.go`:
+Edit slice di `projects.go`:
 
 ```go
 var projects = []Project{
@@ -64,12 +70,24 @@ Setelah edit, restart TUI (`make dev`) untuk melihat perubahan.
 
 ## Mengubah TUI / Screen
 
-Saat ini semua screen ada di satu file:
+Satu file per screen di `internal/tui/`:
 
 ```
-internal/tui/app.go    # App model, navigation, semua screen view
-internal/tui/keymap.go # Keyboard handler
-internal/styles/styles.go # Lip Gloss styles
+internal/tui/app.go          # App model, navigation, layout, routing
+internal/tui/keymap.go       # Keyboard handler
+internal/tui/splash.go       # Splash startup (transisi ke App)
+internal/tui/home.go         # Home screen
+internal/tui/about.go        # About
+internal/tui/projects.go     # Projects list
+internal/tui/project_detail.go # Project detail
+internal/tui/skills.go       # Skills
+internal/tui/experience.go   # Experience
+internal/tui/certificates.go # Certificates
+internal/tui/contact.go      # Contact
+internal/components/         # Reusable UI (header, sidebar, footer, card, list, modal, illustration, hero, figlet, progress bar)
+internal/styles/styles.go    # Lip Gloss styles (umum)
+internal/styles/illustration.go # Lip Gloss styles (ilustrasi)
+internal/assets/art/         # ASCII art dibundel (signature, about)
 ```
 
 ### Screen yang ada
@@ -89,10 +107,9 @@ internal/styles/styles.go # Lip Gloss styles
 
 1. Tambah konstanta di `Screen` enum (`app.go`)
 2. Tambah ke `ScreenNames` dan `menuItems`
-3. Tambah case di `renderContent()`
-4. Update navigasi jika perlu
-
-Target fase berikutnya: pecah ke file terpisah (`home.go`, `about.go`, dll.) — lihat [task-list.md](task-list.md).
+3. Buat file screen baru (`internal/tui/<name>.go`) dengan method `render<Name>Content()`
+4. Tambah `case` di `renderContent()` (`app.go`)
+5. Update navigasi jika perlu
 
 ## Styling
 
@@ -109,6 +126,19 @@ styles.LinkStyle       // URL / link
 ```
 
 Gunakan styles ini — jangan hard-code warna di screen.
+
+## Ilustrasi & Visual Identity
+
+Panduan lengkap: [tui-illustration.md](tui-illustration.md).
+
+Ringkasan:
+
+- **Signature art** — kotak terminal `>_ HABIBI TERMINAL`, variant wide / compact / mini
+- **Responsif** — breakpoint lebar terminal, graceful degradation di < 40 col
+- **Splash** — animasi startup ≤ 2 detik, skip di terminal kecil
+- **Assets** — `internal/assets/art/*.txt`, render via `components/illustration.go`
+
+Implementasi ilustrasi masuk **Fase 2.5**, sebelum deploy (lihat [task-list.md](task-list.md)).
 
 ## Quality Checks
 
@@ -136,11 +166,11 @@ make lint
 ```bash
 make build
 # Output: dist/
-#   habibiahmada-linux-amd64
+#   habibiahmada-linux-x64
 #   habibiahmada-linux-arm64
-#   habibiahmada-darwin-amd64
+#   habibiahmada-darwin-x64
 #   habibiahmada-darwin-arm64
-#   habibiahmada-windows-amd64.exe
+#   habibiahmada-win-x64.exe
 ```
 
 ### Build SSH server

@@ -74,9 +74,9 @@ go build -o habibiahmada ./cmd/portfolio
 # Build binary untuk platform Anda
 bash scripts/build.sh
 
-# Salin ke npm/bin dengan nama yang benar
+# Salin ke npm/bin (nama sudah konsisten dengan index.js)
 mkdir -p npm/bin
-cp dist/habibiahmada-linux-amd64 npm/bin/habibiahmada-linux-x64   # Linux x64
+cp dist/habibiahmada-linux-x64 npm/bin/habibiahmada-linux-x64   # Linux x64
 # atau sesuaikan dengan OS/arch Anda
 
 # Jalankan via npm

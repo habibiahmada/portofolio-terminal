@@ -18,6 +18,7 @@ habibiahmada-terminal/
 │   │
 │   ├── tui/
 │   │   ├── app.go               # Root TUI / state
+│   │   ├── splash.go            # Splash startup
 │   │   ├── home.go              # Home screen
 │   │   ├── about.go             # About
 │   │   ├── projects.go          # Projects
@@ -34,12 +35,22 @@ habibiahmada-terminal/
 │   │   ├── footer.go
 │   │   ├── card.go
 │   │   ├── list.go
-│   │   └── modal.go
+│   │   ├── modal.go
+│   │   ├── illustration.go      # Signature + variant picker
+│   │   ├── hero.go              # Home hero block
+│   │   ├── figlet.go            # FIGlet besar (go-figure)
+│   │   └── progress_bar.go      # Splash progress
 │   │
 │   ├── styles/
-│   │   └── styles.go            # Lip Gloss styles
+│   │   ├── styles.go            # Lip Gloss styles (umum)
+│   │   └── illustration.go      # Lip Gloss styles (ilustrasi)
+│   │
+│   ├── assets/
+│   │   ├── assets.go            # go:embed
+│   │   └── art/                 # Signature, about art
 │   │
 │   └── data/
+│       ├── portfolio.go         # Struct definitions
 │       ├── profile.go
 │       ├── projects.go
 │       ├── skills.go
@@ -178,14 +189,14 @@ npx habibiahmada → npm package → deteksi OS/arch → Go binary → TUI
 
 ```
 dist/
-├── linux-amd64
-├── linux-arm64
-├── darwin-amd64
-├── darwin-arm64
-└── windows-amd64.exe
+├── habibiahmada-linux-x64
+├── habibiahmada-linux-arm64
+├── habibiahmada-darwin-x64
+├── habibiahmada-darwin-arm64
+└── habibiahmada-win-x64.exe
 ```
 
-`release.sh` memasukkan binary ke npm package.
+`release.sh` memasukkan binary ke npm package (langsung dari `dist/`).
 
 ### EC2 — Bukan di Repo
 

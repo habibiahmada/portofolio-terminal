@@ -28,3 +28,8 @@ func isSelect(msg tea.KeyMsg) bool {
 func isBack(msg tea.KeyMsg) bool {
 	return msg.Type == tea.KeyLeft || msg.Type == tea.KeyEsc
 }
+
+// isHelp returns true if the key press toggles the help overlay.
+func isHelp(msg tea.KeyMsg) bool {
+	return msg.String() == "?" || msg.Type == tea.KeyF1
+}

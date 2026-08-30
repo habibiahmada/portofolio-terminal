@@ -12,8 +12,8 @@ import (
 )
 
 func main() {
-	// Create the TUI model with bundled data.
-	model := tui.New()
+	// Start the Bubble Tea program with a splash that transitions to the App.
+	model := tui.NewSplash()
 
 	// Start the Bubble Tea program.
 	p := tea.NewProgram(model, tea.WithAltScreen())

@@ -37,7 +37,7 @@ jobs:
           cp dist/habibiahmada-linux-arm64 npm/bin/
           cp dist/habibiahmada-darwin-x64 npm/bin/
           cp dist/habibiahmada-darwin-arm64 npm/bin/
-          cp dist/habibiahmada-windows-amd64.exe npm/bin/
+          cp dist/habibiahmada-win-x64.exe npm/bin/
 
       - name: Publish to npm
         run: cd npm && npm publish --access public

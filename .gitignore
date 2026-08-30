@@ -1,0 +1,11 @@
+# Build artifacts
+/dist/
+/npm/bin/
+habibiahmada-ssh
+
+# Local SSH dev host key
+/.ssh/
+*.test
+
+# Editor/OS
+.DS_Store

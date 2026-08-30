@@ -60,8 +60,8 @@ func main() {
 
 // teaHandler creates a new Bubble Tea model for each SSH session.
 func teaHandler(sess ssh.Session) (tea.Model, []tea.ProgramOption) {
-	// Create a fresh TUI model for this session.
-	model := tui.New()
+	// Fresh splash per session; it transitions into the shared TUI core.
+	model := tui.NewSplash()
 
 	return model, []tea.ProgramOption{
 		tea.WithAltScreen(),

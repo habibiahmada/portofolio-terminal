@@ -78,6 +78,11 @@ var (
 					Foreground(ColorAccent).
 					Bold(true)
 
+	ListSelectedStyle = lipgloss.NewStyle().
+				Foreground(ColorAccent).
+				Bold(true).
+				PaddingLeft(1)
+
 	ContentStyle = lipgloss.NewStyle().
 			PaddingLeft(2)
 
