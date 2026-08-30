@@ -71,9 +71,10 @@ const (
 	footerHeight  = 2
 )
 
-// footerTickInterval drives the footer animation. Kept slow to avoid rebuilding
-// the full layout too often (was 120ms — caused high CPU/RAM on large screens).
-const footerTickInterval = 600 * time.Millisecond
+// footerTickInterval drives the footer animation. Only the one-line footer is
+// rebuilt on each tick (the body is layout-cached), so a ~300ms cadence keeps
+// the >_ cursor blink smooth without hammering the CPU.
+const footerTickInterval = 300 * time.Millisecond
 
 type App struct {
 	width  int

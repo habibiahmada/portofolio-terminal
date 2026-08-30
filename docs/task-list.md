@@ -271,7 +271,7 @@ Visual polish sebelum portfolio parity & deploy production. Lihat [tui-illustrat
 | 3.12.5 | Manual QA SSH lintas client | ✅ | Lanjutkan 7.5.11 |
 | 3.13 | Footer animasi selalu tampil (`FooterBar`) | ✅ | Brand kiri + hints kanan; equalizer ≥90 cols |
 | 3.14 | UX: layout center, instant ↑↓ nav, j/k scroll | ✅ | `render_cache.go`, `layout.go` |
-| 3.15 | Performance: layout cache, slow footer tick | ✅ | Cache body; footer 600ms; no lipgloss.Place grid |
+| 3.15 | Performance: layout cache, footer tick | ✅ | Cache body; footer 300ms; blinking `>_` cursor |
 
 ---
 

@@ -60,6 +60,7 @@ habibiahmada.          ↑↓ Screens · j/k Scroll · Enter Open · ← Back ·
 ```
 
 - Brand (`habibiahmada.`) **selalu kiri**, hints **kanan**, spacer responsif di tengah.
+- Prompt `>_` beranimasi: **blinking `▊` cursor** selalu tampil (opencode-style); equalizer hanya jika `width ≥ 90`.
 - Jangan stack artline di atas hints — brand + hints **satu row** via `FooterBar`.
 - Equalizer/cursor opsional hanya jika `width ≥ 70` dan muat di sisi kiri setelah brand.
 

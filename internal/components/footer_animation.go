@@ -13,6 +13,10 @@ var wave = []string{
 	"▁", "▂", "▃", "▄", "▅", "▆", "▇", "█", "▇", "▆", "▅", "▄", "▃", "▂", "▁",
 }
 
+// cursorFrames is a two-state blink glyph for the >_ prompt (opencode-style).
+// Each frame is exactly one cell wide so the footer layout stays stable.
+var cursorFrames = []string{"▊", " "}
+
 // FooterBar renders a single footer row: brand on the left, keyboard hints on
 // the right. Animation is minimal to keep CPU/RAM usage low.
 func FooterBar(frame, width int, hints []FooterHint) string {
@@ -41,13 +45,17 @@ func FooterBar(frame, width int, hints []FooterHint) string {
 	return styles.FooterStyle.Width(width).Render(row)
 }
 
-// footerBrand renders the left-side brand mark with optional mini animation.
+// footerBrand renders the left-side brand mark with an animated >_ prompt and
+// an optional equalizer on wider terminals.
 func footerBrand(frame, width int) string {
 	mark := styles.FooterWordmark.Render("habibiahmada") + styles.HeaderDot.Render(".")
 
 	if width < 40 {
 		return styles.FooterArtStyle.Render(mark)
 	}
+
+	// Blinking block cursor after the >_ prompt — always animates.
+	cursor := styles.PromptStyle.Render(cursorFrames[frame%len(cursorFrames)])
 
 	anim := ""
 	// Equalizer only on wide terminals — skip on smaller to save render cost.
@@ -56,7 +64,7 @@ func footerBrand(frame, width int) string {
 	}
 
 	return styles.FooterArtStyle.Render(
-		styles.PromptStyle.Render(">_") + " " + mark + anim,
+		styles.PromptStyle.Render(">_") + cursor + " " + mark + anim,
 	)
 }
 

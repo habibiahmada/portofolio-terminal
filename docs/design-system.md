@@ -285,7 +285,7 @@ Konten pendek di-center vertikal via newline padding (`components.CenterInViewpo
 
 ### Footer
 
-Satu baris: `>_ habibiahmada.` kiri · hints kanan. Tick animasi **600ms**. Equalizer hanya jika `width ≥ 90`.
+Satu baris: `>_ habibiahmada.` kiri · hints kanan. Prompt `>_` selalu berkedip (blinking `▊` cursor, opencode-style). Tick animasi **300ms**. Equalizer hanya jika `width ≥ 90`.
 
 ---
 
