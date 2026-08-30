@@ -124,26 +124,46 @@ Website dan terminal portfolio menampilkan informasi yang sama, dengan presentat
 └───────────────────────────────────────────────┘
 ```
 
-### Kontrol Keyboard
+### Kontrol Keyboard & Navigasi
 
-| Tombol | Aksi |
-|--------|------|
-| `↑` / `↓` | Pindah item menu |
-| `k` / `j` | Pindah item menu (alternatif vim-style) |
-| `Enter` / `Space` | Masuk ke halaman yang dipilih |
-| `←` / `Esc` | Kembali ke menu utama |
-| `Q` / `Ctrl+C` | Keluar dari TUI |
+| Tombol / Shortcut | Aksi |
+|---|---|
+| `↑` / `↓` / `k` / `j` | Navigasi menu sidebar / scroll konten |
+| `→` / `Enter` | Masuk ke area konten / buka detail project |
+| `←` / `Esc` | Kembali ke sidebar navigasi / keluar dari modal |
+| `P` | *[Shortcut]* Langsung lompat ke halaman **Projects** |
+| `C` | *[Shortcut]* Langsung lompat ke halaman **Contact** |
+| `V` | *[Shortcut]* Buka **CV Modal Viewer** (dari Home) |
+| `M` | *[Easter Egg]* Interaksi dengan Maskot CRT Robot |
+| `s` / `S` | Toggle mode seleksi teks native terminal |
+| `?` / `F1` | Buka / tutup overlay panduan bantuan |
+| `q` / `Ctrl+C` | Keluar dari aplikasi TUI |
+
+#### Navigasi di Halaman Project Detail:
+- `←` / `h`: Pindah ke project sebelumnya
+- `→` / `l`: Pindah ke project berikutnya
+- `Esc`: Kembali ke daftar project
+
+### Dukungan Mouse
+
+- **Wheel Up / Down**: Scroll konten atas dan bawah
+- **Klik Menu Sidebar**: Langsung berpindah ke halaman tersebut
+- **Klik Card Project**: Membuka halaman detail project
+- **Scrollbar Drag/Click**: Loncat cepat ke posisi konten yang diinginkan
+- **Klik Maskot**: Memancing reaksi kedip mata (`─ ─`, `★ ★`) atau reaksi marah (`╬`) jika diklik berkali-kali!
 
 ### Menu yang Tersedia
 
 | Menu | Isi |
-|------|-----|
-| **About** | Profil, bio, lokasi |
-| **Projects** | Daftar project (Renshuu, SmartFarm AI, CultureConnect, Spacelab) |
-| **Skills** | Skill teknis per kategori |
-| **Experience** | Riwayat pekerjaan |
-| **Certificates** | Sertifikasi |
-| **Contact** | Email, GitHub, LinkedIn, website |
+|---|---|
+| **Home** | Hero banner `HABIBI`, featured project cards interaktif, trusted partners |
+| **About** | Profil, bio, filosofi rekayasa software, statistik |
+| **Projects** | Daftar seluruh proyek dengan tag pills, badge featured, dan case study detail |
+| **Skills** | Keahlian teknis per domain (Frontend, Backend, DevOps, AI) |
+| **Experience** | Riwayat pekerjaan dan pendidikan formal |
+| **Certificates** | Sertifikasi profesional terverifikasi |
+| **Services** | Layanan dan solusi rekayasa web yang ditawarkan |
+| **Contact** | Email, GitHub, LinkedIn, Website, dan ketersediaan |
 
 ---
 

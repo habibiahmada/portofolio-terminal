@@ -65,8 +65,28 @@ var menuItems = []Screen{
 const (
 	mastheadLines = 2 // brand row + separator
 	footerHeight  = 2
-	bodyTopPad    = 10 // breathing room so the body isn't flush against the header
 )
+
+// bodyTopPad returns a responsive top padding between the header and content
+// shell based on the terminal height.
+// Small/short terminals (IDE split pane / <=22 rows) get 0-1 padding so content
+// isn't clipped; standard and tall terminals scale smoothly.
+func (m *App) bodyTopPad() int {
+	switch {
+	case m.height <= 22:
+		return 0
+	case m.height <= 30:
+		return 1
+	case m.height <= 40:
+		return 2
+	case m.height <= 52:
+		return 3
+	case m.height <= 65:
+		return 4
+	default:
+		return 5
+	}
+}
 
 // Focus identifiers — the top-level interaction zones. When focus is on the
 // navigation rail, arrow keys switch screens; pressing → enters the screen's
@@ -278,7 +298,7 @@ func (m *App) handleMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 	if msg.Action == tea.MouseActionPress && msg.X >= m.shellLeft &&
 		msg.X <= m.shellLeft+components.NavRailWidth()-1 && msg.Y >= m.bodyTop {
 		m.focus = FocusNav
-		if row := msg.Y - m.bodyTop - bodyTopPad; row >= 0 && row < len(menuItems) {
+		if row := msg.Y - m.bodyTop - m.bodyTopPad(); row >= 0 && row < len(menuItems) {
 			m.selectedMenu = row
 			_, cmd := m.enterMenuScreen(row)
 			return m, cmd
@@ -291,14 +311,14 @@ func (m *App) handleMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 	// title/meta/blank headers (+3) sit above the list, then the current
 	// scroll offset is subtracted.
 	if msg.Action == tea.MouseActionPress && m.currentScreen == ScreenProjects &&
-		msg.Y >= m.bodyTop+bodyTopPad && len(m.projects) > 0 {
+		msg.Y >= m.bodyTop+m.bodyTopPad() && len(m.projects) > 0 {
 		textLeft := m.shellLeft + bodyFrameChrome - components.ScrollbarWidth
 		textRight := textLeft + m.contentWidth() - 1
 		if textRight > m.width-1 {
 			textRight = m.width - 1
 		}
 		if msg.X >= textLeft && msg.X <= textRight {
-			if i := msg.Y - m.bodyTop - bodyTopPad - 4 + m.contentOffset; i >= 0 && i < len(m.projects) {
+			if i := msg.Y - m.bodyTop - m.bodyTopPad() - 4 + m.contentOffset; i >= 0 && i < len(m.projects) {
 				m.focus = FocusContent
 				m.selectedProject = i
 				return m.selectItem()
@@ -661,7 +681,7 @@ func (m *App) goBack() (tea.Model, tea.Cmd) {
 // contentHeight returns visible lines for page content beside the sidebar.
 func (m *App) contentHeight() int {
 	bodyH := m.height - mastheadLines - footerHeight
-	h := bodyH - bodyTopPad
+	h := bodyH - m.bodyTopPad()
 	if h < 4 {
 		h = 4
 	}
@@ -772,7 +792,7 @@ func (m *App) renderLayout() string {
 
 	shell := m.renderBodyCached()
 	m.bodyTop = headerLines
-	m.contentTop = headerLines + bodyTopPad
+	m.contentTop = headerLines + m.bodyTopPad()
 	body := m.composeBodyFrame(shell, bodyH)
 	body = m.overlayMascot(body, bodyH)
 	return header + "\n" + body + "\n" + footer

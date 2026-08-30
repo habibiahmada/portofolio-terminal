@@ -230,7 +230,7 @@ func TestNavClickSwitchesScreen(t *testing.T) {
 
 	// menuItems order: Home(idx 0), About(idx 1), Projects(idx 2), ...
 	projectsIdx := 2
-	m.Update(mousePress(m.shellLeft+5, m.bodyTop+bodyTopPad+projectsIdx))
+	m.Update(mousePress(m.shellLeft+5, m.bodyTop+m.bodyTopPad()+projectsIdx))
 
 	if m.currentScreen != ScreenProjects {
 		t.Errorf("expected click on nav row %d to open Projects, got %v", projectsIdx, m.currentScreen)
@@ -274,7 +274,7 @@ func TestProjectRowClickOpensDetail(t *testing.T) {
 
 	textLeft := m.shellLeft + bodyFrameChrome - components.ScrollbarWidth
 	i := 1
-	m.Update(mousePress(textLeft+10, m.bodyTop+bodyTopPad+4+i))
+	m.Update(mousePress(textLeft+10, m.bodyTop+m.bodyTopPad()+4+i))
 
 	if m.currentScreen != ScreenProjectDetail {
 		t.Fatalf("expected ProjectDetail after clicking project row %d, got %v", i, m.currentScreen)
@@ -368,9 +368,36 @@ func TestViewInitializing(t *testing.T) {
 
 func TestContentHeight(t *testing.T) {
 	m := newTestApp()
-	want := m.height - mastheadLines - footerHeight - bodyTopPad
+	want := m.height - mastheadLines - footerHeight - m.bodyTopPad()
 	if m.contentHeight() != want {
 		t.Errorf("expected content height %d, got %d", want, m.contentHeight())
+	}
+}
+
+func TestResponsiveBodyTopPad(t *testing.T) {
+	m := newTestApp()
+
+	tests := []struct {
+		height int
+		want   int
+	}{
+		{18, 0},
+		{22, 0},
+		{24, 1},
+		{30, 1},
+		{35, 2},
+		{40, 2},
+		{45, 3},
+		{52, 3},
+		{60, 4},
+		{70, 5},
+	}
+
+	for _, tt := range tests {
+		m.height = tt.height
+		if got := m.bodyTopPad(); got != tt.want {
+			t.Errorf("height %d: expected top pad %d, got %d", tt.height, tt.want, got)
+		}
 	}
 }
 

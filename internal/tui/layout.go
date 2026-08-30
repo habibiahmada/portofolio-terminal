@@ -57,24 +57,26 @@ func (m *App) composeBodyFrame(shell string, bodyH int) string {
 		pad = minBodyMargin
 	}
 
+	topPad := m.bodyTopPad()
+
 	// Record geometry for mouse hit-testing.
 	m.shellLeft = pad
 	m.shellWidth = shellW
 	// Scrollbar is the rightmost column of the shell.
 	m.scrollBarX = pad + shellW - 1
-	m.scrollBarTop = m.bodyTop + bodyTopPad
+	m.scrollBarTop = m.bodyTop + topPad
 	m.scrollBarH = len(lines)
-	if m.scrollBarH > bodyH-bodyTopPad {
-		m.scrollBarH = bodyH - bodyTopPad
+	if m.scrollBarH > bodyH-topPad {
+		m.scrollBarH = bodyH - topPad
 	}
 
-	// Top-align the block with a small padding for breathing room.
+	// Top-align the block with responsive top padding for breathing room.
 	out := make([]string, bodyH)
-	for i := 0; i < bodyTopPad && i < len(out); i++ {
+	for i := 0; i < topPad && i < len(out); i++ {
 		out[i] = strings.Repeat(" ", pad)
 	}
 	for i, line := range lines {
-		idx := bodyTopPad + i
+		idx := topPad + i
 		if idx >= len(out) {
 			break
 		}
