@@ -85,13 +85,46 @@ go build ./cmd/ssh
 AWS EC2
 │
 ├── /opt/habibiahmada/
-│   └── habibiahmada-ssh
+│   ├── habibiahmada-ssh
+│   ├── portfolio-ssh.service   # salinan unit (sumber: deploy/portfolio-ssh.service)
+│   └── .ssh/
+│       └── term_info_ed25519   # Wish SSH host key (di-generate otomatis saat deploy)
 │
 └── systemd
     └── portfolio-ssh.service
 ```
 
 Systemd menjalankan SSH application (Wish + Go TUI).
+
+### Artefak Deployment
+
+| File | Isi |
+|------|-----|
+| `.github/workflows/deploy.yml` | CI: build `cmd/ssh` → scp ke EC2 → install unit → restart (+ cek port 2222) |
+| `deploy/portfolio-ssh.service` | systemd unit (WorkingDirectory `/opt/habibiahmada`) |
+| `scripts/deploy-ssh.sh` | Deploy manual dari mesin lokal (tanpa GitHub Actions) |
+
+### CI Secrets yang dibutuhkan (`deploy.yml`)
+
+| Secret | Deskripsi |
+|--------|-----------|
+| `EC2_HOST` | IP / hostname EC2 |
+| `EC2_USER` | SSH username (mis. `ubuntu`) |
+| `EC2_SSH_KEY` | Isi private key SSH (pastikan public key ada di `~/.ssh/authorized_keys` server) |
+| `EC2_PORT` | (opsional) port SSH, default `22` |
+
+Deploy dipicu otomatis saat push ke `main` yang menyentuh kode TUI/core, atau manual via **Actions → Deploy SSH Server → Run workflow**.
+
+### Host Key Wish
+
+Server Wish butuh key host di `.ssh/term_info_ed25519` (relatif ke CWD = `/opt/habibiahmada`).
+`scripts/deploy-ssh.sh` meng-generate-nya otomatis bila belum ada:
+
+```bash
+ssh-keygen -t ed25519 -f .ssh/term_info_ed25519 -N "" -C "wish-portfolio@habibiahmada.dev"
+```
+
+> Sama halnya dengan SSH server Linux, key Wish **jangan pernah di-commit ke git** (sudah masuk `.gitignore` melalui `/.ssh/`). Regenerate sesekali sebagai rotasi key.
 
 ### Wish Stack
 

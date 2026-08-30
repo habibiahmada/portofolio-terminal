@@ -283,9 +283,9 @@ Visual polish sebelum portfolio parity & deploy production. Lihat [tui-illustrat
 
 ---
 
-## Fase 4 — Deployment & Production ⬜
+## Fase 4 — Deployment & Production 🔄
 
-**Prasyarat:** Fase 3 (Portfolio Parity) selesai — termasuk QA gate 3.13.
+**Prasyarat:** Fase 3 (Portfolio Parity) selesai — termasuk QA gate 3.13. ✅
 
 ### npm & Release
 
@@ -298,11 +298,11 @@ Visual polish sebelum portfolio parity & deploy production. Lihat [tui-illustrat
 
 | # | Task | Status | Catatan |
 |---|------|--------|---------|
-| 4.3 | Deploy workflow (`deploy.yml`) | ⬜ | Git push → EC2 |
-| 4.4 | systemd service (`portfolio-ssh.service`) | ⬜ | |
-| 4.5 | Layout server `/opt/habibiahmada/` | ⬜ | |
-| 4.6 | SSH host key management (production) | ⬜ | |
-| 4.7 | DNS `habibiahmada.dev` → EC2 SSH | ⬜ | |
+| 4.3 | Deploy workflow (`deploy.yml`) | ✅ | `.github/workflows/deploy.yml` (build → scp → systemd) |
+| 4.4 | systemd service (`portfolio-ssh.service`) | ✅ | `deploy/portfolio-ssh.service` |
+| 4.5 | Layout server `/opt/habibiahmada/` | ✅ | `scripts/deploy-ssh.sh` (build + host key + pipa install) |
+| 4.6 | SSH host key management (production) | ⬜ | Butuh akses EC2 (auto-generate di deploy script) |
+| 4.7 | DNS `habibiahmada.dev` → EC2 SSH | ⬜ | Butuh akses Cloudflare/AWS |
 | 4.8 | Monitoring & health check | 🔮 | |
 
 ### Distribusi & CTA
@@ -311,6 +311,8 @@ Visual polish sebelum portfolio parity & deploy production. Lihat [tui-illustrat
 |---|------|--------|---------|
 | 4.9 | CTA `npx habibiahmada` di website | ⬜ | Koordinasi terpisah |
 | 4.10 | CTA `ssh habibiahmada.dev` di website | ⬜ | Koordinasi terpisah |
+
+> **Untuk melengkapi Fase 4** dibutuhkan akses eksternal: `NPM_TOKEN` (npm publish), SSH key + `EC2_*` secrets (deploy nyata), dan akses Cloudflare untuk DNS. Artefak CI/konfigurasi sudah disiapkan.
 
 ---
 
@@ -353,7 +355,7 @@ Fase 1 — Foundation     ██████████████████
 Fase 2 — Polish         ██████████████████░░  ~90%
 Fase 2.5 — Ilustrasi    ████████████████░░░░  ~85%
 Fase 3 — Portfolio      ████████████████████  100% ← selesai (gate lulus)
-Fase 4 — Deployment     ░░░░░░░░░░░░░░░░░░░░   0%  (next; gate sudah terpenuhi)
+Fase 4 — Deployment     ████░░░░░░░░░░░░░░░░  ~25%  ← CI artefak siap, tunggu akses npm/EC2
 Fase 5 — Evolusi        ░░░░░░░░░░░░░░░░░░░░   0%
 ```
 

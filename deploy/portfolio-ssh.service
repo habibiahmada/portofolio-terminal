@@ -1,0 +1,26 @@
+[Unit]
+Description=Habibi Ahmad SSH Portfolio (Wish + Bubble Tea TUI)
+Documentation=https://habibiahmada.dev
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# sshd on the host should not claim port 2222; Wish app is the ssh server.
+# If using a privileged port change 2222 -> a value + set AmbientCapabilities.
+WorkingDirectory=/opt/habibiahmada
+ExecStart=/opt/habibiahmada/habibiahmada-ssh
+Restart=always
+RestartSec=5
+
+# Raised soft limit for high concurrency of concurrent SSH sessions.
+LimitNOFILE=65535
+
+# Minimal hardening (a plain user, no special privileges required for port 2222).
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=/opt/habibiahmada
+
+[Install]
+WantedBy=multi-user.target

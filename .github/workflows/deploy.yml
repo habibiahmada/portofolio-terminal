@@ -1,0 +1,103 @@
+name: Deploy SSH Server
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        default: "production"
+        type: choice
+        options:
+          - production
+  push:
+    branches:
+      - main
+    paths:
+      - "cmd/ssh/**"
+      - "internal/tui/**"
+      - "internal/components/**"
+      - "internal/styles/**"
+      - "internal/data/**"
+      - "go.mod"
+      - "go.sum"
+      - ".github/workflows/deploy.yml"
+
+concurrency:
+  group: deploy-ssh-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build & Deploy to EC2
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+          cache: true
+
+      - name: Run tests
+        run: go test ./...
+
+      - name: Run vet
+        run: go vet ./...
+
+      - name: Build SSH server binary
+        run: |
+          CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o habibiahmada-ssh ./cmd/ssh
+          ls -lh habibiahmada-ssh
+
+      - name: Copy artifacts to EC2
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_PORT || '22' }}
+          source: "habibiahmada-ssh,deploy/portfolio-ssh.service"
+          target: "/opt/habibiahmada/"
+          strip_components: 0
+
+      - name: Deploy & restart service on EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_PORT || '22' }}
+          script: |
+            set -e
+            cd /opt/habibiahmada
+
+            # Ensure the runtime directory and SSH host key location exist.
+            mkdir -p .ssh
+            chmod 755 habibiahmada-ssh
+
+            # Install the systemd unit.
+            sudo cp deploy/portfolio-ssh.service /etc/systemd/system/portfolio-ssh.service
+            sudo systemctl daemon-reload
+
+            # (Re)start the service.
+            sudo systemctl enable portfolio-ssh.service || true
+            sudo systemctl restart portfolio-ssh.service
+
+            # Report status.
+            sleep 2
+            sudo systemctl --no-pager --lines=20 status portfolio-ssh.service || true
+
+            # Sanity: confirm the Wish SSH port is listening.
+            if sudo ss -ltnp | grep -q ':2222'; then
+              echo "OK: SSH portfolio listening on :2222"
+            else
+              echo "WARN: port 2222 not detected — check systemd logs" >&2
+              exit 1
+            fi
