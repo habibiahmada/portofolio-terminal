@@ -64,6 +64,10 @@ func teaHandler(sess ssh.Session) (tea.Model, []tea.ProgramOption) {
 	model := tui.NewSplash()
 
 	return model, []tea.ProgramOption{
+		// Alternate screen for clean painting + mouse capture for wheel
+		// scroll / scrollbar drag. Press `s` to toggle select mode and enable
+		// the terminal's native text selection (Shift+drag also works while
+		// the mouse is captured).
 		tea.WithAltScreen(),
 		tea.WithMouseCellMotion(),
 	}

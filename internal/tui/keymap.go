@@ -29,6 +29,26 @@ func isScrollDown(msg tea.KeyMsg) bool {
 	return msg.String() == "j"
 }
 
+// isPageUp returns true if the key scrolls a whole page up.
+func isPageUp(msg tea.KeyMsg) bool {
+	return msg.Type == tea.KeyPgUp
+}
+
+// isPageDown returns true if the key scrolls a whole page down.
+func isPageDown(msg tea.KeyMsg) bool {
+	return msg.Type == tea.KeyPgDown
+}
+
+// isScrollHome returns true if the key jumps to the top of content.
+func isScrollHome(msg tea.KeyMsg) bool {
+	return msg.Type == tea.KeyHome
+}
+
+// isScrollEnd returns true if the key jumps to the bottom of content.
+func isScrollEnd(msg tea.KeyMsg) bool {
+	return msg.Type == tea.KeyEnd
+}
+
 // isSelect returns true if the key press selects an item.
 func isSelect(msg tea.KeyMsg) bool {
 	return msg.Type == tea.KeyEnter || msg.Type == tea.KeySpace
@@ -42,4 +62,10 @@ func isBack(msg tea.KeyMsg) bool {
 // isHelp returns true if the key press toggles the help overlay.
 func isHelp(msg tea.KeyMsg) bool {
 	return msg.String() == "?" || msg.Type == tea.KeyF1
+}
+
+// isSelectModeToggle returns true if the key toggles select mode, which
+// releases mouse capture so the terminal's native text selection works.
+func isSelectModeToggle(msg tea.KeyMsg) bool {
+	return msg.String() == "s" || msg.String() == "S"
 }

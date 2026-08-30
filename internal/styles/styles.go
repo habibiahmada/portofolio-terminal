@@ -155,12 +155,33 @@ var (
 	RuleStyle = lipgloss.NewStyle().
 			Foreground(ColorBorder)
 
+	// NavActiveStyle is the currently selected nav item. When the nav zone has
+	// focus it is a solid highlighted bar (filled background) so it is obvious
+	// which item is active; otherwise it stays bold red without the fill.
 	NavActiveStyle = lipgloss.NewStyle().
-			Foreground(ColorPrimary).
+			Foreground(ColorBackground).
+			Background(ColorPrimary).
 			Bold(true)
+
+	// NavSelectedInactive is the selected item while the content zone has
+	// focus — dimmed so the content list owns the strong selection cue.
+	NavSelectedInactive = lipgloss.NewStyle().
+				Foreground(ColorMuted)
 
 	NavItemStyle = lipgloss.NewStyle().
 			Foreground(ColorMuted)
+
+	// NavZoneHighlight draws a colored left rail on the nav column when it has
+	// focus, so nav vs. content zones are visually distinct.
+	NavZoneHighlight = lipgloss.NewStyle().
+				Foreground(ColorPrimary).
+				Bold(true)
+
+	// ContentZoneHighlight draws the matching left rail on the content column
+	// when the content zone has focus.
+	ContentZoneHighlight = lipgloss.NewStyle().
+				Foreground(ColorSecondary).
+				Bold(true)
 )
 
 // Footer animation styles — the always-present animated illustration.
@@ -178,4 +199,70 @@ var (
 	FooterWordmark = lipgloss.NewStyle().
 			Foreground(ColorText).
 			Bold(true)
+
+	// FooterArtMuted is a dimmed outline style for the decorative mascot /
+	// corner illustration so it stays a subtle hiasan, not a distraction.
+	FooterArtMuted = lipgloss.NewStyle().
+			Foreground(ColorSecondary)
+)
+
+// Mascot illustration — layered thin/thick lines with saturation steps.
+var (
+	MascotBold = lipgloss.NewStyle().
+			Foreground(ColorSecondary).
+			Bold(true)
+
+	MascotThin = lipgloss.NewStyle().
+			Foreground(ColorBorder)
+
+	MascotDim = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#1e3a5f"))
+
+	MascotMid = lipgloss.NewStyle().
+			Foreground(ColorSecondary)
+
+	MascotBright = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#60a5fa")).
+			Bold(true)
+
+	MascotEye = lipgloss.NewStyle().
+			Foreground(ColorPrimary).
+			Bold(true)
+
+	MascotCursor = lipgloss.NewStyle().
+			Foreground(ColorAccent).
+			Bold(true)
+)
+
+// Fixed header bar and body frame styles (decorative "hiasan" around content).
+var (
+	HeaderBarStyle = lipgloss.NewStyle().
+			Foreground(ColorText)
+
+	FrameBorderStyle = lipgloss.NewStyle().
+				Foreground(ColorBorder)
+
+	FrameCornerStyle = lipgloss.NewStyle().
+				Foreground(ColorSecondary)
+
+	FrameAccentStyle = lipgloss.NewStyle().
+				Foreground(ColorPrimary).
+				Bold(true)
+
+	// HeaderScanStyle is the bright dash that travels along the header rule.
+	HeaderScanStyle = lipgloss.NewStyle().
+			Foreground(ColorPrimary).
+			Bold(true)
+)
+
+// Scrollbar styles.
+var (
+	ScrollThumb = lipgloss.NewStyle().
+			Foreground(ColorSecondary).
+			Bold(true).
+			Render("█")
+
+	ScrollTrack = lipgloss.NewStyle().
+			Foreground(ColorBorder).
+			Render("░")
 )

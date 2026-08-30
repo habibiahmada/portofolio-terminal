@@ -5,6 +5,9 @@ import (
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+
+	"github.com/habibiahmada/habibiahmada-terminal/internal/components"
 )
 
 // Helpers to construct keyboard messages for tests.
@@ -91,6 +94,7 @@ func TestProjectDetailNavigation(t *testing.T) {
 	m := newTestApp()
 
 	m.currentScreen = ScreenProjects
+	m.focus = FocusContent
 	m.Update(keyMsg(tea.KeyEnter))
 	if m.currentScreen != ScreenProjectDetail {
 		t.Fatalf("expected ProjectDetail, got %v", m.currentScreen)
@@ -105,6 +109,13 @@ func TestProjectDetailNavigation(t *testing.T) {
 func TestNavigateProjectsList(t *testing.T) {
 	m := newTestApp()
 	m.currentScreen = ScreenProjects
+
+	// Arrow/right must first drop into the screen's content before the list
+	// selection moves.
+	m.Update(keyMsg(tea.KeyRight))
+	if m.focus != FocusContent {
+		t.Fatalf("expected focus content after →, got %v", m.focus)
+	}
 
 	m.Update(keyRunes('j'))
 	if m.selectedProject != 1 {
@@ -121,9 +132,12 @@ func TestGoBackFromScreen(t *testing.T) {
 	m := newTestApp()
 	m.currentScreen = ScreenSkills
 
+	// Top-level screens only return focus to the nav; switching screens is
+	// done with ↑/↓ while the nav is focused.
+	m.focus = FocusContent
 	m.Update(keyMsg(tea.KeyLeft))
-	if m.currentScreen != ScreenHome {
-		t.Errorf("expected back to Home, got %v", m.currentScreen)
+	if m.focus != FocusNav {
+		t.Errorf("expected focus back to nav, got %v", m.focus)
 	}
 }
 
@@ -162,10 +176,121 @@ func TestHelpToggle(t *testing.T) {
 	}
 }
 
+func TestSelectModeToggle(t *testing.T) {
+	m := newTestApp()
+
+	model, cmd := m.Update(keyRunes('s'))
+	app := model.(*App)
+	if !app.selectMode {
+		t.Error("expected selectMode to be enabled after 's'")
+	}
+	if cmd == nil {
+		t.Error("expected a command (disable mouse) after enabling select mode")
+	}
+
+	model, cmd = app.Update(keyRunes('s'))
+	if model.(*App).selectMode {
+		t.Error("expected selectMode to be disabled after second 's'")
+	}
+	if cmd == nil {
+		t.Error("expected a command (enable mouse) after disabling select mode")
+	}
+}
+
+func TestMouseIgnoredInSelectMode(t *testing.T) {
+	m := newTestApp()
+	m.selectMode = true
+	m.showHelp = true
+
+	m.Update(tea.MouseMsg{
+		X:      10,
+		Y:      10,
+		Action: tea.MouseActionPress,
+		Button: tea.MouseButtonLeft,
+	})
+	if !m.showHelp {
+		t.Error("expected mouse clicks to be ignored in select mode")
+	}
+}
+
+func mousePress(x, y int) tea.MouseMsg {
+	return tea.MouseMsg{
+		X:      x,
+		Y:      y,
+		Action: tea.MouseActionPress,
+		Button: tea.MouseButtonLeft,
+	}
+}
+
+func TestNavClickSwitchesScreen(t *testing.T) {
+	m := newTestApp()
+	m.bodyTop = mastheadLines
+	m.shellLeft = 2
+
+	// menuItems order: Home(idx 0), About(idx 1), Projects(idx 2), ...
+	projectsIdx := 2
+	m.Update(mousePress(m.shellLeft+5, m.bodyTop+bodyTopPad+projectsIdx))
+
+	if m.currentScreen != ScreenProjects {
+		t.Errorf("expected click on nav row %d to open Projects, got %v", projectsIdx, m.currentScreen)
+	}
+}
+
+func TestScrollbarClickJumpsExactColumn(t *testing.T) {
+	m := newTestApp()
+	m.currentScreen = ScreenAbout
+	m.scrollBarX = 20
+	m.scrollBarTop = 3
+	m.scrollBarH = 10
+	m.scrollMax = 40
+
+	// Top of the track maps to the top of the content.
+	m.Update(mousePress(m.scrollBarX, m.scrollBarTop))
+	if m.contentOffset != 0 {
+		t.Errorf("expected offset 0 at track top, got %d", m.contentOffset)
+	}
+
+	// Bottom of the track maps to the bottom of the content.
+	m.Update(mousePress(m.scrollBarX, m.scrollBarTop+m.scrollBarH-1))
+	if m.contentOffset != 40 {
+		t.Errorf("expected offset 40 at track bottom, got %d", m.contentOffset)
+	}
+
+	// One column to the right of the track must NOT trigger the scrollbar.
+	m.contentOffset = 5
+	m.Update(mousePress(m.scrollBarX+1, m.scrollBarTop+m.scrollBarH-1))
+	if m.contentOffset != 5 {
+		t.Errorf("expected offset unchanged when clicking beside the track, got %d", m.contentOffset)
+	}
+}
+
+func TestProjectRowClickOpensDetail(t *testing.T) {
+	m := newTestApp()
+	m.currentScreen = ScreenProjects
+	m.bodyTop = mastheadLines
+	m.shellLeft = 2
+	m.contentOffset = 0
+
+	textLeft := m.shellLeft + bodyFrameChrome - components.ScrollbarWidth
+	i := 1
+	m.Update(mousePress(textLeft+10, m.bodyTop+bodyTopPad+4+i))
+
+	if m.currentScreen != ScreenProjectDetail {
+		t.Fatalf("expected ProjectDetail after clicking project row %d, got %v", i, m.currentScreen)
+	}
+	if m.projectDetail.Slug != m.projects[i].Slug {
+		t.Errorf("expected project %q selected, got %q", m.projects[i].Slug, m.projectDetail.Slug)
+	}
+}
+
 func TestScrollContent(t *testing.T) {
 	m := newTestApp()
 
+	// Only content taller than the viewport scrolls; short About content fits
+	// so j/k are no-ops. Simulate a long screen via scrollMax.
 	m.currentScreen = ScreenAbout
+	m.focus = FocusContent
+	m.scrollMax = 5
 	m.Update(keyRunes('j'))
 	if m.contentOffset != 1 {
 		t.Errorf("expected offset 1 after j, got %d", m.contentOffset)
@@ -179,6 +304,19 @@ func TestScrollContent(t *testing.T) {
 	m.Update(keyRunes('k'))
 	if m.contentOffset != 0 {
 		t.Errorf("expected offset to stay 0 at top, got %d", m.contentOffset)
+	}
+}
+
+func TestScrollClampedAtBottom(t *testing.T) {
+	m := newTestApp()
+	m.currentScreen = ScreenAbout
+	m.focus = FocusContent
+	m.scrollMax = 5
+	m.contentOffset = 5
+
+	m.Update(keyRunes('j'))
+	if m.contentOffset != 5 {
+		t.Errorf("expected offset to stay 5 at bottom, got %d", m.contentOffset)
 	}
 }
 
@@ -229,7 +367,7 @@ func TestViewInitializing(t *testing.T) {
 
 func TestContentHeight(t *testing.T) {
 	m := newTestApp()
-	want := m.height - footerHeight - mastheadLines - 2
+	want := m.height - mastheadLines - footerHeight - bodyTopPad
 	if m.contentHeight() != want {
 		t.Errorf("expected content height %d, got %d", want, m.contentHeight())
 	}
@@ -331,5 +469,72 @@ func TestFooterShowsBrandAndHints(t *testing.T) {
 	}
 	if !strings.Contains(view, "Screens") {
 		t.Error("expected footer screen hint in view")
+	}
+}
+
+func TestViewLinesFitTerminal(t *testing.T) {
+	sizes := []struct{ w, h int }{
+		{80, 24},
+		{100, 30},
+		{120, 40},
+	}
+	screens := []Screen{ScreenHome, ScreenCertificates, ScreenAbout}
+	for _, size := range sizes {
+		for _, s := range screens {
+			m := New()
+			m.width, m.height = size.w, size.h
+			m.currentScreen = s
+			view := m.View()
+			for i, ln := range strings.Split(stripANSI(view), "\n") {
+				if w := lipgloss.Width(ln); w > size.w {
+					t.Errorf("%v %dx%d line %d width %d > %d: %q", s, size.w, size.h, i, w, size.w, ln)
+				}
+			}
+		}
+	}
+}
+
+func TestProjectsListFocusExclusive(t *testing.T) {
+	m := newTestApp()
+	m.currentScreen = ScreenProjects
+	m.selectedProject = 0
+
+	// Nav focused: sidebar owns the strong cue, list stays plain.
+	m.focus = FocusNav
+	for _, ln := range strings.Split(stripANSI(m.View()), "\n") {
+		if strings.Contains(ln, m.projects[0].Name) && strings.HasPrefix(strings.TrimSpace(ln), ">") {
+			t.Error("expected no list cursor while nav is focused")
+		}
+	}
+
+	// Content focused: list owns the strong cue, nav selection stays dim.
+	m.focus = FocusContent
+	found := false
+	for _, ln := range strings.Split(stripANSI(m.View()), "\n") {
+		if strings.Contains(ln, m.projects[0].Name) && strings.Contains(ln, ">") {
+			found = true
+		}
+		if strings.Contains(ln, "▌ Projects") || strings.Contains(ln, "▍ Projects") {
+			t.Error("expected no animated nav cursor while content is focused")
+		}
+	}
+	if !found {
+		t.Error("expected list cursor when content is focused")
+	}
+}
+
+func TestNavigateChipNotOnName(t *testing.T) {
+	m := newTestApp()
+	plain := stripANSI(m.View())
+	for _, ln := range strings.Split(plain, "\n") {
+		if strings.Contains(ln, "NAVIGATE") && strings.Contains(ln, "Habibi") {
+			t.Errorf("NAVIGATE overlapped the name: %q", ln)
+		}
+	}
+	if !strings.Contains(plain, "NAVIGATE") {
+		t.Error("expected NAVIGATE chip on its own row")
+	}
+	if !strings.Contains(plain, "Habibi Ahmad Aziz") {
+		t.Error("expected full name on one line")
 	}
 }

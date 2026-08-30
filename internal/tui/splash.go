@@ -6,14 +6,18 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
+	"github.com/habibiahmada/habibiahmada-terminal/internal/animation"
 	"github.com/habibiahmada/habibiahmada-terminal/internal/components"
 	"github.com/habibiahmada/habibiahmada-terminal/internal/styles"
 )
 
 // Splash: signature + brand + progress, then hand off to App.
 var splashDelays = []time.Duration{
-	500 * time.Millisecond,
-	500 * time.Millisecond,
+	120 * time.Millisecond,
+	120 * time.Millisecond,
+	120 * time.Millisecond,
+	120 * time.Millisecond,
+	220 * time.Millisecond,
 }
 
 const (
@@ -49,17 +53,17 @@ func (s *Splash) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		s.width = msg.Width
 		s.height = msg.Height
 		if s.skip() {
-			return s.toApp(), nil
+			return s.toApp()
 		}
 		return s, nil
 
 	case tea.KeyMsg:
-		return s.toApp(), nil
+		return s.toApp()
 
 	case splashTickMsg:
 		s.frame++
 		if s.frame >= len(splashDelays) {
-			return s.toApp(), nil
+			return s.toApp()
 		}
 		return s, nextSplashTick(splashDelays[s.frame])
 	}
@@ -67,11 +71,11 @@ func (s *Splash) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return s, nil
 }
 
-func (s *Splash) toApp() *App {
+func (s *Splash) toApp() (*App, tea.Cmd) {
 	app := New()
 	app.width = s.width
 	app.height = s.height
-	return app
+	return app, app.Init()
 }
 
 func (s *Splash) skip() bool {
@@ -87,8 +91,14 @@ func (s *Splash) View() string {
 	}
 
 	barW := clampInt(16, s.width/3, 32)
-	progress := 50
-	if s.frame >= 1 {
+	progress := 0
+	if len(splashDelays) > 0 {
+		progress = (s.frame + 1) * 100 / (len(splashDelays) + 1)
+	}
+	if progress < 0 {
+		progress = 0
+	}
+	if progress > 100 {
 		progress = 100
 	}
 
@@ -96,20 +106,22 @@ func (s *Splash) View() string {
 	if art == "" {
 		art = styles.PromptStyle.Render(">_")
 	}
+	// Pulsing accent dot next to the brand while loading.
+	pulse := styles.FooterBarStyle.Render(animation.New(animation.BlockPulse).Frame(s.frame))
 
 	brand := styles.HeaderWordmark.Render("habibiahmada") + styles.HeaderDot.Render(".")
-	sub := styles.MutedStyle.Render("terminal portfolio")
+	sub := styles.MutedStyle.Render("interactive terminal CV")
 
 	block := lipgloss.JoinVertical(
 		lipgloss.Center,
 		art,
-		brand,
+		pulse+"  "+brand,
 		sub,
 		components.ProgressBar(progress, barW),
 	)
 
-	if s.frame >= 1 {
-		block = lipgloss.JoinVertical(lipgloss.Center, block, styles.MutedStyle.Render("any key to continue"))
+	if progress >= 100 {
+		block = lipgloss.JoinVertical(lipgloss.Center, block, styles.SuccessStyle.Render("ready — any key to continue"))
 	}
 
 	bodyH := s.height

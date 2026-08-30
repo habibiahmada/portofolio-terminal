@@ -15,15 +15,15 @@ func (m *App) renderProjectsContent() string {
 		"",
 	}
 	for i, p := range m.projects {
-		lines = append(lines, renderProjectListRow(p, i == m.selectedProject))
+		lines = append(lines, renderProjectListRow(p, i == m.selectedProject, m.focus == FocusContent))
 	}
 	return strings.Join(lines, "\n")
 }
 
-func renderProjectListRow(p data.Project, selected bool) string {
+func renderProjectListRow(p data.Project, selected, contentFocused bool) string {
 	prefix := "  "
 	nameStyle := styles.NormalStyle
-	if selected {
+	if selected && contentFocused {
 		prefix = "> "
 		nameStyle = styles.ListSelectedStyle
 	}
@@ -34,8 +34,8 @@ func renderProjectListRow(p data.Project, selected bool) string {
 	return prefix + nameStyle.Render(p.Name) + "  " + styles.MutedStyle.Render(meta)
 }
 
-func renderProjectCard(p data.Project, width int, selected bool) string {
-	return renderProjectListRow(p, selected)
+func renderProjectCard(p data.Project, width int, selected, contentFocused bool) string {
+	return renderProjectListRow(p, selected, contentFocused)
 }
 
 func (m *App) renderProjectDetailContent() string {

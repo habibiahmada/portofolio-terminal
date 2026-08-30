@@ -17,13 +17,8 @@ import (
 	"github.com/habibiahmada/habibiahmada-terminal/internal/styles"
 )
 
-// contentOffsetX tracks the horizontal offset of the centered body for mouse
-// click coordinate translation.
-var contentOffsetX int
-
-// contentOffsetY tracks the vertical offset of the centered body for mouse
-// click coordinate translation.
-var contentOffsetY int
+// Focus identifies the active interaction zone (nav rail vs screen content).
+type Focus int
 
 // Screen identifiers.
 type Screen int
@@ -65,16 +60,26 @@ var menuItems = []Screen{
 	ScreenContact,
 }
 
-// Layout dimensions.
+// Layout dimensions. The header (masthead) and footer are fixed bars; the body
+// between them holds a fixed nav column and a scrollable content viewport.
 const (
-	mastheadLines = 1
+	mastheadLines = 2 // brand row + separator
 	footerHeight  = 2
+	bodyTopPad    = 1 // breathing room so the body isn't flush against the header
 )
 
-// footerTickInterval drives the footer animation. Only the one-line footer is
-// rebuilt on each tick (the body is layout-cached), so a ~300ms cadence keeps
-// the >_ cursor blink smooth without hammering the CPU.
-const footerTickInterval = 300 * time.Millisecond
+// Focus identifiers — the top-level interaction zones. When focus is on the
+// navigation rail, arrow keys switch screens; pressing → enters the screen's
+// content where arrows scroll/select. ←/Esc returns to the nav.
+const (
+	FocusNav Focus = iota
+	FocusContent
+)
+
+// footerTickInterval drives the App-wide animation loop (splash, nav selector,
+// header accent, footer equalizer). One tick redraws the fixed bars and the
+// animated accents; the cached content body stays cheap.
+const footerTickInterval = 350 * time.Millisecond
 
 type App struct {
 	width  int
@@ -84,6 +89,9 @@ type App struct {
 	currentScreen Screen
 	selectedMenu  int
 	prevScreen    Screen
+
+	// Focus zone: nav rail or screen content.
+	focus Focus
 
 	// Child screen state.
 	selectedProject int
@@ -104,13 +112,28 @@ type App struct {
 
 	// View state.
 	contentOffset int
+	scrollMax     int // max contentOffset for the current screen (for scrollbar)
 	showHelp      bool
+
+	// selectMode releases the mouse so the terminal's native text selection
+	// works. When off, the mouse is captured for wheel scroll / scrollbar drag.
+	selectMode bool
 
 	// CV modal viewer (V from Home).
 	cvModal bool
 
 	// Footer animation frame.
 	footerFrame int
+
+	// Last-painted layout geometry for mouse hit-testing (scrollbar drag,
+	// nav click). Set during renderLayout/renderBodyCached each frame.
+	bodyTop      int // y of the first body row (below the header)
+	shellLeft    int // x where the nav+content shell starts
+	shellWidth   int // total shell width (nav + divider + content)
+	contentTop   int // y of the first content row (including top padding)
+	scrollBarX   int // x column of the scrollbar (right of content)
+	scrollBarTop int // y of the first scrollbar row
+	scrollBarH   int // visible height of the scrollbar
 
 	// Layout cache — excludes footerFrame so animation is cheap.
 	cachedBodyKey string
@@ -125,6 +148,7 @@ func New() *App {
 	return &App{
 		currentScreen: ScreenHome,
 		selectedMenu:  0,
+		focus:         FocusNav,
 		profile:       data.GetProfile(),
 		projects:      data.GetProjects(),
 		skills:        data.GetSkills(),
@@ -173,44 +197,86 @@ func (m *App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-// handleMouse processes mouse click and scroll events.
+// handleMouse processes wheel scroll, scrollbar drag, and nav clicks. Mouse
+// capture is enabled so these work; press `s` to toggle select mode and use
+// the terminal's native text selection instead.
 func (m *App) handleMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
-	// Only handle left-click press and wheel scroll.
-	if msg.Action != tea.MouseActionPress && msg.Button != tea.MouseButtonWheelUp && msg.Button != tea.MouseButtonWheelDown {
+	// Select mode releases the mouse (tea.DisableMouse), so no events should
+	// arrive; guard defensively in case any are still in flight.
+	if m.selectMode {
 		return m, nil
 	}
 
-	// Help overlay intercepts clicks.
-	if m.showHelp {
+	// Help overlay / CV modal intercept clicks.
+	if msg.Action == tea.MouseActionPress {
 		m.showHelp = false
-		return m, nil
-	}
-
-	// CV modal intercepts clicks.
-	if m.cvModal {
 		m.cvModal = false
-		return m, nil
 	}
 
-	// Translate click coordinates relative to the centered body.
-	_ = msg.X - contentOffsetX
-	y := msg.Y - contentOffsetY
-
-	// Wheel scroll.
+	// Wheel scroll always scrolls content and focuses it.
 	if msg.Button == tea.MouseButtonWheelUp {
+		m.focus = FocusContent
 		m.scrollOrSelectUp()
 		return m, nil
 	}
 	if msg.Button == tea.MouseButtonWheelDown {
+		m.focus = FocusContent
 		m.scrollOrSelectDown()
 		return m, nil
 	}
 
-	// Click content to open detail on list screens.
-	if msg.Action == tea.MouseActionPress {
-		if y >= 0 && m.currentScreen == ScreenProjects {
-			return m.selectItem()
+	// Scrollbar drag / click: jump scroll position by fraction. The track is a
+	// single column at the right edge of the shell (scrollBarX), so only that
+	// exact column counts — clicks in the right margin must not trigger it.
+	if msg.X == m.scrollBarX && msg.Y >= m.scrollBarTop &&
+		msg.Y < m.scrollBarTop+m.scrollBarH {
+		frac := 0.0
+		if m.scrollBarH > 1 {
+			frac = float64(msg.Y-m.scrollBarTop) / float64(m.scrollBarH-1)
 		}
+		m.setScrollToLineFraction(frac)
+		return m, nil
+	}
+
+	// Click on the nav rail focuses navigation; clicking a menu row switches
+	// to that screen. Rows map 1:1 to menuItems (NavRail renders one line per
+	// item starting at the top of the shell), so hit-testing is exact.
+	if msg.Action == tea.MouseActionPress && msg.X >= m.shellLeft &&
+		msg.X <= m.shellLeft+components.NavRailWidth()-1 && msg.Y >= m.bodyTop {
+		m.focus = FocusNav
+		if row := msg.Y - m.bodyTop - bodyTopPad; row >= 0 && row < len(menuItems) {
+			m.selectedMenu = row
+			_, cmd := m.enterMenuScreen(row)
+			return m, cmd
+		}
+		return m, nil
+	}
+
+	// Click a project row on the Projects list to open its detail view. Rows
+	// map exactly to the rendered list: focus-rail chip (+1) and the
+	// title/meta/blank headers (+3) sit above the list, then the current
+	// scroll offset is subtracted.
+	if msg.Action == tea.MouseActionPress && m.currentScreen == ScreenProjects &&
+		msg.Y >= m.bodyTop+bodyTopPad && len(m.projects) > 0 {
+		textLeft := m.shellLeft + bodyFrameChrome - components.ScrollbarWidth
+		textRight := textLeft + m.contentWidth() - 1
+		if textRight > m.width-1 {
+			textRight = m.width - 1
+		}
+		if msg.X >= textLeft && msg.X <= textRight {
+			if i := msg.Y - m.bodyTop - bodyTopPad - 4 + m.contentOffset; i >= 0 && i < len(m.projects) {
+				m.focus = FocusContent
+				m.selectedProject = i
+				return m.selectItem()
+			}
+		}
+		// Fall through: a click on any other content row just focuses content.
+	}
+
+	// Click anywhere in content focuses it.
+	if msg.Action == tea.MouseActionPress && msg.Y >= m.contentTop {
+		m.focus = FocusContent
+		return m, nil
 	}
 
 	return m, nil
@@ -238,6 +304,16 @@ func (m *App) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 
+	// Toggle select mode: releases mouse capture so the terminal's native text
+	// selection (click + drag) works. Press again to re-enable mouse scrolling.
+	if isSelectModeToggle(msg) {
+		m.selectMode = !m.selectMode
+		if m.selectMode {
+			return m, tea.DisableMouse
+		}
+		return m, tea.EnableMouseCellMotion
+	}
+
 	// CV overlay intercepts keys first.
 	if m.cvModal {
 		if isBack(msg) || isSelect(msg) || isQuit(msg) || isHelp(msg) ||
@@ -262,7 +338,7 @@ func (m *App) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	// Project detail prev/next navigation (`h`/`l`). `←`/Esc remains Back.
+	// Project detail prev/next navigation (`h`/`l`). `←`/Esc returns to list.
 	if m.currentScreen == ScreenProjectDetail {
 		if msg.String() == "h" {
 			m.prevProject()
@@ -272,22 +348,54 @@ func (m *App) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.nextProject()
 			return m, nil
 		}
+		if isBack(msg) {
+			return m.goBack()
+		}
 	}
 
-	// Screen switch (↑↓) — instant, no Enter required.
-	if isNavigateUp(msg) {
-		return m.switchScreen(-1)
-	}
-	if isNavigateDown(msg) {
-		return m.switchScreen(1)
+	// Focus-based navigation.
+	//
+	// Nav focus (default): ↑↓ switch screens, → drops into the screen content.
+	if m.focus == FocusNav {
+		if msg.Type == tea.KeyRight || isSelect(msg) {
+			m.focus = FocusContent
+			return m, nil
+		}
+		if isNavigateUp(msg) {
+			return m.switchScreen(-1)
+		}
+		if isNavigateDown(msg) {
+			return m.switchScreen(1)
+		}
+		return m, nil
 	}
 
-	// Scroll / list selection (j/k).
-	if isScrollUp(msg) {
+	// Content focus: ↑↓ / j/k scroll or select within the screen; ←/Esc return.
+	if isBack(msg) {
+		m.focus = FocusNav
+		return m, nil
+	}
+	if isPageUp(msg) {
+		m.scrollPageUp()
+		return m, nil
+	}
+	if isPageDown(msg) {
+		m.scrollPageDown()
+		return m, nil
+	}
+	if isScrollHome(msg) {
+		m.scrollTop()
+		return m, nil
+	}
+	if isScrollEnd(msg) {
+		m.scrollBottom()
+		return m, nil
+	}
+	if isNavigateUp(msg) || isScrollUp(msg) {
 		m.scrollOrSelectUp()
 		return m, nil
 	}
-	if isScrollDown(msg) {
+	if isNavigateDown(msg) || isScrollDown(msg) {
 		m.scrollOrSelectDown()
 		return m, nil
 	}
@@ -295,11 +403,6 @@ func (m *App) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	// Select / drill-down.
 	if isSelect(msg) {
 		return m.selectItem()
-	}
-
-	// Back.
-	if isBack(msg) {
-		return m.goBack()
 	}
 
 	return m, nil
@@ -328,6 +431,7 @@ func (m *App) syncMenuFromScreen() {
 func (m *App) enterMenuScreen(idx int) (tea.Model, tea.Cmd) {
 	m.prevScreen = ScreenHome
 	m.resetScroll()
+	m.focus = FocusNav
 
 	screen := menuItems[idx]
 	m.selectedMenu = idx
@@ -460,15 +564,16 @@ func (m *App) goBack() (tea.Model, tea.Cmd) {
 		m.currentScreen = ScreenHome
 	}
 	m.resetScroll()
+	m.focus = FocusNav
 	return m, nil
 }
 
 // contentHeight returns visible lines for page content beside the sidebar.
 func (m *App) contentHeight() int {
-	bodyH := m.height - footerHeight
-	h := bodyH - mastheadLines - 2
-	if h < 6 {
-		h = 6
+	bodyH := m.height - mastheadLines - footerHeight
+	h := bodyH - bodyTopPad
+	if h < 4 {
+		h = 4
 	}
 	return h
 }
@@ -476,6 +581,7 @@ func (m *App) contentHeight() int {
 // resetScroll resets the content scroll offset to the top.
 func (m *App) resetScroll() {
 	m.contentOffset = 0
+	m.scrollMax = 0
 }
 
 // scrollUp scrolls the content one line up.
@@ -487,14 +593,54 @@ func (m *App) scrollUp() {
 
 // scrollDown scrolls the content one line down.
 func (m *App) scrollDown() {
-	maxH := m.contentHeight()
-	if maxH <= 0 {
+	if m.scrollMax > 0 && m.contentOffset < m.scrollMax {
 		m.contentOffset++
-		return
 	}
-	// Soft cap: avoid unbounded offset growth on short content.
-	if m.contentOffset < 10000 {
-		m.contentOffset++
+}
+
+// scrollTop jumps to the start of the screen content.
+func (m *App) scrollTop() {
+	m.contentOffset = 0
+}
+
+// scrollBottom jumps to the end of the screen content.
+func (m *App) scrollBottom() {
+	m.contentOffset = m.scrollMax
+}
+
+// setScrollToLineFraction maps a 0..1 fraction (cursor position within the
+// scrollbar) to a content offset.
+func (m *App) setScrollToLineFraction(f float64) {
+	if f < 0 {
+		f = 0
+	}
+	if f > 1 {
+		f = 1
+	}
+	m.contentOffset = int(f * float64(m.scrollMax))
+}
+
+// scrollPageDown scrolls down by roughly one visible page.
+func (m *App) scrollPageDown() {
+	page := m.contentHeight() - 2
+	if page < 1 {
+		page = 1
+	}
+	m.contentOffset += page
+	if m.contentOffset > m.scrollMax {
+		m.contentOffset = m.scrollMax
+	}
+}
+
+// scrollPageUp scrolls up by roughly one visible page.
+func (m *App) scrollPageUp() {
+	page := m.contentHeight() - 2
+	if page < 1 {
+		page = 1
+	}
+	m.contentOffset -= page
+	if m.contentOffset < 0 {
+		m.contentOffset = 0
 	}
 }
 
@@ -521,42 +667,137 @@ func (m *App) View() string {
 	return layout
 }
 
-// renderLayout pins footer to the bottom; body fills remaining height with ambient gutters.
+// renderLayout pins a fixed header on top and footer on the bottom; the body
+// between them is a decorated, top-aligned area that scrolls.
 func (m *App) renderLayout() string {
+	header := m.renderHeaderBar()
+	headerLines := strings.Count(header, "\n") + 1
 	footer := m.renderFooter()
 	footerLines := strings.Count(footer, "\n") + 1
-	bodyH := m.height - footerLines
-	if bodyH < 1 {
-		bodyH = 1
+
+	bodyH := m.height - headerLines - footerLines
+	if bodyH < 5 {
+		bodyH = 5
 	}
 
 	shell := m.renderBodyCached()
 	body := m.composeBodyFrame(shell, bodyH)
-	return body + "\n" + footer
+	body = m.overlayMascot(body, bodyH)
+	m.bodyTop = headerLines
+	m.contentTop = headerLines + bodyTopPad
+	return header + "\n" + body + "\n" + footer
 }
 
-// renderBodyCached builds sidebar + content column (cached, no footer frame).
+// overlayMascot draws the decorative mascot in the RIGHT MARGIN of the body,
+// never over content. If the shell already fills the terminal, the mascot is
+// skipped so certificate boxes and the scrollbar stay intact.
+func (m *App) overlayMascot(body string, bodyH int) string {
+	figure := components.MascotFigure(m.footerFrame)
+	if figure == "" {
+		return body
+	}
+	fLines := strings.Split(figure, "\n")
+	mascotW := 0
+	for _, fl := range fLines {
+		if w := lipgloss.Width(fl); w > mascotW {
+			mascotW = w
+		}
+	}
+	if mascotW == 0 || len(fLines) == 0 || len(fLines) > bodyH {
+		return body
+	}
+
+	rightStart := m.shellLeft + m.shellWidth + 1
+	if rightStart+mascotW > m.width {
+		return body
+	}
+
+	bodyLines := strings.Split(body, "\n")
+	if len(bodyLines) < bodyH {
+		for len(bodyLines) < bodyH {
+			bodyLines = append(bodyLines, strings.Repeat(" ", m.width))
+		}
+	}
+
+	startRow := bodyH - len(fLines)
+	for i, fl := range fLines {
+		row := components.FitLine(bodyLines[startRow+i], rightStart)
+		bodyLines[startRow+i] = components.FitLine(row+fl, m.width)
+	}
+	return strings.Join(bodyLines, "\n")
+}
+
+// renderHeaderBar renders the fixed top bar (brand + role) with an animated
+// accent, spanning the full terminal width.
+func (m *App) renderHeaderBar() string {
+	return components.HeaderBar("habibiahmada", m.profile.Title, m.profile.Location, m.width, m.footerFrame)
+}
+
+// renderBodyCached builds the nav column + content viewport (cached). The
+// content is clipped to a FIXED viewport height so the nav column stays put
+// regardless of how long a screen's content is.
 func (m *App) renderBodyCached() string {
 	key := m.layoutCacheKey()
 	if key == m.cachedBodyKey && m.cachedBody != "" {
 		return m.cachedBody
 	}
 
-	w := m.contentWidth()
-	masthead := components.Masthead("habibiahmada", m.profile.Title, w)
+	h := m.contentHeight()
 	content := m.renderContentRaw()
-	contentCol := lipgloss.JoinVertical(lipgloss.Left, masthead, content)
-
+	content = m.renderFocusRail(content, h)
 	rail := m.renderNavRail()
-	shellLines := maxLineCount(rail, contentCol)
-	block := components.JoinShell(rail, contentCol, shellLines)
+	block := components.JoinShell(rail, content, h)
 
 	m.cachedBody = block
 	m.cachedBodyKey = key
 	return m.cachedBody
 }
 
-// renderNavRail renders the vertical side navigation.
+// renderFocusRail adds a one-cell focus indicator column on the LEFT edge of
+// the content area. The zone chip ("► NAVIGATE" / "► CONTENT") sits on its own
+// first row so it never collides with the page heading.
+func (m *App) renderFocusRail(content string, h int) string {
+	lines := strings.Split(content, "\n")
+
+	var railStyle lipgloss.Style
+	var chipStyle lipgloss.Style
+	chip := "CONTENT"
+	railGlyph := "▎"
+	if m.focus == FocusNav {
+		railStyle = styles.RuleStyle
+		chipStyle = styles.MutedStyle
+		chip = "NAVIGATE"
+		railGlyph = "·"
+	} else {
+		railStyle = styles.ContentZoneHighlight
+		chipStyle = styles.ContentZoneHighlight
+	}
+
+	prefix := railStyle.Render(railGlyph) + " "
+	rowWidth := 0
+	if len(lines) > 0 {
+		rowWidth = lipgloss.Width(lines[0])
+	}
+	target := focusRailCells + rowWidth
+
+	out := make([]string, h)
+	out[0] = components.FitLine(prefix+chipStyle.Render("► "+chip), target)
+	src := lines
+	if len(src) > h-1 {
+		src = src[:h-1]
+	}
+	for i := 0; i < h-1; i++ {
+		ln := ""
+		if i < len(src) {
+			ln = src[i]
+		}
+		out[i+1] = components.FitLine(prefix+ln, target)
+	}
+	return strings.Join(out, "\n")
+}
+
+// renderNavRail renders the vertical side navigation with an animated
+// selection indicator.
 func (m *App) renderNavRail() string {
 	items := make([]components.SidebarItem, 0, len(menuItems))
 	for _, screen := range menuItems {
@@ -565,7 +806,7 @@ func (m *App) renderNavRail() string {
 			Name: navLabel(screen),
 		})
 	}
-	return components.NavRail(items, m.navSelectedIndex(), components.NavRailWidth())
+	return components.NavRail(items, m.navSelectedIndex(), components.NavRailWidth(), m.footerFrame, m.focus == FocusNav)
 }
 
 // navLabel returns short nav text (skip "Project Detail").
@@ -595,17 +836,26 @@ func (m *App) navSelectedIndex() int {
 
 // renderFooter renders brand (left) and keyboard hints (right) on one row.
 func (m *App) renderFooter() string {
-	return components.FooterBar(m.footerFrame, m.width, footerHints())
+	return components.FooterBar(m.footerFrame, m.width, m.footerHints())
 }
 
 // footerHints returns the context-sensitive key hints.
-func footerHints() []components.FooterHint {
+func (m *App) footerHints() []components.FooterHint {
+	if m.focus == FocusNav {
+		return []components.FooterHint{
+			{Key: "↑↓", Label: "Screens"},
+			{Key: "→", Label: "Focus screen"},
+			{Key: "s", Label: "Select text"},
+			{Key: "?", Label: "Help"},
+			{Key: "q", Label: "Quit"},
+		}
+	}
 	return []components.FooterHint{
-		{Key: "↑↓", Label: "Screens"},
-		{Key: "j/k", Label: "Scroll"},
-		{Key: "Click", Label: "Navigate"},
+		{Key: "↑↓/jk", Label: "Scroll"},
+		{Key: "PgUp/PgDn", Label: "Page"},
 		{Key: "Enter", Label: "Open"},
-		{Key: "←", Label: "Back"},
+		{Key: "←/Esc", Label: "Nav"},
+		{Key: "s", Label: "Select text"},
 		{Key: "?", Label: "Help"},
 		{Key: "q", Label: "Quit"},
 	}
@@ -637,17 +887,41 @@ func (m *App) renderContentRaw() string {
 	return m.applyViewport(content)
 }
 
-// applyViewport clips long content to the visible area (top-aligned, stable layout).
+// applyViewport clips long content to the visible area (top-aligned, stable
+// layout) and appends a scrollbar column when the screen is taller than the
+// viewport. The nav column stays fixed; only this content viewport scrolls.
 func (m *App) applyViewport(content string) string {
-	contentWidth := m.contentWidth()
-	if contentWidth < 1 {
-		contentWidth = m.width
+	maxH := m.contentHeight() - 1 // first viewport row is the zone chip
+	if maxH < 3 {
+		maxH = 3
 	}
+	cw := m.contentWidth()
 
-	maxH := m.contentHeight()
-	clipped, _ := components.ClipContent(content, m.contentOffset, maxH)
-	_ = contentWidth
-	return clipped
+	res := components.ClipContentFull(content, m.contentOffset, maxH)
+	m.contentOffset = res.Offset
+	m.scrollMax = res.Max
+
+	// Pad every line to a FIXED content width so the shell (nav + rule +
+	// content) has a stable width regardless of screen. Always reserve the
+	// scrollbar gutter so the right edge does not jump between screens.
+	body := padToWidth(res.Text, maxH, cw)
+	return components.AddScrollbar(body, res.Offset, res.Max, cw)
+}
+
+// padToWidth ensures text is exactly maxH lines, each padded to cw visible
+// cells (right-padded) so the content column is a fixed width.
+func padToWidth(s string, maxH, cw int) string {
+	lines := strings.Split(s, "\n")
+	if len(lines) > maxH {
+		lines = lines[:maxH]
+	}
+	for i, ln := range lines {
+		lines[i] = components.FitLine(ln, cw)
+	}
+	for len(lines) < maxH {
+		lines = append(lines, strings.Repeat(" ", cw))
+	}
+	return strings.Join(lines, "\n")
 }
 
 // clipScroll is a test helper wrapping ClipContent.
@@ -662,16 +936,26 @@ func (m *App) renderHelpOverlay(layout string) string {
 	lines := []string{
 		"Navigation",
 		"──────────",
+		"On nav:",
 		"↑ / ↓       Switch screen",
-		"j / k       Scroll / select in list",
+		"Click item  Switch screen (mouse)",
+		"→ / Enter   Focus into screen content",
+		"On screen:",
+		"↑ / ↓ / j/k  Scroll / select in list",
+		"Mouse wheel  Scroll (also drag scrollbar)",
+		"PgUp/PgDn   Scroll a page",
+		"Home / End  Jump top / bottom",
 		"Enter       Open detail",
-		"← / Esc       Back",
+		"← / Esc     Back to nav",
 		"",
-		"Mouse",
-		"──────",
-		"Click         Open / select item",
-		"Click nav     Switch screen",
-		"Scroll        Scroll content",
+		"Text selection",
+		"──────────────",
+		"s            Toggle select mode (release mouse)",
+		"             then click & drag to select text.",
+		"             Press s again to re-enable mouse",
+		"             scroll (wheel + scrollbar drag).",
+		"Shift+drag   Also select text while mouse is on",
+		"             (terminals bypass the app's mouse).",
 		"",
 		"Screens",
 		"───────",

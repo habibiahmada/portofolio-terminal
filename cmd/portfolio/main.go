@@ -12,11 +12,18 @@ import (
 )
 
 func main() {
-	// Start the Bubble Tea program with a splash that transitions to the App.
+	// Splash transitions into the full TUI core.
 	model := tui.NewSplash()
 
-	// Start the Bubble Tea program.
-	p := tea.NewProgram(model, tea.WithAltScreen(), tea.WithMouseCellMotion())
+	// Mouse capture is enabled so the wheel can scroll the content and the
+	// scrollbar can be dragged. Press `s` to toggle "select mode", which
+	// releases the mouse so the terminal's native text selection works; press
+	// `s` again to re-enable mouse scrolling. Everything is also reachable
+	// with the keyboard.
+	p := tea.NewProgram(model,
+		tea.WithAltScreen(),       // clean full-screen painting
+		tea.WithMouseCellMotion(), // wheel scroll / scrollbar drag (toggled by `s`)
+	)
 
 	if _, err := p.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)

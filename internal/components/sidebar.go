@@ -16,8 +16,15 @@ type SidebarItem struct {
 	Name string
 }
 
+// navCursor cycles a 1-cell "activity" bar beside the active menu item.
+var navCursor = []string{"▌", "▍", "▎", "▏", "▎", "▍"}
+
 // NavRail renders a fixed-width vertical menu with key hints at the bottom.
-func NavRail(items []SidebarItem, selectedIndex int, width int) string {
+// The active item carries an animated cursor so the whole app shows life even
+// while the content body is idle. When navFocused is true the active item is a
+// solid highlighted bar; otherwise it is a muted selection to show the content
+// zone currently has focus.
+func NavRail(items []SidebarItem, selectedIndex int, width, frame int, navFocused bool) string {
 	if width <= 0 {
 		width = navRailWidth
 	}
@@ -27,24 +34,43 @@ func NavRail(items []SidebarItem, selectedIndex int, width int) string {
 		if it.Name == "" {
 			continue
 		}
-		label := it.Name
 		if i == selectedIndex {
-			label = styles.NavActiveStyle.Render("[" + it.Name + "]")
+			if navFocused {
+				marker := navCursor[frame%len(navCursor)]
+				label := styles.NavActiveStyle.Bold(true).Render(marker + " " + it.Name)
+				pad := width - lipgloss.Width(label)
+				if pad < 0 {
+					pad = 0
+				}
+				bar := styles.NavActiveStyle.Bold(true).Render(strings.Repeat(" ", pad))
+				lines = append(lines, label+bar)
+			} else {
+				label := styles.NavSelectedInactive.Render("  " + it.Name)
+				lines = append(lines, label)
+			}
 		} else {
-			label = styles.NavItemStyle.Render(" " + it.Name)
+			label := styles.NavItemStyle.Render("  " + it.Name + " ")
+			lines = append(lines, label)
 		}
-		lines = append(lines, label)
 	}
 
 	lines = append(lines, "")
-	lines = append(lines,
-		styles.MutedStyle.Render("↑↓ screen"),
-		styles.MutedStyle.Render("j/k scroll"),
-		styles.MutedStyle.Render("Enter open"),
-	)
+	if navFocused {
+		lines = append(lines,
+			styles.NavZoneHighlight.Render("◤ NAV"),
+			styles.MutedStyle.Render("↑↓ screen"),
+			styles.MutedStyle.Render("→ focus"),
+		)
+	} else {
+		lines = append(lines,
+			styles.NavZoneHighlight.Render("◤ SCREEN"),
+			styles.MutedStyle.Render("↑↓ scroll"),
+			styles.MutedStyle.Render("←/Esc to nav"),
+		)
+	}
 
 	block := lipgloss.JoinVertical(lipgloss.Left, lines...)
-	return lipgloss.NewStyle().Width(width).Render(block)
+	return FitBlock(block, width)
 }
 
 // VerticalRule renders a column divider for the shell height.
@@ -61,11 +87,11 @@ func VerticalRule(height int) string {
 }
 
 // JoinShell combines nav rail, divider, and content into one top-aligned block.
-// The nav rail is vertically centered within the shell height while content is
-// kept top-aligned (it is scrollable).
+// Both columns start at the top so the vertical rule stays a continuous line
+// next to the menu and the NAV hints, instead of floating mid-screen.
 func JoinShell(rail, content string, height int) string {
 	content = PadRailHeight(content, height)
-	rail = VAlignBlock(rail, height)
+	rail = PadRailHeight(rail, height)
 	rule := VerticalRule(height)
 	return lipgloss.JoinHorizontal(lipgloss.Top, rail, rule, " ", content)
 }
@@ -115,5 +141,5 @@ func PadRailHeight(block string, targetLines int) string {
 func Sidebar(items []SidebarItem, selectedIndex int, activeKey string, height int) string {
 	_ = activeKey
 	_ = height
-	return NavRail(items, selectedIndex, navRailWidth)
+	return NavRail(items, selectedIndex, navRailWidth, 0, true)
 }

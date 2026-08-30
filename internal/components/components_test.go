@@ -64,15 +64,15 @@ func TestSidebarHighlights(t *testing.T) {
 		{Key: "Skills", Name: "Skills"},
 	}
 
-	out := NavRail(items, 1, navRailWidth)
-	if !strings.Contains(out, "[Projects]") {
-		t.Errorf("expected selected item in brackets, got %q", out)
+	out := NavRail(items, 1, navRailWidth, 0, true)
+	if !strings.Contains(out, "Projects") {
+		t.Errorf("expected selected item present, got %q", out)
 	}
 	if !strings.Contains(out, "About") {
 		t.Errorf("expected unselected item to still render, got %q", out)
 	}
-	if !strings.Contains(out, "↑↓ screen") {
-		t.Errorf("expected nav hints, got %q", out)
+	if !strings.Contains(out, "◤ NAV") {
+		t.Errorf("expected nav focus hint, got %q", out)
 	}
 }
 
@@ -175,6 +175,30 @@ func TestProgressBar(t *testing.T) {
 
 	if full := ProgressBar(100, 20); strings.Contains(full, "░") {
 		t.Errorf("expected full bar to have no track, got %q", full)
+	}
+}
+
+func TestMascotFigureRendersLayeredMonitor(t *testing.T) {
+	out := MascotFigure(1)
+	if out == "" {
+		t.Fatal("expected mascot to render")
+	}
+	if !strings.Contains(out, "╔") || !strings.Contains(out, "╭") {
+		t.Errorf("expected thick and thin frame glyphs in mascot, got %q", out)
+	}
+	if !strings.Contains(out, "●") {
+		t.Errorf("expected centered eyes in mascot, got %q", out)
+	}
+	if strings.Contains(out, ">_") {
+		t.Errorf("expected face without prompt text, got %q", out)
+	}
+}
+
+func TestMascotFigureAnimates(t *testing.T) {
+	a := MascotFigure(0)
+	b := MascotFigure(5)
+	if a == b {
+		t.Errorf("expected mascot to change with frame, got identical output")
 	}
 }
 

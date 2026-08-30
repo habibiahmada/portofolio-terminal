@@ -3,67 +3,84 @@ package tui
 import (
 	"strings"
 
-	"github.com/charmbracelet/lipgloss"
-
 	"github.com/habibiahmada/habibiahmada-terminal/internal/components"
 )
 
 const maxContentWidth = 76
 
-// contentWidth returns page content width (right of sidebar + divider).
+// Cells reserved beside the inner content column so the assembled shell
+// (nav + rule + focus rail + content + scrollbar) never exceeds the terminal.
+const (
+	focusRailCells  = 2 // "· " / "▎ "
+	minBodyMargin   = 2
+	bodyFrameChrome = 16 + 1 + 1 + focusRailCells + components.ScrollbarWidth // nav + │ + gap + rail + bar
+)
+
+// contentWidth returns the inner text column (right of sidebar, focus rail,
+// and scrollbar gutter). Capped so the full shell stays on-screen.
 func (m *App) contentWidth() int {
-	// rail + rule + gap + margin
-	shellPad := components.NavRailWidth() + 3 + 4
-	w := m.width - shellPad
+	w := m.width - 2*minBodyMargin - bodyFrameChrome
 	if w > maxContentWidth {
 		return maxContentWidth
 	}
-	if w < 32 {
-		return 32
+	if w < 12 {
+		return 12
 	}
 	return w
 }
 
-// composeBodyFrame center-aligns the shell vertically and horizontally so the
-// content sits in the middle of the viewport with a stable nav position.
+// frameWidth is nav + rule + focus rail + content + scrollbar (before centering).
+func (m *App) frameWidth() int {
+	return bodyFrameChrome + m.contentWidth()
+}
+
+// composeBodyFrame lays the nav+content shell into the body region. The shell is
+// horizontally CENTERED (so on wide terminals content does not pile up on the
+// left with an empty right side) and top-aligned with a small top padding, so
+// the nav column keeps a stable position. Overlong content is already clipped
+// to the viewport in renderBodyCached.
 func (m *App) composeBodyFrame(shell string, bodyH int) string {
 	lines := strings.Split(shell, "\n")
 	if len(lines) > bodyH {
 		lines = lines[:bodyH]
 	}
-	if len(lines) == 0 {
-		lines = []string{""}
-	}
 
-	// Vertical centering padding above the content block.
-	padTop := 0
-	if len(lines) < bodyH {
-		padTop = (bodyH - len(lines)) / 2
-	}
-
-	maxW := 0
-	for _, line := range lines {
-		if w := lipgloss.Width(line); w > maxW {
-			maxW = w
+	shellW := m.frameWidth()
+	if shellW > m.width-2*minBodyMargin {
+		shellW = m.width - 2*minBodyMargin
+		if shellW < 1 {
+			shellW = 1
 		}
 	}
+	pad := (m.width - shellW) / 2
+	if pad < minBodyMargin {
+		pad = minBodyMargin
+	}
 
-	padX := (m.width - maxW) / 2
-	if padX < 0 {
-		padX = 0
+	// Record geometry for mouse hit-testing.
+	m.shellLeft = pad
+	m.shellWidth = shellW
+	// Scrollbar is the rightmost column of the shell.
+	m.scrollBarX = pad + shellW - 1
+	m.scrollBarTop = m.bodyTop + bodyTopPad
+	m.scrollBarH = len(lines)
+	if m.scrollBarH > bodyH-bodyTopPad {
+		m.scrollBarH = bodyH - bodyTopPad
 	}
-	contentOffsetX = padX
-	contentOffsetY = padTop
 
-	out := make([]string, 0, bodyH)
-	for i := 0; i < padTop; i++ {
-		out = append(out, "")
+	// Top-align the block with a small padding for breathing room.
+	out := make([]string, bodyH)
+	for i := 0; i < bodyTopPad && i < len(out); i++ {
+		out[i] = strings.Repeat(" ", pad)
 	}
-	for _, line := range lines {
-		out = append(out, strings.Repeat(" ", padX)+line)
-	}
-	for len(out) < bodyH {
-		out = append(out, "")
+	for i, line := range lines {
+		idx := bodyTopPad + i
+		if idx >= len(out) {
+			break
+		}
+		// Left-align within the fixed shell, then clip to the terminal so a
+		// long line can never wrap and break the nav/content columns.
+		out[idx] = components.FitLine(strings.Repeat(" ", pad)+line, m.width)
 	}
 	return strings.Join(out, "\n")
 }

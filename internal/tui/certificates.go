@@ -21,7 +21,7 @@ func (m *App) renderCertificatesContent() string {
 	lines := []string{styles.SectionTitleStyle.Render("Certificates")}
 	lines = append(lines, pinned...)
 	if len(rest) > 0 {
-		lines = append(lines, components.TagGrid(rest, m.contentWidth()))
+		lines = append(lines, components.TagColumn(rest, m.contentWidth()))
 	}
 	return strings.Join(lines, "\n")
 }

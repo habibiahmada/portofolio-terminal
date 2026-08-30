@@ -22,16 +22,11 @@ func (m *App) renderHomeContent() string {
 }
 
 func (m *App) renderHeroCompact(width int) string {
-	badge := styles.SuccessStyle.Render("● " + m.profile.Availability)
-
-	text := lipgloss.JoinVertical(
-		lipgloss.Left,
-		badge,
-		styles.SectionTitleStyle.Render(m.profile.Name),
-		styles.MutedStyle.Render(m.profile.Title+" · "+m.profile.Location),
-		styles.NormalStyle.Render(
-			"Full-stack developer — clear UI, solid APIs, measurable performance.",
-		),
+	name := components.ShimmerText(
+		m.profile.Name,
+		m.footerFrame,
+		styles.SectionTitleStyle.Copy().UnsetMarginBottom(),
+		styles.PrimaryText,
 	)
 
 	artW := width / 3
@@ -44,16 +39,30 @@ func (m *App) renderHeroCompact(width int) string {
 	}
 
 	textW := width - artW - 2
-	if textW < 24 {
+	stack := textW < 28
+	wrapW := width
+	if !stack {
+		wrapW = textW
+	}
+
+	badge := styles.SuccessStyle.Render(
+		components.WrapTextLine("● "+m.profile.Availability, wrapW),
+	)
+	meta := styles.MutedStyle.Render(
+		components.WrapTextLine(m.profile.Title+" · "+m.profile.Location, wrapW),
+	)
+	bio := styles.NormalStyle.Render(
+		components.WrapTextLine(
+			"Full-stack developer — clear UI, solid APIs, measurable performance.",
+			wrapW,
+		),
+	)
+	text := lipgloss.JoinVertical(lipgloss.Left, badge, name, meta, bio)
+	if stack {
 		return lipgloss.JoinVertical(lipgloss.Left, text, "", art)
 	}
 
-	return lipgloss.JoinHorizontal(
-		lipgloss.Top,
-		lipgloss.NewStyle().Width(textW).Render(text),
-		"  ",
-		art,
-	)
+	return lipgloss.JoinHorizontal(lipgloss.Top, text, "  ", art)
 }
 
 func (m *App) renderCompaniesInline(width int) string {
@@ -62,7 +71,7 @@ func (m *App) renderCompaniesInline(width int) string {
 		names = append(names, c.Name)
 	}
 	line := strings.Join(names, " · ")
-	return "\n" + styles.MutedStyle.Render("Trusted · "+components.WrapTextLine(line, width))
+	return "\n" + styles.MutedStyle.Render(components.WrapTextLine("Trusted · "+line, width))
 }
 
 func (m *App) renderFeaturedCompact(width int) string {

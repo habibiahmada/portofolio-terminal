@@ -77,3 +77,23 @@ func TagGrid(tags []string, width int) string {
 	}
 	return lipgloss.JoinVertical(lipgloss.Left, rows...)
 }
+
+// TagColumn renders each tag as a full-width bordered row so a long list
+// (certificates) has a straight right edge instead of ragged pill widths.
+func TagColumn(tags []string, width int) string {
+	if width < 8 {
+		width = 8
+	}
+	inner := width - 4 // rounded border (2) + horizontal padding (2)
+	if inner < 4 {
+		inner = 4
+	}
+	box := styles.TagStyle.Copy().
+		Width(width - 2).
+		MarginRight(0)
+	rows := make([]string, 0, len(tags))
+	for _, t := range tags {
+		rows = append(rows, box.Render(Truncate(t, inner)))
+	}
+	return lipgloss.JoinVertical(lipgloss.Left, rows...)
+}
