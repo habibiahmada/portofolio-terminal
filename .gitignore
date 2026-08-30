@@ -9,3 +9,6 @@ habibiahmada-ssh
 
 # Editor/OS
 .DS_Store
+
+# Graphify tool output (regenerated; cache is transient)
+/graphify-out/

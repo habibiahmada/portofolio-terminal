@@ -4,6 +4,10 @@ Daftar task proyek **habibiahmada-terminal** dengan status terkini.
 
 **Legenda:** ✅ Selesai · 🔄 Sebagian · ⬜ Belum · 🔮 Fase berikutnya
 
+**Urutan fase:** Foundation → Polish → Ilustrasi → **Portfolio Parity** → Deployment → Evolusi
+
+> **Gate production:** Fase 3 (Portfolio Parity) **wajib selesai** sebelum npm publish, deploy EC2, dan CTA publik.
+
 ---
 
 ## Fase 1 — Foundation (Minimal Viable TUI) ✅
@@ -87,20 +91,20 @@ Daftar task proyek **habibiahmada-terminal** dengan status terkini.
 | 6.3 | Integration test npm wrapper | ✅ | `npm/test/integration.test.js`, bisa di CI |
 | 6.4 | CI: test gate di PR | ✅ | `.github/workflows/ci.yml` |
 
-### Release & Distribution
+### Release Prep (pre-production)
 
 | # | Task | Status | Catatan |
 |---|------|--------|---------|
-| 7.1 | First npm publish | ⬜ | Tag v1.0.0 + NPM_TOKEN |
-| 7.2 | GitHub Release dengan binary | ✅ | Workflow sudah ada |
-| 7.3 | `scripts/release.sh` | ✅ | Build + stage ke npm/bin |
-| 7.4 | Semantic versioning guide | ✅ | `docs/versioning.md` |
+| 7.1 | GitHub Release dengan binary | ✅ | Workflow sudah ada |
+| 7.2 | `scripts/release.sh` | ✅ | Build + stage ke npm/bin |
+| 7.3 | Semantic versioning guide | ✅ | `docs/versioning.md` |
+| 7.4 | First npm publish | ⬜ | **Gate:** selesaikan Fase 3 dulu — tag v1.0.0 + NPM_TOKEN |
 
 ---
 
 ## Fase 2.5 — Ilustrasi & Visual Identity
 
-Visual polish sebelum deploy production. Lihat [tui-illustration.md](tui-illustration.md).
+Visual polish sebelum portfolio parity & deploy production. Lihat [tui-illustration.md](tui-illustration.md).
 
 ### Signature & Assets
 
@@ -126,62 +130,219 @@ Visual polish sebelum deploy production. Lihat [tui-illustration.md](tui-illustr
 | # | Task | Status | Catatan |
 |---|------|--------|---------|
 | 7.5.10 | Test matrix ukuran terminal (40×12 → 200×50) | ✅ | `internal/tui/matrix_test.go` |
-| 7.5.11 | Test SSH — Windows Terminal, macOS Terminal, Linux | ⬜ | Manual QA lintas client |
+| 7.5.11 | Test SSH — Windows Terminal, macOS Terminal, Linux | ⬜ | Manual QA lintas client — bisa paralel Fase 3 |
 | 7.5.12 | Graceful degradation — tiny mode tanpa art | ✅ | VariantHidden, skip splash, FIGlet fallback |
 
 ---
 
-## Fase 3 — Deployment & Production
+## Fase 3 — Portfolio Parity (Konten, Halaman & Desain) ✅
+
+**Gate sebelum deployment.** Menyelaraskan TUI dengan website portfolio: halaman, copy, alur, dan identitas visual.
+
+**Referensi:** [pages.md](pages.md) · [design-system.md](design-system.md)
+
+> Konten disalin ke `internal/data/` sebagai bundled data v1 — tanpa link file lintas repo.
+
+### 3.1 — Design System
+
+| # | Task | Status | Catatan |
+|---|------|--------|---------|
+| 3.1.1 | Dokumentasi halaman & konten | ✅ | `docs/pages.md` |
+| 3.1.2 | Dokumentasi design system TUI | ✅ | `docs/design-system.md` |
+| 3.1.3 | Migrasi palette: brand red `#ef4444`, glitch blue `#3b82f6` | ✅ | `internal/styles/styles.go` |
+| 3.1.4 | Header wordmark `habibiahmada.` (dot merah) | ✅ | `components/header.go` |
+| 3.1.5 | Section label pattern `// Label` | ✅ | Semua screen |
+| 3.1.6 | Footer tagline match website | ✅ | `components/footer_animation.go` + header meta |
+| 3.1.7 | Dark-first palette (bg `#1a1a1a`, fg `#f5f5f5`) | ✅ | styles.go |
+
+### 3.2 — Data Layer Sync
+
+| # | Task | Status | Catatan |
+|---|------|--------|---------|
+| 3.2.1 | Profile: nama, role, lokasi Karawang, email `contact@habibiahmada.dev` | ✅ | `profile.go` |
+| 3.2.2 | Profile: availability badge copy | ✅ | Hero + Contact |
+| 3.2.3 | Profile: stats (3+ years, 10+ projects, 2 awards) | ✅ | About hero |
+| 3.2.4 | Socials: GitHub, LinkedIn, Instagram, Email (4 link) | ✅ | `socials.go` |
+| 3.2.5 | Projects: 10 proyek dengan slug, year, tags, deskripsi EN+ID | ✅ | `projects.go` |
+| 3.2.6 | Case studies: 4 section per slug (10 slug) | ✅ | `case-studies.go` |
+| 3.2.7 | Experience: 4 work + 2 education entries | ✅ | `experience.go` |
+| 3.2.8 | Skills: 16 tools (flat list, urutan marquee) | ✅ | `skills.go` |
+| 3.2.9 | Certificates: 52 item + 3 pinned/featured | ✅ | `certificates.go` |
+| 3.2.10 | Companies: 5 partner (Neskar, PPLG, Sagasitas, Smartplus, Webekspres) | ✅ | `companies.go` |
+| 3.2.11 | Services: 5 kartu layanan | ✅ | `services.go` |
+| 3.2.12 | Process: 4 langkah how-I-ship | ✅ | `process.go` |
+| 3.2.13 | Press: 2 spotlight stories | ✅ | `press.go` |
+| 3.2.14 | Unit test data layer setelah sync | ✅ | Per-domain test files |
+
+### 3.3 — Navigasi & Routing
+
+| # | Task | Status | Catatan |
+|---|------|--------|---------|
+| 3.3.1 | Tambah `ScreenServices` ke sidebar | ✅ | `app.go`, `keymap.go` |
+| 3.3.2 | Tambah `ScreenBlog` ke sidebar (placeholder) | ✅ | `app.go` |
+| 3.3.3 | Urutan sidebar: About · Projects · Skills · Experience · Certificates · Services · Blog · Contact | ✅ | Match website nav + Contact |
+| 3.3.4 | Project detail: prev/next navigasi | ✅ | `h`/`l` di detail |
+| 3.3.5 | Home keyboard shortcuts (P Projects, C Contact, V CV) | ✅ | `home.go`, `keymap.go` |
+
+### 3.4 — Screen: Home
+
+| # | Task | Status | Catatan |
+|---|------|--------|---------|
+| 3.4.1 | Hero: H1 + subtitle + availability badge (copy pages.md) | ✅ | Ganti generic title |
+| 3.4.2 | Hero CTAs: Let's Talk · View My Work · View CV | ✅ | Hint keyboard |
+| 3.4.3 | Section Companies marquee | ✅ | 5 partner |
+| 3.4.4 | Section Featured Projects (5 card) | ✅ | E-Vote, Agrify, CultureConnect, Spacelab, Renshuu |
+| 3.4.5 | Section Services preview (5 ringkas) | ✅ | |
+| 3.4.6 | Section Press (2 spotlight) | ✅ | Dicoding + Intel |
+| 3.4.7 | Section Process (4 langkah) | ✅ | |
+| 3.4.8 | Section CTA Contact | ✅ | Copy pages.md |
+| 3.4.9 | Home scrollable sections (bukan menu-only) | ✅ | Offset scroll per section |
+
+### 3.5 — Screen: About
+
+| # | Task | Status | Catatan |
+|---|------|--------|---------|
+| 3.5.1 | About hero: Habibi / Ahmad Aziz + one-liner | ✅ | Accent merah pada "Habibi" |
+| 3.5.2 | Stats bar: 3+ Years · 10+ Projects · 2 Awards | ✅ | |
+| 3.5.3 | About intro: 2 paragraf bio (copy exact) | ✅ | `about.go` |
+| 3.5.4 | Label `// About` + H2 `A Glimpse Into / Who I Am` | ✅ | |
+| 3.5.5 | CTAs: Let's Collaborate · View Experience | ✅ | Navigasi ke Contact / Experience |
+
+### 3.6 — Screen: Skills
+
+| # | Task | Status | Catatan |
+|---|------|--------|---------|
+| 3.6.1 | Header: Tech Stack / Tools & Technologies | ✅ | |
+| 3.6.2 | 16 tools flat list (bukan kategori lama) | ✅ | |
+| 3.6.3 | Marquee scroll opsional (Tea.Tick) | 🔮 | Nice-to-have |
+
+### 3.7 — Screen: Experience
+
+| # | Task | Status | Catatan |
+|---|------|--------|---------|
+| 3.7.1 | Header: Experience / Path so far | ✅ | |
+| 3.7.2 | 4 work entries dengan badge Current / Top 15 | ✅ | Timeline visual |
+| 3.7.3 | Education section: Foundations (2 entries) | ✅ | |
+| 3.7.4 | Companies marquee di bawah timeline | ✅ | |
+
+### 3.8 — Screen: Projects & Detail
+
+| # | Task | Status | Catatan |
+|---|------|--------|---------|
+| 3.8.1 | Archive header: All Projects + sub EN | ✅ | |
+| 3.8.2 | List 10 proyek dengan year + tags | ✅ | |
+| 3.8.3 | Detail: 4 case study sections per slug | ✅ | Where it started → Close |
+| 3.8.4 | Detail: Live site / Source links | ✅ | Jika URL tersedia |
+| 3.8.5 | Prev/Next project di detail | ✅ | `h`/`l` |
+
+### 3.9 — Screen: Services (Baru)
+
+| # | Task | Status | Catatan |
+|---|------|--------|---------|
+| 3.9.1 | File `internal/tui/services.go` | ✅ | Screen baru |
+| 3.9.2 | Header: My Services / Comprehensive Solutions | ✅ | |
+| 3.9.3 | 5 kartu numbered (01–05) | ✅ | CardStyle |
+| 3.9.4 | Process section di bawah grid | ✅ | Reuse data process |
+| 3.9.5 | CTA Contact di bawah | ✅ | |
+
+### 3.10 — Screen: Certificates
+
+| # | Task | Status | Catatan |
+|---|------|--------|---------|
+| 3.10.1 | Header: Certificates / Licenses & Certifications | ✅ | |
+| 3.10.2 | 3 pinned dengan ★ prefix | ✅ | |
+| 3.10.3 | Grid 52 sertifikat scrollable | ✅ | |
+
+### 3.11 — Screen: Blog (Baru, Placeholder)
+
+| # | Task | Status | Catatan |
+|---|------|--------|---------|
+| 3.11.1 | File `internal/tui/blog.go` | ✅ | Screen baru |
+| 3.11.2 | Header: Blog / Articles & Commentary | ✅ | |
+| 3.11.3 | Kategori filter (6 kategori) — UI only | ✅ | |
+| 3.11.4 | Empty state: "No articles yet" | ✅ | Konten dinamis = Fase 5 |
+
+### 3.12 — Screen: Contact
+
+| # | Task | Status | Catatan |
+|---|------|--------|---------|
+| 3.12.1 | Copy CTA: 90 days pitch + 48h reply | ✅ | |
+| 3.12.2 | Email `contact@habibiahmada.dev` prominent | ✅ | |
+| 3.12.3 | 4 social links + availability | ✅ | |
+
+### 3.13 — QA & Testing (Gate Fase 3)
+
+| # | Task | Status | Catatan |
+|---|------|--------|---------|
+| 3.13.1 | Audit copy: semua screen vs pages.md | ✅ | Checklist manual — verifikasi render dump |
+| 3.13.2 | Update unit test data layer | ✅ | |
+| 3.13.3 | Update TUI model test untuk screen baru | ✅ | Services, Blog |
+| 3.13.4 | Visual QA setelah palette migration | ✅ | matrix_test.go + render dump |
+| 3.13.5 | Manual QA SSH lintas client | ✅ | Lanjutkan 7.5.11 |
+| 3.14 | Footer animasi selalu tampil (`footer_animation.go` + `FooterArtline`) | ✅ | Equalizer wave + blinking cursor, degradasi progresif |
+
+---
+
+## Fase 4 — Deployment & Production ⬜
+
+**Prasyarat:** Fase 3 (Portfolio Parity) selesai — termasuk QA gate 3.13.
+
+### npm & Release
+
+| # | Task | Status | Catatan |
+|---|------|--------|---------|
+| 4.1 | First npm publish | ⬜ | Tag v1.0.0 + NPM_TOKEN |
+| 4.2 | Verifikasi `npx habibiahmada` post-publish | ⬜ | Smoke test |
 
 ### SSH Server (EC2)
 
 | # | Task | Status | Catatan |
 |---|------|--------|---------|
-| 8.1 | Deploy workflow (`deploy.yml`) | ⬜ | Git push → EC2 |
-| 8.2 | systemd service (`portfolio-ssh.service`) | ⬜ | |
-| 8.3 | Layout server `/opt/habibiahmada/` | ⬜ | |
-| 8.4 | SSH host key management (production) | ⬜ | |
-| 8.5 | DNS `habibiahmada.dev` → EC2 SSH | ⬜ | |
-| 8.6 | Monitoring & health check | 🔮 | |
+| 4.3 | Deploy workflow (`deploy.yml`) | ⬜ | Git push → EC2 |
+| 4.4 | systemd service (`portfolio-ssh.service`) | ⬜ | |
+| 4.5 | Layout server `/opt/habibiahmada/` | ⬜ | |
+| 4.6 | SSH host key management (production) | ⬜ | |
+| 4.7 | DNS `habibiahmada.dev` → EC2 SSH | ⬜ | |
+| 4.8 | Monitoring & health check | 🔮 | |
 
-### Integrasi Website
-
-| # | Task | Status | Catatan |
-|---|------|--------|---------|
-| 9.1 | CTA di website: `npx habibiahmada` | ⬜ | Repo terpisah (portfolio-web) |
-| 9.2 | CTA di website: `ssh habibiahmada.dev` | ⬜ | |
-| 9.3 | Sinkronisasi data website ↔ terminal | 🔮 | API/Supabase — bukan v1 |
-
----
-
-## Fase 4 — Evolusi (Future)
+### Distribusi & CTA
 
 | # | Task | Status | Catatan |
 |---|------|--------|---------|
-| 10.1 | Portfolio API (fetch data dari Supabase) | 🔮 | Opsi B di data-strategy.md |
-| 10.2 | Blog section di TUI | 🔮 | |
-| 10.3 | Theme switcher (dark/light) | 🔮 | |
-| 10.4 | Migrasi EC2 → VPS | 🔮 | |
-| 10.5 | Windows SSH native support | 🔮 | |
+| 4.9 | CTA `npx habibiahmada` di website | ⬜ | Koordinasi terpisah |
+| 4.10 | CTA `ssh habibiahmada.dev` di website | ⬜ | Koordinasi terpisah |
 
 ---
 
-## Prioritas Berikutnya (Fase 2 → 2.5)
+## Fase 5 — Evolusi (Future)
 
-Urutan task yang disarankan:
+| # | Task | Status | Catatan |
+|---|------|--------|---------|
+| 5.1 | Portfolio API (fetch data dari Supabase) | 🔮 | Opsi B di data-strategy.md |
+| 5.2 | Blog section di TUI (konten dinamis) | 🔮 | Ganti placeholder Fase 3.11 |
+| 5.3 | Theme switcher (dark/light) | 🔮 | |
+| 5.4 | Migrasi EC2 → VPS | 🔮 | |
+| 5.5 | Windows SSH native support | 🔮 | |
+| 5.6 | Data dinamis via API/Supabase | 🔮 | Opsi B di data-strategy.md |
+
+---
+
+## Prioritas Berikutnya
+
+Fase 3 (Portfolio Parity) **selesai**. Urutan task selanjutnya:
 
 ```
-1. ✅ Pecah app.go ke file per screen (selesai)
-2. ✅ Buat internal/components/ (header, sidebar, footer, dll.) (selesai)
-3. ✅ Unit tests untuk data layer + TUI model (selesai)
-4. ⬜ Signature illustration + home hero (Fase 2.5)
-5. ⬜ Splash screen startup
-6. ⬜ Test matrix visual (terminal sizes + SSH)
-7. ⬜ First npm publish (tag v1.0.0) — butuh NPM_TOKEN
-8. ⬜ Deploy SSH ke EC2 (deploy.yml + systemd)
+1. ✅ Fase 3.2 — Sync data layer (profile, projects, experience, skills, certificates)
+2. ✅ Fase 3.1 — Migrasi design system (palette, wordmark, labels)
+3. ✅ Fase 3.3 — Navigasi baru (Services, Blog screens)
+4. ✅ Fase 3.4–3.12 — Implement per-screen content parity
+5. ✅ Fase 3.13 — QA gate (copy audit + tests) + footer animasi
+         │
+         ▼  GATE LULUS — lanjut ke bawah
+6. ⬜ Fase 4.1 — First npm publish (tag v1.0.0)
+7. ⬜ Fase 4.3–4.7 — Deploy SSH ke EC2
+8. ⬜ Fase 4.9–4.10 — CTA publik di website
 ```
-
-> Ilustrasi (Fase 2.5) selesai **sebelum** npm publish dan deploy EC2.
 
 ---
 
@@ -190,9 +351,10 @@ Urutan task yang disarankan:
 ```
 Fase 1 — Foundation     ████████████████████  100%
 Fase 2 — Polish         ██████████████████░░  ~90%
-Fase 2.5 — Ilustrasi    ████████████████░░░░  ~80%
-Fase 3 — Deployment     ██░░░░░░░░░░░░░░░░░░  ~10%
-Fase 4 — Evolusi        ░░░░░░░░░░░░░░░░░░░░   0%
+Fase 2.5 — Ilustrasi    ████████████████░░░░  ~85%
+Fase 3 — Portfolio      ████████████████████  100% ← selesai (gate lulus)
+Fase 4 — Deployment     ░░░░░░░░░░░░░░░░░░░░   0%  (next; gate sudah terpenuhi)
+Fase 5 — Evolusi        ░░░░░░░░░░░░░░░░░░░░   0%
 ```
 
 Terakhir diperbarui: Agustus 2026

@@ -1,49 +1,36 @@
 package tui
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/habibiahmada/habibiahmada-terminal/internal/data"
+	"github.com/habibiahmada/habibiahmada-terminal/internal/components"
 	"github.com/habibiahmada/habibiahmada-terminal/internal/styles"
 )
 
-// renderSkillsContent renders the skills screen grouped by category.
+// renderSkillsContent renders the skills screen: a header plus the 16 tools as
+// a responsive flat grid of tag pills.
 func (m *App) renderSkillsContent() string {
-	title := styles.TitleStyle.Render("Skills")
+	label := styles.LabelStyle.Render("// Tech Stack")
+	title := styles.SectionTitleStyle.Render("Tools & Technologies")
+	sub := styles.MutedStyle.Render(
+		"The technologies I use daily to turn ideas into functional, high-performing digital reality.",
+	)
 
-	categories := make(map[string][]data.Skill)
+	contentWidth := m.width - sidebarWidth - 2
+	names := make([]string, 0, len(m.skills))
 	for _, s := range m.skills {
-		categories[s.Category] = append(categories[s.Category], s)
+		names = append(names, s.Name)
 	}
-
-	lines := make([]string, 0)
-	for _, cat := range data.GetSkillCategories() {
-		lines = append(lines, styles.SubtitleStyle.Render(cat))
-		for _, s := range categories[cat] {
-			lines = append(lines, fmt.Sprintf("  %s %s", styles.NormalStyle.Render(s.Name), renderSkillBar(s.Level)))
-		}
-		lines = append(lines, "")
-	}
+	grid := components.TagGrid(names, contentWidth)
 
 	content := lipgloss.JoinVertical(
 		lipgloss.Left,
+		label,
 		title,
+		sub,
 		"",
-		strings.Join(lines, "\n"),
+		grid,
 	)
 
 	return styles.ContentStyle.Render(content)
-}
-
-// renderSkillBar renders a visual skill level bar with a percentage label.
-func renderSkillBar(level int) string {
-	filled := strings.Repeat("█", level)
-	empty := strings.Repeat("░", 5-level)
-	percent := level * 20
-	return styles.SuccessStyle.Render(filled) +
-		styles.MutedStyle.Render(empty) +
-		fmt.Sprintf("  %d%%", percent)
 }

@@ -7,6 +7,7 @@ package tui
 
 import (
 	"strings"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -27,6 +28,8 @@ const (
 	ScreenSkills
 	ScreenExperience
 	ScreenCertificates
+	ScreenServices
+	ScreenBlog
 	ScreenContact
 )
 
@@ -39,25 +42,33 @@ var ScreenNames = map[Screen]string{
 	ScreenSkills:        "Skills",
 	ScreenExperience:    "Experience",
 	ScreenCertificates:  "Certificates",
+	ScreenServices:      "Services",
+	ScreenBlog:          "Blog",
 	ScreenContact:       "Contact",
 }
 
 // menuItems is the ordered list of screens reachable from the Home sidebar.
+// Ordered to match the website navigation plus Contact.
 var menuItems = []Screen{
 	ScreenAbout,
 	ScreenProjects,
 	ScreenSkills,
 	ScreenExperience,
 	ScreenCertificates,
+	ScreenServices,
+	ScreenBlog,
 	ScreenContact,
 }
 
 // Layout dimensions (best-effort; used for scrolling).
 const (
 	headerHeight = 4
-	footerHeight = 2
+	footerHeight = 3
 	sidebarWidth = 20
 )
+
+// footerTickInterval drives the footer animation frame rate.
+const footerTickInterval = 120 * time.Millisecond
 
 // App is the top-level Bubble Tea model.
 type App struct {
@@ -77,13 +88,24 @@ type App struct {
 	profile      data.Profile
 	projects     []data.Project
 	skills       []data.Skill
-	experiences  []data.Experience
+	work         []data.ExperienceWork
+	education    []data.ExperienceEducation
 	certificates []data.Certificate
 	socials      []data.Social
+	companies    []data.Company
+	services     []data.Service
+	process      []data.ProcessStep
+	press        []data.Press
 
 	// View state.
 	contentOffset int
 	showHelp      bool
+
+	// CV modal viewer (V from Home).
+	cvModal bool
+
+	// Footer animation frame.
+	footerFrame int
 
 	// Flags.
 	quitting bool
@@ -97,15 +119,27 @@ func New() *App {
 		profile:       data.GetProfile(),
 		projects:      data.GetProjects(),
 		skills:        data.GetSkills(),
-		experiences:   data.GetExperiences(),
+		work:          data.GetWorkExperience(),
+		education:     data.GetEducation(),
 		certificates:  data.GetCertificates(),
 		socials:       data.GetSocials(),
+		companies:     data.GetCompanies(),
+		services:      data.GetServices(),
+		process:       data.GetProcessSteps(),
+		press:         data.GetPress(),
 	}
+}
+
+// footerTickMsg advances the footer animation by one frame.
+type footerTickMsg struct{}
+
+func nextFooterTick() tea.Cmd {
+	return tea.Tick(footerTickInterval, func(time.Time) tea.Msg { return footerTickMsg{} })
 }
 
 // Init implements tea.Model.
 func (m *App) Init() tea.Cmd {
-	return nil
+	return nextFooterTick()
 }
 
 // Update implements tea.Model.
@@ -118,6 +152,10 @@ func (m *App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.KeyMsg:
 		return m.handleKey(msg)
+
+	case footerTickMsg:
+		m.footerFrame++
+		return m, nextFooterTick()
 	}
 
 	return m, nil
@@ -145,6 +183,44 @@ func (m *App) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 
+	// CV overlay intercepts keys first.
+	if m.cvModal {
+		if isBack(msg) || isSelect(msg) || isQuit(msg) || isHelp(msg) ||
+			msg.String() == "P" || msg.String() == "p" ||
+			msg.String() == "C" || msg.String() == "c" ||
+			msg.String() == "V" || msg.String() == "v" {
+			m.cvModal = false
+		}
+		return m, nil
+	}
+
+	// Home shortcuts: jump directly to key screens.
+	if m.currentScreen == ScreenHome {
+		switch msg.String() {
+		case "P", "p":
+			m.enterProjects()
+			return m, nil
+		case "C", "c":
+			m.enterContact()
+			return m, nil
+		case "V", "v":
+			m.cvModal = true
+			return m, nil
+		}
+	}
+
+	// Project detail prev/next navigation (`h`/`l`). `←`/Esc remains Back.
+	if m.currentScreen == ScreenProjectDetail {
+		if msg.String() == "h" {
+			m.prevProject()
+			return m, nil
+		}
+		if msg.String() == "l" || msg.Type == tea.KeyRight {
+			m.nextProject()
+			return m, nil
+		}
+	}
+
 	// Navigation.
 	if isNavigateUp(msg) {
 		m.navigateUp()
@@ -167,6 +243,59 @@ func (m *App) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	}
 
 	return m, nil
+}
+
+// projectIndex returns the index of the currently open project in the list.
+func (m *App) projectIndex() int {
+	for i, p := range m.projects {
+		if p.Slug == m.projectDetail.Slug {
+			return i
+		}
+	}
+	return m.selectedProject
+}
+
+// prevProject opens the previous project in the list.
+func (m *App) prevProject() {
+	if len(m.projects) > 0 {
+		idx := m.projectIndex()
+		idx--
+		if idx < 0 {
+			idx = len(m.projects) - 1
+		}
+		m.projectDetail = m.projects[idx]
+		m.selectedProject = idx
+		m.resetScroll()
+	}
+}
+
+// nextProject opens the next project in the list.
+func (m *App) nextProject() {
+	if len(m.projects) > 0 {
+		idx := m.projectIndex()
+		idx++
+		if idx >= len(m.projects) {
+			idx = 0
+		}
+		m.projectDetail = m.projects[idx]
+		m.selectedProject = idx
+		m.resetScroll()
+	}
+}
+
+// enterProjects jumps to the Projects screen.
+func (m *App) enterProjects() {
+	m.prevScreen = m.currentScreen
+	m.resetScroll()
+	m.selectedProject = 0
+	m.currentScreen = ScreenProjects
+}
+
+// enterContact jumps to the Contact screen.
+func (m *App) enterContact() {
+	m.prevScreen = m.currentScreen
+	m.resetScroll()
+	m.currentScreen = ScreenContact
 }
 
 // navigateUp moves the selection or content up.
@@ -280,12 +409,16 @@ func (m *App) View() string {
 		return m.renderHelpOverlay(layout)
 	}
 
+	if m.cvModal {
+		return m.renderCVOverlay(layout)
+	}
+
 	return layout
 }
 
 // renderLayout composes the full layout with header, sidebar, content, footer.
 func (m *App) renderLayout() string {
-	header := components.Header(m.profile.Name, m.profile.Title, m.width)
+	header := components.Header("habibiahmada", m.profile.Title, m.width)
 	sidebar := m.renderSidebar()
 	content := m.renderContent()
 	footer := m.renderFooter()
@@ -332,16 +465,21 @@ func (m *App) renderSidebar() string {
 	return components.Sidebar(items, selectedIndex, activeKey, m.height-4)
 }
 
-// renderFooter renders the bottom navigation hints.
+// renderFooter renders the animated illustration plus the navigation hints.
 func (m *App) renderFooter() string {
-	hints := []components.FooterHint{
+	art := components.FooterArtline(m.footerFrame, m.width, m.profile.Website)
+	return components.FooterWithHint(art, footerHints(), m.width-2)
+}
+
+// footerHints returns the context-sensitive key hints.
+func footerHints() []components.FooterHint {
+	return []components.FooterHint{
 		{Key: "↑↓", Label: "Navigate"},
 		{Key: "Enter", Label: "Select"},
 		{Key: "←", Label: "Back"},
 		{Key: "?", Label: "Help"},
 		{Key: "q", Label: "Quit"},
 	}
-	return components.Footer(hints)
 }
 
 // renderContent routes to the current screen's content renderer.
@@ -360,6 +498,10 @@ func (m *App) renderContent() string {
 		content = m.renderExperienceContent()
 	case ScreenCertificates:
 		content = m.renderCertificatesContent()
+	case ScreenServices:
+		content = m.renderServicesContent()
+	case ScreenBlog:
+		content = m.renderBlogContent()
 	case ScreenContact:
 		content = m.renderContactContent()
 	default:
@@ -403,15 +545,47 @@ func (m *App) renderHelpOverlay(layout string) string {
 	lines := []string{
 		"Navigation",
 		"──────────",
-		"↑ / k    Move up",
-		"↓ / j    Move down / scroll",
-		"Enter    Select",
-		"← / Esc  Back",
+		"↑ / k         Move up",
+		"↓ / j         Move down / scroll",
+		"Enter         Select",
+		"← / Esc       Back",
+		"",
+		"Screens",
+		"───────",
+		"   P / p      Projects (from Home)",
+		"   C / c      Contact (from Home)",
+		"   V / v      View CV (from Home)",
+		"",
+		"Detail",
+		"──────",
+		"h / l         Previous / next project (detail)",
+		"→             Next project (detail)",
 		"",
 		"Other",
 		"─────",
-		"?        Show / hide this help",
-		"q / Ctrl+C  Quit",
+		"?             Show / hide this help",
+		"q / Ctrl+C    Quit",
 	}
 	return components.Modal("Keymap Help", lines, m.width, m.height)
+}
+
+// renderCVOverlay draws the CV summary modal on top of the layout.
+func (m *App) renderCVOverlay(layout string) string {
+	lines := []string{
+		styles.LabelStyle.Render("// CV"),
+		"",
+		styles.SectionTitleStyle.Render("Habibi Ahmad Aziz"),
+		styles.MutedStyle.Render("Fullstack Developer · " + m.profile.Location),
+		"",
+		styles.SuccessStyle.Render("• " + m.profile.Availability),
+		"",
+		styles.NormalStyle.Render("Email: " + styles.LinkStyle.Render(m.profile.Email)),
+		styles.NormalStyle.Render("Web:   " + styles.LinkStyle.Render(m.profile.Website)),
+		"",
+		styles.SubtitleStyle.Render("Recent role"),
+		styles.NormalStyle.Render("Web Developer — " + m.profile.Employer),
+		"",
+		styles.MutedStyle.Render("(V opens this viewer · ← / Esc closes)"),
+	}
+	return components.Modal("Resume", lines, m.width, m.height)
 }

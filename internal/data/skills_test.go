@@ -4,34 +4,18 @@ import "testing"
 
 func TestGetSkills(t *testing.T) {
 	skills := GetSkills()
-	if len(skills) == 0 {
-		t.Fatal("expected at least one skill")
+	if len(skills) != 16 {
+		t.Errorf("expected exactly 16 skills, got %d", len(skills))
 	}
 
+	seen := make(map[string]bool)
 	for i, s := range skills {
 		if s.Name == "" {
 			t.Errorf("skill[%d]: Name must not be empty", i)
 		}
-		if s.Category == "" {
-			t.Errorf("skill %q: Category must not be empty", s.Name)
+		if seen[s.Name] {
+			t.Errorf("duplicate skill %q at index %d", s.Name, i)
 		}
-		if s.Level < 1 || s.Level > 5 {
-			t.Errorf("skill %q: Level %d out of range (1-5)", s.Name, s.Level)
-		}
-	}
-}
-
-func TestGetSkillCategories(t *testing.T) {
-	categories := GetSkillCategories()
-	if len(categories) == 0 {
-		t.Fatal("expected at least one skill category")
-	}
-
-	seen := make(map[string]bool)
-	for i, c := range categories {
-		if seen[c] {
-			t.Errorf("duplicate category %q at index %d", c, i)
-		}
-		seen[c] = true
+		seen[s.Name] = true
 	}
 }

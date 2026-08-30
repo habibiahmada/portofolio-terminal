@@ -15,8 +15,8 @@ func TestGetSocials(t *testing.T) {
 		if s.Name == "" {
 			t.Errorf("social[%d]: Name must not be empty", i)
 		}
-		if !strings.HasPrefix(s.URL, "https://") {
-			t.Errorf("social %q: URL %q must start with https://", s.Name, s.URL)
+		if !strings.HasPrefix(s.URL, "https://") && !strings.HasPrefix(s.URL, "mailto:") {
+			t.Errorf("social %q: URL %q must start with https:// or mailto:", s.Name, s.URL)
 		}
 	}
 }

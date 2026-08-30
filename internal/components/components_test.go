@@ -6,12 +6,43 @@ import (
 )
 
 func TestHeader(t *testing.T) {
-	out := Header("Habibi Ahmad Aziz", "Full-Stack Web Developer", 80)
-	if !strings.Contains(out, "Habibi Ahmad Aziz") {
-		t.Errorf("expected header to contain name, got %q", out)
+	out := Header("habibiahmada", "Fullstack Developer", 80)
+	if !strings.Contains(out, "habibiahmada") {
+		t.Errorf("expected header to contain wordmark, got %q", out)
 	}
-	if !strings.Contains(out, "Full-Stack Web Developer") {
+	if !strings.Contains(out, "Fullstack Developer") {
 		t.Errorf("expected header to contain title, got %q", out)
+	}
+}
+
+func TestFooterArtlineRenders(t *testing.T) {
+	out := FooterArtline(0, 80, "habibiahmada.dev")
+	if out == "" {
+		t.Fatal("expected footer artline to render")
+	}
+	if !strings.Contains(out, ">_") {
+		t.Errorf("expected footer artline to contain the >_ prompt, got %q", out)
+	}
+	if !strings.Contains(out, "habibiahmada.dev") {
+		t.Errorf("expected footer artline to show the website, got %q", out)
+	}
+	if !strings.Contains(out, "▁") {
+		t.Errorf("expected footer artline to include the equalizer wave, got %q", out)
+	}
+}
+
+func TestFooterArtlineAnimates(t *testing.T) {
+	a := FooterArtline(0, 80, "habibiahmada.dev")
+	b := FooterArtline(3, 80, "habibiahmada.dev")
+	if a == b {
+		t.Errorf("expected footer artline to change with frame (got identical output %q)", a)
+	}
+}
+
+func TestFooterArtlineTinyDegrades(t *testing.T) {
+	out := FooterArtline(3, 30, "habibiahmada.dev")
+	if !strings.Contains(out, ">_") {
+		t.Errorf("expected tiny footer to keep the >_ prompt, got %q", out)
 	}
 }
 

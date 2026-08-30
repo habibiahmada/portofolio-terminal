@@ -4,6 +4,8 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+
+	"github.com/habibiahmada/habibiahmada-terminal/internal/styles"
 )
 
 // Modal renders a centered overlay box with the given title and lines on top
@@ -13,7 +15,7 @@ func Modal(title string, lines []string, width, height int) string {
 	content = append(content, lines...)
 	box := lipgloss.NewStyle().
 		Border(lipgloss.DoubleBorder()).
-		BorderForeground(lipgloss.Color("#FF6B6B")).
+		BorderForeground(styles.ColorPrimary).
 		Padding(1, 2).
 		Width(min(width-4, 50)).
 		Render(strings.Join(content, "\n"))

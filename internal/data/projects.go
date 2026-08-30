@@ -1,49 +1,125 @@
 package data
 
-// GetProjects returns all portfolio projects.
+// GetProjects returns all portfolio projects synced with docs/pages.md. Order
+// matches the website archive (newest first) so prev/next navigation flows
+// naturally through the list.
 func GetProjects() []Project {
 	return []Project{
 		{
-			Name:        "Renshuu",
-			Description: "Japanese learning platform with spaced repetition, kanji tracking, and community features.",
-			Stack:       []string{"Laravel", "React", "Inertia.js", "PostgreSQL"},
-			GitHub:      "https://github.com/habibiahmada/renshuu",
-			Live:        "",
-			Featured:    true,
+			Name:          "Aksara Pustaka",
+			Slug:          "aksara-pustaka",
+			Year:          "2026",
+			Description:   "I built a web library system to manage books, members, loans, returns, stock, and history in one place.",
+			DescriptionID: "Sistem perpustakaan web untuk mengelola buku, anggota, peminjaman, pengembalian, stok, dan riwayat dalam satu tempat.",
+			Tags:          []string{"Laravel", "MySQL", "PHP", "Tailwind CSS"},
+			Stack:         []string{"Laravel", "MySQL", "PHP", "Tailwind CSS"},
+			Featured:      false,
 		},
 		{
-			Name:        "SmartFarm AI",
-			Description: "AI-powered agriculture platform for crop monitoring, pest detection, and yield prediction.",
-			Stack:       []string{"Next.js", "Python", "TensorFlow", "FastAPI"},
-			GitHub:      "https://github.com/habibiahmada/smartfarm-ai",
-			Live:        "",
-			Featured:    true,
+			Name:          "SiPadu",
+			Slug:          "sipadu",
+			Year:          "2026",
+			Description:   "I built SiPadu so school facility reports can be filed and tracked in real time instead of disappearing into paper trails.",
+			DescriptionID: "Aplikasi pelaporan sarana prasarana sekolah secara real time, menggantikan pencatatan kertas.",
+			Tags:          []string{"Laravel", "Tailwind CSS", "MySQL", "PHP"},
+			Stack:         []string{"Laravel", "Tailwind CSS", "MySQL", "PHP"},
+			Featured:      false,
 		},
 		{
-			Name:        "CultureConnect",
-			Description: "Cultural exchange platform connecting people worldwide through language and traditions.",
-			Stack:       []string{"Next.js", "TypeScript", "Supabase", "Tailwind CSS"},
-			GitHub:      "https://github.com/habibiahmada/cultureconnect",
-			Live:        "",
-			Featured:    true,
+			Name:          "ParkingApp",
+			Slug:          "parking-app",
+			Year:          "2026",
+			Description:   "I built a parking web app for check-in, check-out, reporting, and audit in one flow.",
+			DescriptionID: "Aplikasi parkir untuk check-in, check-out, laporan, dan audit dalam satu alur.",
+			Tags:          []string{"PHP"},
+			Stack:         []string{"PHP"},
+			Featured:      false,
 		},
 		{
-			Name:        "Spacelab",
-			Description: "Collaborative workspace management tool with real-time updates and analytics dashboard.",
-			Stack:       []string{"React", "Node.js", "WebSocket", "MongoDB"},
-			GitHub:      "https://github.com/habibiahmada/spacelab",
-			Live:        "",
-			Featured:    false,
+			Name:          "Inventoryflow",
+			Slug:          "inventoryflow",
+			Year:          "2026",
+			Description:   "I built Inventoryflow to handle school/lab equipment loans, inventory, approvals, and returns, without spreadsheet chaos.",
+			DescriptionID: "Aplikasi untuk peminjaman alat sekolah/laboratorium, inventori, persetujuan, dan pengembalian tanpa kekacauan spreadsheet.",
+			Tags:          []string{"Laravel", "Tailwind CSS", "PHP", "MySQL"},
+			Stack:         []string{"Laravel", "Tailwind CSS", "PHP", "MySQL"},
+			Featured:      false,
+		},
+		{
+			Name:          "BagiBerkah",
+			Slug:          "bagiberkah",
+			Year:          "2026",
+			Description:   "I built BagiBerkah, a digital THR experience with mini-games and smarter allocation recommendations.",
+			DescriptionID: "Pengalaman THR digital dengan mini-game dan rekomendasi alokasi yang lebih cerdas.",
+			Tags:          []string{"Next.js", "Express", "Prisma", "Mayar", "Xendit"},
+			Stack:         []string{"Next.js", "Express", "Prisma", "Mayar", "Xendit"},
+			Featured:      false,
+		},
+		{
+			Name:          "E-Democracy (E-Vote)",
+			Slug:          "e-vote",
+			Year:          "2025",
+			Description:   "I built E-Vote so students can run digital OSIS elections with confidence, from ballots to real-time results.",
+			DescriptionID: "Pemilu OSIS digital mulai dari surat suara hingga hasil real-time.",
+			Tags:          []string{"PHP", "Laravel", "Bootstrap", "MySQL"},
+			Stack:         []string{"PHP", "Laravel", "Bootstrap", "MySQL"},
+			Featured:      true,
+		},
+		{
+			Name:          "Smartfarm AI (Agrify)",
+			Slug:          "agrify",
+			Year:          "2025",
+			Description:   "On a team project, I helped ship Smartfarm AI, combining modern web UI with ML-assisted insights for Indonesian farmers.",
+			DescriptionID: "Membantu membangun Smartfarm AI, menggabungkan UI web modern dengan wawasan ML untuk petani Indonesia.",
+			Tags:          []string{"React", "Python", "Machine Learning", "JavaScript"},
+			Stack:         []string{"React", "Python", "Machine Learning", "JavaScript"},
+			Featured:      true,
+		},
+		{
+			Name:          "CultureConnect.",
+			Slug:          "culture-connect",
+			Year:          "2025",
+			Description:   "With a distributed team, I helped build CultureConnect, an AI platform for more personal, community-aware cultural travel.",
+			DescriptionID: "Bersama tim terdistribusi, membangun CultureConnect, platform AI untuk wisata budaya yang lebih personal.",
+			Tags:          []string{"Python", "React", "Machine Learning", "Express", "Prisma"},
+			Stack:         []string{"Python", "React", "Machine Learning", "Express", "Prisma"},
+			Featured:      true,
+		},
+		{
+			Name:          "Spacelab",
+			Slug:          "spacelab",
+			Year:          "2025",
+			Description:   "I built Spacelab to keep school schedules, rooms, and teachers conflict-free without spreadsheet chaos.",
+			DescriptionID: "Aplikasi penjadwalan sekolah (jadwal, ruangan, guru) bebas konflik tanpa spreadsheet.",
+			Tags:          []string{"Laravel", "PHP", "JavaScript"},
+			Stack:         []string{"Laravel", "PHP", "JavaScript"},
+			Featured:      true,
+		},
+		{
+			Name:          "Renshuu web",
+			Slug:          "renshuu",
+			Year:          "2025",
+			Description:   "During PKL at CV Smartplus, my team and I built Renshuu, a job-search web app assigned for SMKN 1 Karawang students.",
+			DescriptionID: "Selama PKL di CV Smartplus, tim dan saya membangun Renshuu, aplikasi pencarian kerja untuk siswa SMKN 1 Karawang.",
+			Tags:          []string{"React", "Laravel"},
+			Stack:         []string{"React", "Laravel"},
+			Featured:      true,
 		},
 	}
 }
 
-// GetFeaturedProjects returns only the projects marked as featured.
+// GetFeaturedProjects returns only the projects marked as featured, in the
+// order they appear on the website home section.
 func GetFeaturedProjects() []Project {
-	all := GetProjects()
-	featured := make([]Project, 0, len(all))
-	for _, p := range all {
-		if p.Featured {
+	ordered := []string{"e-vote", "agrify", "culture-connect", "spacelab", "renshuu"}
+	bySlug := map[string]Project{}
+	for _, p := range GetProjects() {
+		bySlug[p.Slug] = p
+	}
+	featured := make([]Project, 0, len(ordered))
+	for _, slug := range ordered {
+		p, ok := bySlug[slug]
+		if ok {
 			featured = append(featured, p)
 		}
 	}

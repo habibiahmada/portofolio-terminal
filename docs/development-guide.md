@@ -138,7 +138,7 @@ Ringkasan:
 - **Splash** — animasi startup ≤ 2 detik, skip di terminal kecil
 - **Assets** — `internal/assets/art/*.txt`, render via `components/illustration.go`
 
-Implementasi ilustrasi masuk **Fase 2.5**, sebelum deploy (lihat [task-list.md](task-list.md)).
+Implementasi ilustrasi masuk **Fase 2.5**; portfolio parity **Fase 3**; deploy **Fase 4** (lihat [task-list.md](task-list.md)).
 
 ## Quality Checks
 

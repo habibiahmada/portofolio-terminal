@@ -10,12 +10,13 @@ import (
 	"github.com/habibiahmada/habibiahmada-terminal/internal/styles"
 )
 
-// Header renders the profile masthead (name + title) inside a bordered bar.
-func Header(name, title string, width int) string {
-	content := lipgloss.JoinVertical(
-		lipgloss.Left,
-		styles.TitleStyle.Render(name),
-		styles.SubtitleStyle.Render(title),
-	)
-	return styles.BorderStyle.Width(width - 2).Render(content)
+// Header renders the brand masthead: the wordmark "habibiahmada" with a brand
+// red dot, plus the role title, inside a bordered bar that spans the width.
+func Header(wordmark, title string, width int) string {
+	mark := styles.HeaderWordmark.Render(wordmark)
+	dot := styles.HeaderDot.Render(".")
+	right := styles.HeaderMeta.Render(title)
+
+	row := lipgloss.JoinHorizontal(lipgloss.Center, mark, dot, "   "+right)
+	return styles.BorderStyle.Width(width - 2).Render(row)
 }

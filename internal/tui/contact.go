@@ -9,24 +9,45 @@ import (
 	"github.com/habibiahmada/habibiahmada-terminal/internal/styles"
 )
 
-// renderContactContent renders the contact screen.
+// renderContactContent renders the contact screen: CTA copy, email, social
+// links, and availability badge.
 func (m *App) renderContactContent() string {
-	title := styles.TitleStyle.Render("Contact")
+	label := styles.LabelStyle.Render("// Contact")
 
-	contactLines := []string{
-		styles.NormalStyle.Render(fmt.Sprintf("Email:    %s", styles.LinkStyle.Render(m.profile.Email))),
-		styles.NormalStyle.Render(fmt.Sprintf("GitHub:   %s", styles.LinkStyle.Render(m.profile.GitHub))),
-		styles.NormalStyle.Render(fmt.Sprintf("LinkedIn: %s", styles.LinkStyle.Render(m.profile.LinkedIn))),
-		styles.NormalStyle.Render(fmt.Sprintf("Website:  %s", styles.LinkStyle.Render(m.profile.Website))),
+	badge := styles.SuccessStyle.Render("● " + m.profile.Availability)
+
+	h2 := styles.SectionTitleStyle.Render("Need a web product that actually ships in the next 90 days?")
+
+	body := styles.NormalStyle.Render(
+		"Open to freelance and full-time. Remote (WIB). Write to " +
+			styles.LinkStyle.Render(m.profile.Email) +
+			". I usually reply within 48 hours.",
+	)
+
+	cta := styles.SelectedStyle.Render("Let's talk → " + m.profile.Email)
+
+	// Social list.
+	lines := make([]string, 0, len(m.socials)+1)
+	lines = append(lines, "", styles.SectionTitleStyle.Render("Social Profiles"))
+	for _, s := range m.socials {
+		lines = append(lines, fmt.Sprintf("[%s] %s  %s",
+			styles.SelectedStyle.Render(s.Icon),
+			styles.NormalStyle.Render(s.Name+":"),
+			styles.LinkStyle.Render(s.URL),
+		))
 	}
 
 	content := lipgloss.JoinVertical(
 		lipgloss.Left,
-		title,
+		label,
+		badge,
 		"",
-		strings.Join(contactLines, "\n"),
+		h2,
 		"",
-		styles.MutedStyle.Render("Feel free to reach out!"),
+		body,
+		"",
+		styles.PrimaryCardStyle.Render(cta),
+		strings.Join(lines, "\n"),
 	)
 
 	return styles.ContentStyle.Render(content)

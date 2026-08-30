@@ -1,32 +1,18 @@
 package data
 
-// GetSkills returns all technical skills.
-func GetSkills() []Skill {
-	return []Skill{
-		{Name: "Laravel", Category: "Backend", Level: 5},
-		{Name: "Next.js", Category: "Frontend", Level: 5},
-		{Name: "React", Category: "Frontend", Level: 5},
-		{Name: "Node.js", Category: "Backend", Level: 4},
-		{Name: "TypeScript", Category: "Language", Level: 5},
-		{Name: "Go", Category: "Language", Level: 3},
-		{Name: "PostgreSQL", Category: "Database", Level: 4},
-		{Name: "Supabase", Category: "Database", Level: 4},
-		{Name: "Docker", Category: "DevOps", Level: 3},
-		{Name: "GCP", Category: "Cloud", Level: 3},
-		{Name: "Tailwind CSS", Category: "Frontend", Level: 5},
-		{Name: "Python", Category: "Language", Level: 3},
-	}
+// skillOrder is the flat marquee order of tools from docs/pages.md. Category
+// and level bars were removed to match the website's flat marquee.
+var skillOrder = []string{
+	"React", "Next.js", "Node.js", "TypeScript", "PostgreSQL",
+	"Tailwind CSS", "PHP", "Laravel", "WordPress", "Elementor",
+	"Astra", "Git", "GitHub", "Bootstrap", "Vercel", "JavaScript",
 }
 
-// GetSkillCategories returns the unique skill categories in sorted order.
-func GetSkillCategories() []string {
-	categories := make([]string, 0, 4)
-	seen := make(map[string]bool)
-	for _, s := range GetSkills() {
-		if !seen[s.Category] {
-			seen[s.Category] = true
-			categories = append(categories, s.Category)
-		}
+// GetSkills returns the flat list of technical tools in marquee order.
+func GetSkills() []Skill {
+	skills := make([]Skill, 0, len(skillOrder))
+	for _, name := range skillOrder {
+		skills = append(skills, Skill{Name: name})
 	}
-	return categories
+	return skills
 }

@@ -2,7 +2,7 @@
 
 Panduan visual identity, ilustrasi ASCII, dan animasi untuk **habibiahmada-terminal**.
 
-Dokumen ini harus selesai diimplementasikan **sebelum Fase 3 — Deployment**, agar pengalaman `npx habibiahmada` dan `ssh habibiahmada.dev` sudah terasa seperti produk yang sengaja didesain — bukan website yang dipindahkan ke terminal.
+Dokumen ini harus selesai diimplementasikan **sebelum Fase 4 — Deployment** (setelah Fase 3 Portfolio Parity), agar pengalaman `npx habibiahmada` dan `ssh habibiahmada.dev` sudah terasa seperti produk yang sengaja didesain — bukan website yang dipindahkan ke terminal.
 
 ---
 

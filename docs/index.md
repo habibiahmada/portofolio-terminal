@@ -15,6 +15,8 @@ Indeks dokumentasi resmi proyek habibiahmada-terminal.
 
 | Dokumen | Topik |
 |---------|-------|
+| [pages.md](pages.md) | **Halaman TUI** — mapping screen, copy, alur, konten per halaman |
+| [design-system.md](design-system.md) | **Design system** — palette, typography, komponen, identitas visual |
 | [architecture.md](architecture.md) | Arsitektur platform, layer, CI/CD, isolation |
 | [tech-stack.md](tech-stack.md) | Teknologi per layer |
 | [folder-structure.md](folder-structure.md) | Struktur repo, fase 1 vs target |

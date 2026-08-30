@@ -40,3 +40,40 @@ func Section(title string, body ...string) string {
 	}
 	return lipgloss.JoinVertical(lipgloss.Left, parts...)
 }
+
+// Hints renders a row of bracketed keyboard hint pills, wrapping to fit width.
+func Hints(hints []string, width int) string {
+	pills := make([]string, 0, len(hints))
+	for _, h := range hints {
+		pills = append(pills, styles.SelectedStyle.Render(h))
+	}
+	joined := strings.Join(pills, "  ")
+	if width > 0 && lipgloss.Width(joined) > width {
+		return lipgloss.JoinVertical(lipgloss.Left, pills...)
+	}
+	return joined
+}
+
+// TagGrid renders a flat list of tag pills, wrapping into rows that fit the
+// given width. Unstyled names are styled as tech tags.
+func TagGrid(tags []string, width int) string {
+	rows := make([]string, 0)
+	current := ""
+	for _, t := range tags {
+		pill := styles.TagStyle.Render(t)
+		if current == "" {
+			current = pill
+			continue
+		}
+		if lipgloss.Width(current)+lipgloss.Width(pill) > width {
+			rows = append(rows, current)
+			current = pill
+		} else {
+			current = current + " " + pill
+		}
+	}
+	if current != "" {
+		rows = append(rows, current)
+	}
+	return lipgloss.JoinVertical(lipgloss.Left, rows...)
+}
