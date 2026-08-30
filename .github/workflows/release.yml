@@ -87,8 +87,17 @@ jobs:
       - name: Verify npm registry tarball
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          curl -fsSL "https://registry.npmjs.org/habibiahmada/-/habibiahmada-${VERSION}.tgz" \
-            | tar -tzf - | grep 'package/bin/habibiahmada-linux-amd64'
+          for i in 1 2 3 4 5; do
+            if curl -fsSL "https://registry.npmjs.org/habibiahmada/-/habibiahmada-${VERSION}.tgz" \
+              | tar -tzf - | grep -q 'package/bin/habibiahmada-linux-amd64'; then
+              echo "Registry tarball OK"
+              exit 0
+            fi
+            echo "Waiting for npm registry propagation (attempt $i)..."
+            sleep 10
+          done
+          echo "Registry tarball missing linux-amd64 binary" >&2
+          exit 1
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
