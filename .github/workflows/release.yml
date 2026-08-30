@@ -1,0 +1,51 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache: true
+
+      - name: Run tests
+        run: go test ./...
+
+      - name: Run vet
+        run: go vet ./...
+
+      - name: Build all platforms
+        run: bash scripts/build.sh
+
+      - name: Copy binaries to npm/bin
+        run: |
+          mkdir -p npm/bin
+          cp dist/habibiahmada-linux-x64 npm/bin/
+          cp dist/habibiahmada-linux-arm64 npm/bin/
+          cp dist/habibiahmada-darwin-x64 npm/bin/
+          cp dist/habibiahmada-darwin-arm64 npm/bin/
+          cp dist/habibiahmada-windows-amd64.exe npm/bin/
+
+      - name: Publish to npm
+        run: cd npm && npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true

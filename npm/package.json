@@ -1,0 +1,33 @@
+{
+  "name": "habibiahmada",
+  "version": "1.0.0",
+  "description": "Interactive CLI portfolio built with Go and Bubble Tea",
+  "main": "index.js",
+  "bin": {
+    "habibiahmada": "./index.js"
+  },
+  "keywords": [
+    "cli",
+    "portfolio",
+    "tui",
+    "bubbletea",
+    "terminal",
+    "interactive"
+  ],
+  "author": "Habibi Ahmad Aziz <habibi@habibiahmada.dev>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/habibiahmada/habibiahmada-terminal"
+  },
+  "files": [
+    "index.js",
+    "bin/"
+  ],
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "scripts": {
+    "postinstall": "node index.js --postinstall"
+  }
+}

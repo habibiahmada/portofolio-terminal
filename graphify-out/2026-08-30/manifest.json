@@ -1,8 +1,146 @@
 {
-  "docs/foo.md": {
-    "mtime": 1788047178.8774679,
-    "seen": 1788048800.955768,
-    "ast_hash": "16e4731c57e89a6e4a89789d167642cc",
+  ".cursor/skills/bubble-tea-tui/SKILL.md": {
+    "mtime": 1788048952.0055468,
+    "seen": 1788048960.2450104,
+    "ast_hash": "1ead6d90d760941831f04137a1605fad",
+    "semantic_hash": ""
+  },
+  ".cursor/skills/go-code-quality/SKILL.md": {
+    "mtime": 1788048840.6704636,
+    "seen": 1788048960.2450137,
+    "ast_hash": "37b748e47ef9c2ed7d6a5e90daaefdd7",
+    "semantic_hash": ""
+  },
+  ".cursor/skills/graphify-workflow/SKILL.md": {
+    "mtime": 1788048838.1869903,
+    "seen": 1788048960.2450156,
+    "ast_hash": "f521d971742c75278f73c084a9c0cf17",
+    "semantic_hash": ""
+  },
+  "AGENTS.md": {
+    "mtime": 1788048951.7622876,
+    "seen": 1788048960.2450166,
+    "ast_hash": "a2a71347d6b9be75a6f9721ee41caa79",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1788048965.3135662,
+    "seen": 1788050433.6102371,
+    "ast_hash": "aaeca3b4b50fdd68029d6bd3d419fe10",
+    "semantic_hash": ""
+  },
+  "docs/architecture.md": {
+    "mtime": 1788048958.6622565,
+    "seen": 1788048960.245018,
+    "ast_hash": "010ddd754adc096404c8932ca5aac5d5",
+    "semantic_hash": ""
+  },
+  "docs/data-strategy.md": {
+    "mtime": 1788048830.1019988,
+    "seen": 1788048960.2450192,
+    "ast_hash": "e24d49de76a0367b97327ae1df1fa08c",
+    "semantic_hash": ""
+  },
+  "docs/deployment.md": {
+    "mtime": 1788048833.2636578,
+    "seen": 1788048960.24502,
+    "ast_hash": "1d9044d488f35c7cd117ffa8ef13b373",
+    "semantic_hash": ""
+  },
+  "docs/folder-structure.md": {
+    "mtime": 1788048822.795988,
+    "seen": 1788048960.2450206,
+    "ast_hash": "623d8b53b70b9c0906c2ae28523a0d64",
+    "semantic_hash": ""
+  },
+  "docs/index.md": {
+    "mtime": 1788048958.6622565,
+    "seen": 1788048960.2450213,
+    "ast_hash": "be165c2db836acd88e185ca2c72248ae",
+    "semantic_hash": ""
+  },
+  "docs/npx-vs-ssh.md": {
+    "mtime": 1788048826.4526653,
+    "seen": 1788048960.2450223,
+    "ast_hash": "0c63d6900a62baaebd490288427c4469",
+    "semantic_hash": ""
+  },
+  "docs/tech-stack.md": {
+    "mtime": 1788048958.6629555,
+    "seen": 1788048960.2450235,
+    "ast_hash": "2c2df3bcc33733c0d1dd3de8edc4f9d7",
+    "semantic_hash": ""
+  },
+  "cmd/portofolio/main.go": {
+    "mtime": 1788049727.4186316,
+    "seen": 1788050433.6102152,
+    "ast_hash": "403b505946e7a81337c14c2a03ff5314",
+    "semantic_hash": ""
+  },
+  "cmd/ssh/main.go": {
+    "mtime": 1788049791.1921165,
+    "seen": 1788050433.6102185,
+    "ast_hash": "27f21caefb485cf76f75362a077d8a4e",
+    "semantic_hash": ""
+  },
+  "go.mod": {
+    "mtime": 1788050162.784643,
+    "seen": 1788050433.61022,
+    "ast_hash": "472a5543ad2f8d7a1b1ab72e586c63eb",
+    "semantic_hash": ""
+  },
+  "internal/data/portfolio.go": {
+    "mtime": 1788049596.490541,
+    "seen": 1788050433.6102211,
+    "ast_hash": "632940dbb4653a81188fda070a429284",
+    "semantic_hash": ""
+  },
+  "internal/styles/styles.go": {
+    "mtime": 1788049727.4096313,
+    "seen": 1788050433.6102219,
+    "ast_hash": "26a43dc9a68cfff62f3572821d73dcb9",
+    "semantic_hash": ""
+  },
+  "internal/tui/app.go": {
+    "mtime": 1788049771.2603395,
+    "seen": 1788050433.6102226,
+    "ast_hash": "d1d3934870ac03af79c127e6338a34af",
+    "semantic_hash": ""
+  },
+  "internal/tui/keymap.go": {
+    "mtime": 1788049749.9405088,
+    "seen": 1788050433.6102233,
+    "ast_hash": "107b4992b2b42d3968e6baa1e56915cc",
+    "semantic_hash": ""
+  },
+  "npm/index.js": {
+    "mtime": 1788049662.8361187,
+    "seen": 1788050433.6102245,
+    "ast_hash": "89621539acefebe8f901ef7de119eee8",
+    "semantic_hash": ""
+  },
+  "npm/package.json": {
+    "mtime": 1788049662.8331184,
+    "seen": 1788050433.6102252,
+    "ast_hash": "0c38f1d42f575d20af6a1f3d6167b301",
+    "semantic_hash": ""
+  },
+  "scripts/build-ssh.sh": {
+    "mtime": 1788049683.8895478,
+    "seen": 1788050433.610226,
+    "ast_hash": "f0060bf0c93a4f6883af991dec6dba79",
+    "semantic_hash": ""
+  },
+  "scripts/build.sh": {
+    "mtime": 1788049683.8859372,
+    "seen": 1788050433.610227,
+    "ast_hash": "4835d6d2222816415c9c0a62dc9b33ce",
+    "semantic_hash": ""
+  },
+  ".github/workflows/release.yml": {
+    "mtime": 1788049987.5017822,
+    "seen": 1788050433.6102347,
+    "ast_hash": "17daa2d8aa52c8bd84ec6befcf33ccf4",
     "semantic_hash": ""
   }
 }

@@ -136,3 +136,11 @@ npm/
 ## Referensi
 
 Semua spesifikasi detail ada di `docs/`. Jangan menambah fitur/tech stack di luar yang terdokumentasi di sana.
+
+| Dokumen | Isi |
+|---------|-----|
+| [docs/index.md](docs/index.md) | Indeks dokumentasi |
+| [docs/user-guide.md](docs/user-guide.md) | Panduan akses terminal (npx, ssh) |
+| [docs/getting-started.md](docs/getting-started.md) | Setup proyek untuk developer baru |
+| [docs/development-guide.md](docs/development-guide.md) | Workflow development |
+| [docs/task-list.md](docs/task-list.md) | Task list & roadmap |

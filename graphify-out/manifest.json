@@ -18,15 +18,15 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1788048951.7622876,
-    "seen": 1788048960.2450166,
-    "ast_hash": "a2a71347d6b9be75a6f9721ee41caa79",
+    "mtime": 1788050630.457958,
+    "seen": 1788052185.319536,
+    "ast_hash": "37e8bc8d1becfe90168f4c2b9a6ba34e",
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1788048952.2806275,
-    "seen": 1788048960.2450173,
-    "ast_hash": "4cf0764648fc5bd0289d58d065bc96ce",
+    "mtime": 1788052156.424442,
+    "seen": 1788052185.319537,
+    "ast_hash": "af4b63e8948296d38737fae1a92ef180",
     "semantic_hash": ""
   },
   "docs/architecture.md": {
@@ -54,9 +54,9 @@
     "semantic_hash": ""
   },
   "docs/index.md": {
-    "mtime": 1788048958.6622565,
-    "seen": 1788048960.2450213,
-    "ast_hash": "be165c2db836acd88e185ca2c72248ae",
+    "mtime": 1788052112.377402,
+    "seen": 1788052185.3195443,
+    "ast_hash": "e979d4739050a289ac9ab54acdf71350",
     "semantic_hash": ""
   },
   "docs/npx-vs-ssh.md": {
@@ -69,6 +69,102 @@
     "mtime": 1788048958.6629555,
     "seen": 1788048960.2450235,
     "ast_hash": "2c2df3bcc33733c0d1dd3de8edc4f9d7",
+    "semantic_hash": ""
+  },
+  "cmd/ssh/main.go": {
+    "mtime": 1788049791.1921165,
+    "seen": 1788050433.6102185,
+    "ast_hash": "27f21caefb485cf76f75362a077d8a4e",
+    "semantic_hash": ""
+  },
+  "go.mod": {
+    "mtime": 1788050162.784643,
+    "seen": 1788050433.61022,
+    "ast_hash": "472a5543ad2f8d7a1b1ab72e586c63eb",
+    "semantic_hash": ""
+  },
+  "internal/data/portfolio.go": {
+    "mtime": 1788049596.490541,
+    "seen": 1788050433.6102211,
+    "ast_hash": "632940dbb4653a81188fda070a429284",
+    "semantic_hash": ""
+  },
+  "internal/styles/styles.go": {
+    "mtime": 1788049727.4096313,
+    "seen": 1788050433.6102219,
+    "ast_hash": "26a43dc9a68cfff62f3572821d73dcb9",
+    "semantic_hash": ""
+  },
+  "internal/tui/app.go": {
+    "mtime": 1788052106.5172718,
+    "seen": 1788052185.3195236,
+    "ast_hash": "4038421148f6efe9f1e9ac4390c04f96",
+    "semantic_hash": ""
+  },
+  "internal/tui/keymap.go": {
+    "mtime": 1788049749.9405088,
+    "seen": 1788050433.6102233,
+    "ast_hash": "107b4992b2b42d3968e6baa1e56915cc",
+    "semantic_hash": ""
+  },
+  "npm/index.js": {
+    "mtime": 1788049662.8361187,
+    "seen": 1788050433.6102245,
+    "ast_hash": "89621539acefebe8f901ef7de119eee8",
+    "semantic_hash": ""
+  },
+  "npm/package.json": {
+    "mtime": 1788049662.8331184,
+    "seen": 1788050433.6102252,
+    "ast_hash": "0c38f1d42f575d20af6a1f3d6167b301",
+    "semantic_hash": ""
+  },
+  "scripts/build-ssh.sh": {
+    "mtime": 1788049683.8895478,
+    "seen": 1788050433.610226,
+    "ast_hash": "f0060bf0c93a4f6883af991dec6dba79",
+    "semantic_hash": ""
+  },
+  "scripts/build.sh": {
+    "mtime": 1788052109.6073403,
+    "seen": 1788052185.319529,
+    "ast_hash": "9afbd5974adfad9e007a1fc1f7aabb31",
+    "semantic_hash": ""
+  },
+  ".github/workflows/release.yml": {
+    "mtime": 1788049987.5017822,
+    "seen": 1788050433.6102347,
+    "ast_hash": "17daa2d8aa52c8bd84ec6befcf33ccf4",
+    "semantic_hash": ""
+  },
+  "cmd/portfolio/main.go": {
+    "mtime": 1788052108.8573153,
+    "seen": 1788052185.3195102,
+    "ast_hash": "403b505946e7a81337c14c2a03ff5314",
+    "semantic_hash": ""
+  },
+  "docs/development-guide.md": {
+    "mtime": 1788052147.1141877,
+    "seen": 1788052185.319541,
+    "ast_hash": "b5974691dcbc6c5f328b112fb2f79bc7",
+    "semantic_hash": ""
+  },
+  "docs/getting-started.md": {
+    "mtime": 1788052156.424442,
+    "seen": 1788052185.3195434,
+    "ast_hash": "f6378705979873bdcdc022679e502c00",
+    "semantic_hash": ""
+  },
+  "docs/task-list.md": {
+    "mtime": 1788052151.7701151,
+    "seen": 1788052185.3195462,
+    "ast_hash": "5d51b265f09d784fe9322d7bfee3732b",
+    "semantic_hash": ""
+  },
+  "docs/user-guide.md": {
+    "mtime": 1788050601.835351,
+    "seen": 1788052185.319548,
+    "ast_hash": "79857b74c38b82d2d9ee364b3efab585",
     "semantic_hash": ""
   }
 }
