@@ -254,12 +254,10 @@ var (
 
 // Scrollbar styles.
 var (
-	ScrollThumb = lipgloss.NewStyle().
-			Foreground(ColorSecondary).
-			Bold(true).
-			Render("█")
+	ScrollThumbStyle = lipgloss.NewStyle().
+				Foreground(ColorSecondary).
+				Bold(true)
 
-	ScrollTrack = lipgloss.NewStyle().
-			Foreground(ColorBorder).
-			Render("░")
+	ScrollTrackStyle = lipgloss.NewStyle().
+				Foreground(ColorBorder)
 )

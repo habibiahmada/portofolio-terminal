@@ -8,10 +8,12 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/habibiahmada/habibiahmada-terminal/internal/styles"
 	"github.com/habibiahmada/habibiahmada-terminal/internal/tui"
 )
 
 func main() {
+	styles.ForceTrueColor()
 	// Splash transitions into the full TUI core.
 	model := tui.NewSplash()
 

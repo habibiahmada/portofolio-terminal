@@ -11,7 +11,7 @@ npm/
 ├── package.json
 ├── index.js
 └── bin/
-    ├── habibiahmada-linux-x64
+    ├── habibiahmada-linux-amd64
     ├── habibiahmada-linux-arm64
     ├── habibiahmada-darwin-x64
     ├── habibiahmada-darwin-arm64

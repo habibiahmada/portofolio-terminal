@@ -12,7 +12,7 @@ BINARY_NAME="habibiahmada"
 
 # Build targets: <goos>:<goarch>:<output-suffix>
 TARGETS=(
-  "linux:amd64:linux-x64"
+  "linux:amd64:linux-amd64"
   "linux:arm64:linux-arm64"
   "darwin:amd64:darwin-x64"
   "darwin:arm64:darwin-arm64"

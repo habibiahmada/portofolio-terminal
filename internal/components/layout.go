@@ -206,7 +206,7 @@ func AddScrollbar(text string, offset, max int, _ int) string {
 func buildScrollbar(offset, max, h int) []string {
 	bar := make([]string, h)
 	for i := range bar {
-		bar[i] = styles.ScrollTrack
+		bar[i] = styles.ScrollTrackStyle.Render("░")
 	}
 	if max <= 0 || h <= 0 {
 		return bar
@@ -225,7 +225,7 @@ func buildScrollbar(offset, max, h int) []string {
 		pos = int(float64(offset) / float64(max) * float64(h-thumb))
 	}
 	for i := pos; i < pos+thumb && i < h; i++ {
-		bar[i] = styles.ScrollThumb
+		bar[i] = styles.ScrollThumbStyle.Render("█")
 	}
 	return bar
 }

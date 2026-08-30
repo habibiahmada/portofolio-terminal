@@ -42,16 +42,19 @@ function detectPlatform() {
       throw new Error(`Unsupported architecture: ${arch}`);
   }
 
-  return { os, goArch };
+  // npm registry has omitted linux ELF x64 binaries named *-linux-x64; use amd64.
+  const archSuffix = os === "linux" && goArch === "x64" ? "amd64" : goArch;
+
+  return { os, goArch, archSuffix };
 }
 
 /**
  * Get the binary filename for the current platform.
  */
 function getBinaryName() {
-  const { os, goArch } = detectPlatform();
+  const { os, archSuffix } = detectPlatform();
   const ext = os === "win" ? ".exe" : "";
-  return `habibiahmada-${os}-${goArch}${ext}`;
+  return `habibiahmada-${os}-${archSuffix}${ext}`;
 }
 
 /**

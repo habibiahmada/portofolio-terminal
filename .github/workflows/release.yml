@@ -44,7 +44,7 @@ jobs:
       - name: Stage npm package
         run: |
           mkdir -p npm/bin
-          cp dist/habibiahmada-linux-x64 npm/bin/
+          cp dist/habibiahmada-linux-amd64 npm/bin/
           cp dist/habibiahmada-linux-arm64 npm/bin/
           cp dist/habibiahmada-darwin-x64 npm/bin/
           cp dist/habibiahmada-darwin-arm64 npm/bin/
@@ -64,23 +64,29 @@ jobs:
 
       - name: Verify npm package contents
         run: |
-          test -f npm/bin/habibiahmada-linux-x64
+          test -f npm/bin/habibiahmada-linux-amd64
           test -f npm/bin/habibiahmada-linux-arm64
           test -f npm/bin/habibiahmada-darwin-x64
           test -f npm/bin/habibiahmada-darwin-arm64
           test -f npm/bin/habibiahmada-win-x64.exe
           cd npm
           PACK="$(npm pack | tail -1)"
-          tar -tzf "$PACK" | grep 'package/bin/habibiahmada-linux-x64'
-          rm -f "$PACK"
+          tar -tzf "$PACK" | grep 'package/bin/habibiahmada-linux-amd64'
+          echo "pack=$PACK" >> "$GITHUB_ENV"
 
       - name: Test npm wrapper
         run: cd npm && node test/integration.test.js
 
       - name: Publish to npm
-        run: cd npm && npm publish --access public
+        run: cd npm && npm publish "$PACK" --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Verify npm registry tarball
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          curl -fsSL "https://registry.npmjs.org/habibiahmada/-/habibiahmada-${VERSION}.tgz" \
+            | tar -tzf - | grep 'package/bin/habibiahmada-linux-amd64'
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

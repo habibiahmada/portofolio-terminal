@@ -284,6 +284,28 @@ func TestProjectRowClickOpensDetail(t *testing.T) {
 	}
 }
 
+func TestMouseWheelScrollsWithoutFocusChange(t *testing.T) {
+	m := newTestApp()
+	m.focus = FocusNav
+	m.currentScreen = ScreenHome
+	m.scrollMax = 8
+	m.contentOffset = 0
+
+	m.Update(tea.MouseMsg{
+		Button: tea.MouseButtonWheelDown,
+		Action: tea.MouseActionPress,
+	})
+	if m.focus != FocusNav {
+		t.Errorf("wheel must not change focus, got %v", m.focus)
+	}
+	if m.contentOffset != 1 {
+		t.Errorf("expected scroll offset 1 after wheel down, got %d", m.contentOffset)
+	}
+	if m.selectedFeatured != 0 {
+		t.Errorf("wheel must not change featured selection, got %d", m.selectedFeatured)
+	}
+}
+
 func TestScrollContent(t *testing.T) {
 	m := newTestApp()
 

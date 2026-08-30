@@ -284,7 +284,7 @@ Visual polish sebelum portfolio parity & deploy production. Lihat [tui-illustrat
 | # | Task | Status | Catatan |
 |---|------|--------|---------|
 | 4.1 | First npm publish | ✅ | `habibiahmada@0.0.2` |
-| 4.2 | Verifikasi `npx habibiahmada` post-publish | ✅ | linux-x64 fix v0.0.2 |
+| 4.2 | Verifikasi `npx habibiahmada` post-publish | ✅ | linux binary as `linux-amd64` (v0.0.3+) |
 
 ### SSH Server (EC2)
 

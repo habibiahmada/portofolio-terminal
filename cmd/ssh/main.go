@@ -23,7 +23,6 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/ssh"
 	"github.com/charmbracelet/wish"
 	"github.com/charmbracelet/wish/accesscontrol"
@@ -34,6 +33,7 @@ import (
 	"github.com/muesli/termenv"
 	"golang.org/x/time/rate"
 
+	"github.com/habibiahmada/habibiahmada-terminal/internal/styles"
 	"github.com/habibiahmada/habibiahmada-terminal/internal/tui"
 )
 
@@ -106,8 +106,10 @@ func main() {
 
 // teaHandler creates a new Bubble Tea model for each SSH session.
 func teaHandler(sess ssh.Session) (tea.Model, []tea.ProgramOption) {
-	// Route lipgloss through the SSH session renderer (TrueColor over PTY).
-	lipgloss.SetDefaultRenderer(bm.MakeRenderer(sess))
+	r := bm.MakeRenderer(sess)
+	r.SetColorProfile(termenv.TrueColor)
+	styles.UseRenderer(r)
+	styles.ForceTrueColor()
 
 	model := tui.NewSplash()
 

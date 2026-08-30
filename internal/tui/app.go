@@ -251,15 +251,13 @@ func (m *App) handleMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 		m.cvModal = false
 	}
 
-	// Wheel scroll always scrolls content and focuses it.
+	// Wheel scroll moves content only; it must not change focus or list selection.
 	if msg.Button == tea.MouseButtonWheelUp {
-		m.focus = FocusContent
-		m.scrollOrSelectUp()
+		m.mouseScrollUp()
 		return m, nil
 	}
 	if msg.Button == tea.MouseButtonWheelDown {
-		m.focus = FocusContent
-		m.scrollOrSelectDown()
+		m.mouseScrollDown()
 		return m, nil
 	}
 
@@ -515,6 +513,16 @@ func (m *App) enterMenuScreen(idx int) (tea.Model, tea.Cmd) {
 	}
 
 	return m, nil
+}
+
+// mouseScrollUp scrolls the viewport one line without changing focus.
+func (m *App) mouseScrollUp() {
+	m.scrollUp()
+}
+
+// mouseScrollDown scrolls the viewport one line without changing focus.
+func (m *App) mouseScrollDown() {
+	m.scrollDown()
 }
 
 // scrollOrSelectUp handles j/k up: list selection or content scroll.
@@ -1100,7 +1108,7 @@ func (m *App) renderHelpOverlay(layout string) string {
 		"→ / Enter   Focus into screen content",
 		"On screen:",
 		"↑ / ↓ / j/k  Scroll / select in list",
-		"Mouse wheel  Scroll (also drag scrollbar)",
+		"Mouse wheel  Scroll content (does not change focus)",
 		"PgUp/PgDn   Scroll a page",
 		"Home / End  Jump top / bottom",
 		"Enter       Open detail",

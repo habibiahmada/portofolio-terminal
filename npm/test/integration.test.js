@@ -24,7 +24,7 @@ const SKIP = process.platform === "win32";
 // Clean up any test binary from previous runs.
 function cleanup() {
   try {
-    fs.unlinkSync(path.join(BIN, "habibiahmada-linux-x64"));
+    fs.unlinkSync(path.join(BIN, "habibiahmada-linux-amd64"));
   } catch {}
 }
 
@@ -60,7 +60,7 @@ async function main() {
     savedChecksums = fs.readFileSync(checksumsPath);
     fs.writeFileSync(checksumsPath, "{}\n");
   }
-  const stub = path.join(BIN, "habibiahmada-linux-x64");
+  const stub = path.join(BIN, "habibiahmada-linux-amd64");
   fs.writeFileSync(
     stub,
     "#!/bin/sh\necho wrapper-ok:$1\n",
