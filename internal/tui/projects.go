@@ -8,7 +8,6 @@ import (
 
 	"github.com/habibiahmada/habibiahmada-terminal/internal/components"
 	"github.com/habibiahmada/habibiahmada-terminal/internal/data"
-	"github.com/habibiahmada/habibiahmada-terminal/internal/sanitize"
 	"github.com/habibiahmada/habibiahmada-terminal/internal/styles"
 )
 
@@ -17,11 +16,18 @@ func (m *App) renderProjectsContent() string {
 
 	// ── Header ────────────────────────────────────────────────────────────
 	title := styles.SectionTitleStyle.Render("▸ Projects Archive")
-	hint := styles.MutedStyle.Render(
-		fmt.Sprintf("%d projects in the archive. Use j/k or arrow keys to browse, Enter to open a case study, and Esc to go back.", len(m.projects)),
-	)
 
-	lines := []string{title, hint, ""}
+	hintText := projectsArchiveHint(len(m.projects))
+	if m.portfolioSync == PortfolioSyncPending {
+		hintText = "Syncing latest projects…"
+	}
+	hint := styles.MutedStyle.Render(hintText)
+
+	lines := []string{title, hint}
+	if banner := m.renderPortfolioSyncBanner(cw); banner != "" {
+		lines = append(lines, "", banner)
+	}
+	lines = append(lines, "")
 
 	// ── Project rows ──────────────────────────────────────────────────────
 	for i, p := range m.projects {
@@ -127,87 +133,6 @@ func renderProjectListRow(p data.Project, idx int, selected, contentFocused bool
 // renderProjectCard is kept for backward-compat (used by mouse hit-testing).
 func renderProjectCard(p data.Project, width int, selected, contentFocused bool) string {
 	return renderProjectListRow(p, 0, selected, contentFocused, width)
-}
-
-func (m *App) renderProjectDetailContent() string {
-	p := m.projectDetail
-	cw := m.contentWidth()
-
-	// ── Back nav ──────────────────────────────────────────────────────────
-	backHint := styles.MutedStyle.Render("← Back  (← / Esc)")
-
-	// ── Title block ───────────────────────────────────────────────────────
-	titleLine := styles.HeroTitleStyle.Render(p.Name)
-
-	yearTags := p.Year
-	if len(p.Tags) > 0 {
-		yearTags += "  ·  " + strings.Join(p.Tags, " · ")
-	}
-
-	// ── Featured marker ───────────────────────────────────────────────────
-	var featLine string
-	if p.Featured {
-		featLine = styles.BadgeStyle.Render("★ Featured Project")
-	}
-
-	lines := []string{backHint, "", titleLine}
-	for _, wl := range components.WrapText(yearTags, cw) {
-		lines = append(lines, styles.SubtitleStyle.Render(wl))
-	}
-	if featLine != "" {
-		lines = append(lines, featLine)
-	}
-	lines = append(lines, "")
-
-	// ── Hero / description ────────────────────────────────────────────────
-	cs := data.GetCaseStudy(p.Slug)
-	if cs != nil {
-		sanitized := sanitize.CaseStudy(*cs)
-		cs = &sanitized
-	}
-	if cs != nil && cs.Hero != "" {
-		wrapped := strings.Join(components.WrapText(cs.Hero, cw), "\n")
-		lines = append(lines, styles.NormalStyle.Render(wrapped), "")
-	} else if p.Description != "" {
-		wrapped := strings.Join(components.WrapText(p.Description, cw), "\n")
-		lines = append(lines, styles.NormalStyle.Render(wrapped), "")
-	}
-
-	// ── Case study sections ───────────────────────────────────────────────
-	if cs != nil {
-		for _, sec := range cs.Sections {
-			sectionLabel := styles.PrimaryText.Render("▸ " + sec.Label)
-			body := strings.Join(components.WrapText(sec.Body, cw-2), "\n  ")
-			sectionBody := "  " + styles.NormalStyle.Render(body)
-			lines = append(lines, sectionLabel, sectionBody, "")
-		}
-	}
-
-	// ── Tech stack pills ──────────────────────────────────────────────────
-	if len(p.Stack) > 0 {
-		stackLabel := styles.MutedStyle.Render("Stack  ")
-		stackPills := make([]string, len(p.Stack))
-		for i, s := range p.Stack {
-			stackPills[i] = styles.TagStyle.Render("[" + s + "]")
-		}
-		lines = append(lines, stackLabel+strings.Join(stackPills, " "), "")
-	}
-
-	// ── Links ─────────────────────────────────────────────────────────────
-	if p.Live != "" {
-		lines = append(lines, styles.MutedStyle.Render("Live  ")+styles.LinkStyle.Render(p.Live))
-	}
-	if p.GitHub != "" {
-		lines = append(lines, styles.MutedStyle.Render("Repo  ")+styles.LinkStyle.Render(p.GitHub))
-	}
-
-	// ── Prev / Next navigation ────────────────────────────────────────────
-	prev, next := m.projectNeighbors()
-	lines = append(lines, "",
-		styles.MutedStyle.Render("  ← "+prev+"   ·   "+next+" →   ·   [Esc] Back to list"),
-	)
-
-	return strings.Join(lines, "\n")
 }
 
 func (m *App) projectNeighbors() (prev, next string) {

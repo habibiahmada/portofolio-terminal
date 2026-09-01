@@ -6,7 +6,7 @@ import "fmt"
 // intentionally excluded so footer animation does not rebuild the whole UI.
 func (m *App) layoutCacheKey() string {
 	return fmt.Sprintf(
-		"%d|%dx%d|off%d|menu%d|proj%d|feat%d|help%t|cv%t|f%d",
+		"%d|%dx%d|off%d|menu%d|proj%d|feat%d|help%t|cv%t|f%d|sync%d|projN%d",
 		m.currentScreen,
 		m.width,
 		m.height,
@@ -17,6 +17,8 @@ func (m *App) layoutCacheKey() string {
 		m.showHelp,
 		m.cvModal,
 		m.focus,
+		m.portfolioSync,
+		len(m.projects),
 	)
 }
 

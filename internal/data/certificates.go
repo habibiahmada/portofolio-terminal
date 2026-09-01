@@ -1,8 +1,15 @@
 package data
 
-// GetCertificates returns 52 certifications synced with
-// portofolio/public/data/certificates.json. Pinned entries match isPinned: true.
+// GetCertificates returns certifications — live API data when available, else bundled.
 func GetCertificates() []Certificate {
+	if live, ok := liveCertificatesCopy(); ok {
+		return live
+	}
+	return bundledCertificates()
+}
+
+// bundledCertificates is the offline fallback shipped with the binary.
+func bundledCertificates() []Certificate {
 	return []Certificate{
 		{Name: "Best Capstone Project — Coding Camp 2025", Issuer: "Coding Camp", Date: "2025", Pinned: true},
 		{Name: "Coding Camp 2025 — Certificate of Completion", Issuer: "Coding Camp", Date: "2025", Pinned: true},

@@ -1,7 +1,7 @@
 {
   "name": "habibiahmada",
-  "version": "0.0.4",
-  "description": "Interactive CLI portfolio built with Go and Bubble Tea",
+  "version": "0.0.5",
+  "description": "Interactive CLI portfolio — Go Bubble Tea TUI via npx (habibiahmada.dev)",
   "main": "index.js",
   "bin": {
     "habibiahmada": "./index.js"
@@ -21,6 +21,7 @@
     "url": "https://github.com/habibiahmada/portofolio-terminal"
   },
   "files": [
+    "README.md",
     "index.js",
     "checksums.json",
     "bin/habibiahmada-linux-amd64",

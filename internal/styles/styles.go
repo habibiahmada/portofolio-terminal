@@ -53,6 +53,10 @@ var (
 			Foreground(ColorSuccess).
 			Bold(true)
 
+	WarningStyle = lipgloss.NewStyle().
+			Foreground(ColorWarning).
+			Italic(true)
+
 	LinkStyle = lipgloss.NewStyle().
 			Foreground(ColorLink).
 			Underline(true)

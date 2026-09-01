@@ -112,8 +112,13 @@ Systemd menjalankan SSH application (Wish + Go TUI).
 | `EC2_USER` | SSH username (mis. `ubuntu`) |
 | `EC2_SSH_KEY` | Isi private key SSH (pastikan public key ada di `~/.ssh/authorized_keys` server) |
 | `EC2_PORT` | Port SSH **admin** (bukan Wish). Default workflow: `2223` (admin sshd). Wish portfolio listen di `:22`. |
+| `EC2_INSTANCE_ID` | Instance ID untuk cek state EC2 (AWS API) |
+| `AWS_ACCESS_KEY_ID` | IAM key dengan `ec2:DescribeInstances` |
+| `AWS_SECRET_ACCESS_KEY` | Secret IAM matching |
 
-Deploy dipicu otomatis saat push ke `main` atau tag `v*`, atau manual via **Actions → Deploy SSH Server → Run workflow**.
+Deploy dipicu otomatis saat push ke `main` atau tag `v*`, manual via **Actions → Deploy SSH Server**, atau **scheduled catch-up** (07:05 / 13:05 / 20:05 WIB) jika EC2 sempat mati saat merge.
+
+Workflow mengecek state EC2 via AWS (`EC2_INSTANCE_ID`). Jika instance **stopped**, job berhenti tanpa error dan menunggu jadwal berikutnya. Saat scheduled run, deploy hanya jalan jika commit `main` belum tercatat di `/opt/habibiahmada/.deployed-sha` di server.
 
 ### DNS — subdomain SSH (`ssh.habibiahmada.dev`)
 

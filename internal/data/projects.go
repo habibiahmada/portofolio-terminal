@@ -1,9 +1,15 @@
 package data
 
-// GetProjects returns all portfolio projects synced with docs/pages.md. Order
-// matches the website archive (newest first) so prev/next navigation flows
-// naturally through the list.
+// GetProjects returns portfolio projects — live API data when available, else bundled.
 func GetProjects() []Project {
+	if live, ok := liveProjectsCopy(); ok {
+		return live
+	}
+	return bundledProjects()
+}
+
+// bundledProjects is the offline fallback shipped with the binary.
+func bundledProjects() []Project {
 	return []Project{
 		{
 			Name:          "Aksara Pustaka",
@@ -113,7 +119,7 @@ func GetProjects() []Project {
 func GetFeaturedProjects() []Project {
 	ordered := []string{"e-vote", "agrify", "culture-connect", "spacelab", "renshuu"}
 	bySlug := map[string]Project{}
-	for _, p := range GetProjects() {
+	for _, p := range bundledProjects() {
 		bySlug[p.Slug] = p
 	}
 	featured := make([]Project, 0, len(ordered))

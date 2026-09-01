@@ -1,24 +1,29 @@
 package data
 
-// GetCaseStudy returns the case study for a project slug. Every slug has a
-// four-part narrative (opening, constraints, build, close) per docs/pages.md.
-// Returns nil when the slug is unknown.
+// GetCaseStudy returns the case study for a project slug (live API or bundled).
 func GetCaseStudy(slug string) *CaseStudy {
-	for i := range caseStudies {
-		if caseStudies[i].Slug == slug {
-			cs := caseStudies[i]
+	if cs, ok := liveCaseStudy(slug); ok {
+		return cs
+	}
+	return bundledCaseStudy(slug)
+}
+
+func bundledCaseStudy(slug string) *CaseStudy {
+	for i := range bundledCaseStudies {
+		if bundledCaseStudies[i].Slug == slug {
+			cs := bundledCaseStudies[i]
 			return &cs
 		}
 	}
 	return nil
 }
 
-// GetCaseStudies returns all case studies.
+// GetCaseStudies returns all bundled case studies (offline catalog).
 func GetCaseStudies() []CaseStudy {
-	return caseStudies
+	return bundledCaseStudies
 }
 
-var caseStudies = []CaseStudy{
+var bundledCaseStudies = []CaseStudy{
 	{
 		Slug:  "aksara-pustaka",
 		Title: "Aksara Pustaka",

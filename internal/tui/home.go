@@ -72,7 +72,7 @@ func (m *App) renderHomeFeatured(width int) string {
 	sub := styles.MutedStyle.Render("Select a card with arrow keys, press Enter to read the full case study, or press P to browse all projects.")
 
 	featured := m.featuredProjects()
-	if len(featured) == 0 {
+	if len(featured) == 0 && m.portfolioSync != PortfolioSyncCached {
 		return ""
 	}
 
@@ -124,7 +124,14 @@ func (m *App) renderHomeFeatured(width int) string {
 	}
 
 	subLines := components.WrapText(sub, width)
-	return "\n" + heading + "\n" + strings.Join(subLines, "\n") + "\n\n" + strings.Join(rows, "\n")
+	out := "\n" + heading + "\n" + strings.Join(subLines, "\n")
+	if banner := m.renderPortfolioSyncBanner(width); banner != "" {
+		out += "\n\n" + banner
+	}
+	if len(featured) == 0 {
+		return out
+	}
+	return out + "\n\n" + strings.Join(rows, "\n")
 }
 
 // buildCardLines builds card content lines, wrapping to inner width.

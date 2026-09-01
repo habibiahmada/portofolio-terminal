@@ -1,9 +1,6 @@
-// Package data contains bundled portfolio data for the TUI.
-// No external API calls — all data is embedded in the binary.
-//
-// Shared struct definitions live here; concrete data and getters live in
-// per-domain files: profile.go, projects.go, skills.go, experience.go,
-// certificates.go, socials.go.
+// Package data contains portfolio data for the TUI.
+// Projects and case studies load from the public API when online; bundled
+// structs in this package are the offline fallback.
 package data
 
 // Profile represents the developer profile.

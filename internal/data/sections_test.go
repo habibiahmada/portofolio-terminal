@@ -57,8 +57,8 @@ func TestGetPress(t *testing.T) {
 }
 
 func TestGetCaseStudiesCoverAllProjects(t *testing.T) {
-	for _, p := range GetProjects() {
-		if GetCaseStudy(p.Slug) == nil {
+	for _, p := range bundledProjects() {
+		if bundledCaseStudy(p.Slug) == nil {
 			t.Errorf("missing case study for slug %q", p.Slug)
 		}
 	}

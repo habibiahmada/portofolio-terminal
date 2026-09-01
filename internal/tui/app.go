@@ -100,7 +100,22 @@ const (
 // footerTickInterval drives the App-wide animation loop (splash, nav selector,
 // header accent, footer equalizer). One tick redraws the fixed bars and the
 // animated accents; the cached content body stays cheap.
-const footerTickInterval = 350 * time.Millisecond
+const (
+	footerTickInterval = 350 * time.Millisecond
+)
+
+// PortfolioSync tracks remote portfolio load state.
+type PortfolioSync int
+
+const (
+	PortfolioSyncPending PortfolioSync = iota
+	PortfolioSyncLive
+	PortfolioSyncCached
+)
+
+type portfolioLoadedMsg struct {
+	err error
+}
 
 type App struct {
 	width  int
@@ -170,6 +185,9 @@ type App struct {
 	mascotState  int // 0: normal, 1: blink/wink, 2: angry
 	mascotTimer  int // ticks remaining in interactive state
 
+	// Portfolio sync: bundled fallback until live API succeeds.
+	portfolioSync PortfolioSync
+
 	// Flags.
 	quitting bool
 }
@@ -191,6 +209,7 @@ func New() *App {
 		services:      sanitize.Services(data.GetServices()),
 		process:       sanitize.ProcessSteps(data.GetProcessSteps()),
 		press:         sanitize.PressItems(data.GetPress()),
+		portfolioSync: PortfolioSyncPending,
 	}
 }
 
@@ -203,7 +222,33 @@ func nextFooterTick() tea.Cmd {
 
 // Init implements tea.Model.
 func (m *App) Init() tea.Cmd {
-	return nextFooterTick()
+	return tea.Batch(nextFooterTick(), m.fetchPortfolioCmd())
+}
+
+func (m *App) fetchPortfolioCmd() tea.Cmd {
+	return func() tea.Msg {
+		projects, caseStudies, certificates, err := data.FetchPortfolio()
+		if err != nil {
+			return portfolioLoadedMsg{err: err}
+		}
+		data.SetLiveData(projects, caseStudies, certificates)
+		return portfolioLoadedMsg{}
+	}
+}
+
+func (m *App) applyLivePortfolio() {
+	m.projects = sanitize.Projects(data.GetProjects())
+	m.certificates = sanitize.Certificates(data.GetCertificates())
+	if m.selectedProject >= len(m.projects) {
+		m.selectedProject = 0
+	}
+	if len(m.projects) > 0 && m.currentScreen == ScreenProjectDetail {
+		idx := m.projectIndex()
+		if idx >= 0 && idx < len(m.projects) {
+			m.projectDetail = m.projects[idx]
+		}
+	}
+	m.invalidateLayoutCache()
 }
 
 // Update implements tea.Model.
@@ -230,6 +275,16 @@ func (m *App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 		return m, nextFooterTick()
+
+	case portfolioLoadedMsg:
+		if msg.err != nil {
+			m.portfolioSync = PortfolioSyncCached
+		} else {
+			m.portfolioSync = PortfolioSyncLive
+			m.applyLivePortfolio()
+		}
+		m.invalidateLayoutCache()
+		return m, nil
 	}
 
 	return m, nil
@@ -320,6 +375,7 @@ func (m *App) handleMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 			if i := msg.Y - m.bodyTop - m.bodyTopPad() - 4 + m.contentOffset; i >= 0 && i < len(m.projects) {
 				m.focus = FocusContent
 				m.selectedProject = i
+				m.ensureProjectSelectionVisible()
 				return m.selectItem()
 			}
 		}
@@ -378,6 +434,15 @@ func (m *App) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.mascotTimer = 5
 		}
 		return m, nil
+	}
+
+	// Retry portfolio sync when offline (R).
+	if msg.String() == "R" || msg.String() == "r" {
+		if m.portfolioSync != PortfolioSyncLive {
+			m.portfolioSync = PortfolioSyncPending
+			m.invalidateLayoutCache()
+			return m, m.fetchPortfolioCmd()
+		}
 	}
 
 	// CV overlay intercepts keys first.
@@ -535,12 +600,14 @@ func (m *App) scrollOrSelectUp() {
 			if m.selectedFeatured < 0 {
 				m.selectedFeatured = len(featured) - 1
 			}
+			m.ensureFeaturedSelectionVisible()
 		}
 	case ScreenProjects:
 		m.selectedProject--
 		if m.selectedProject < 0 {
 			m.selectedProject = len(m.projects) - 1
 		}
+		m.ensureProjectSelectionVisible()
 	default:
 		m.scrollUp()
 	}
@@ -556,12 +623,14 @@ func (m *App) scrollOrSelectDown() {
 			if m.selectedFeatured >= len(featured) {
 				m.selectedFeatured = 0
 			}
+			m.ensureFeaturedSelectionVisible()
 		}
 	case ScreenProjects:
 		m.selectedProject++
 		if m.selectedProject >= len(m.projects) {
 			m.selectedProject = 0
 		}
+		m.ensureProjectSelectionVisible()
 	default:
 		m.scrollDown()
 	}
@@ -1136,6 +1205,7 @@ func (m *App) renderHelpOverlay(layout string) string {
 		"",
 		"Other",
 		"─────",
+		"R / r         Retry portfolio sync (when offline)",
 		"?             Show / hide this help",
 		"q / Ctrl+C    Quit",
 	}
