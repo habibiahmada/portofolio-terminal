@@ -3,6 +3,8 @@ package tui
 import (
 	"strings"
 	"testing"
+
+	"github.com/habibiahmada/habibiahmada-terminal/internal/data"
 )
 
 func TestFormatSectionBodyBullets(t *testing.T) {
@@ -33,7 +35,15 @@ func TestRenderProjectDetailContent(t *testing.T) {
 	if !strings.Contains(out, m.projectDetail.Name) {
 		t.Fatalf("expected project name in detail, got %q", out)
 	}
-	if !strings.Contains(out, "01 · OPENING") {
+	// Section headers are numbered and driven by the section's own label.
+	if !strings.Contains(out, "01 · ") {
 		t.Fatalf("expected numbered section header, got %q", out)
+	}
+	if len(m.projectDetail.Slug) > 0 {
+		if cs := data.GetCaseStudy(m.projectDetail.Slug); cs != nil && len(cs.Sections) > 0 {
+			if !strings.Contains(out, strings.ToUpper(cs.Sections[0].Label)) {
+				t.Fatalf("expected first section label in detail, got %q", out)
+			}
+		}
 	}
 }

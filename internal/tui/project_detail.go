@@ -13,13 +13,6 @@ import (
 	"github.com/habibiahmada/habibiahmada-terminal/internal/styles"
 )
 
-var caseStudyPhaseLabels = []string{
-	"Opening",
-	"Reality",
-	"Build",
-	"Close",
-}
-
 func (m *App) renderProjectDetailContent() string {
 	p := m.projectDetail
 	cw := m.contentWidth()
@@ -115,15 +108,13 @@ func renderDetailLead(text string, inner int) string {
 }
 
 func renderCaseStudySection(idx int, sec data.CaseStudySection, inner int) []string {
-	phase := "Section"
-	if idx >= 0 && idx < len(caseStudyPhaseLabels) {
-		phase = caseStudyPhaseLabels[idx]
-	}
 	num := fmt.Sprintf("%02d", idx+1)
 
+	// The section label is authoritative (it comes from the API and mirrors the
+	// web detail structure), so the header is driven by it rather than a fixed
+	// positional phase list that cannot describe every project shape.
 	header := []string{
-		styles.MutedStyle.Render(fmt.Sprintf("%s · %s", num, strings.ToUpper(phase))),
-		styles.PrimaryText.Render(sec.Label),
+		styles.MutedStyle.Render(num+" · ") + styles.PrimaryText.Render(strings.ToUpper(sec.Label)),
 	}
 	panel := renderDetailPanel(formatSectionBody(sec.Body, inner), inner)
 
