@@ -80,14 +80,21 @@ jobs:
         run: cd npm && node test/integration.test.js
 
       - name: Publish to npm
-        run: npm publish "${{ steps.npm_pack.outputs.path }}" --access public
+        run: |
+          # A rerun after a later step failed must not try to republish.
+          if npm view "habibiahmada@${{ steps.version.outputs.version }}" version >/dev/null 2>&1; then
+            echo "habibiahmada@${{ steps.version.outputs.version }} already on npm, skipping publish"
+            exit 0
+          fi
+          npm publish "${{ steps.npm_pack.outputs.path }}" --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Verify npm registry tarball
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          for i in 1 2 3 4 5 6 7 8; do
+          # npm can take several minutes to process a new version; wait up to 10.
+          for i in $(seq 1 60); do
             if curl -fsSL "https://registry.npmjs.org/habibiahmada/-/habibiahmada-${VERSION}.tgz?cb=$(date +%s)" \
               | tar -tzf - | grep -q 'package/bin/habibiahmada-linux-amd64'; then
               echo "Registry tarball OK"
