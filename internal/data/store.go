@@ -13,11 +13,11 @@ const (
 )
 
 var (
-	storeMu            sync.RWMutex
-	liveProjects       []Project
-	liveCaseStudies    map[string]CaseStudy
-	liveCertificates   []Certificate
-	liveSource         Source = SourceBundled
+	storeMu          sync.RWMutex
+	liveProjects     []Project
+	liveCaseStudies  map[string]CaseStudy
+	liveCertificates []Certificate
+	liveSource       Source = SourceBundled
 )
 
 // DataSource returns the active portfolio data source.

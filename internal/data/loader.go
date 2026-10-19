@@ -13,11 +13,11 @@ import (
 )
 
 const (
-	defaultAPIBase        = "https://www.habibiahmada.dev"
-	fetchTimeout          = 8 * time.Second
-	terminalProjectsPath  = "/api/public/terminal/projects"
-	caseStudiesPath       = "/api/public/case-studies"
-	certificatesPath      = "/api/public/certificates?page_size=100"
+	defaultAPIBase       = "https://www.habibiahmada.dev"
+	fetchTimeout         = 8 * time.Second
+	terminalProjectsPath = "/api/public/terminal/projects"
+	caseStudiesPath      = "/api/public/case-studies"
+	certificatesPath     = "/api/public/certificates?page_size=100"
 )
 
 type apiEnvelope struct {
@@ -48,11 +48,11 @@ type apiCaseStudySection struct {
 }
 
 type apiCertificate struct {
-	Title     string   `json:"title"`
-	Org       string   `json:"org"`
-	Pages     []string `json:"pages"`
-	Thumb     string   `json:"thumb"`
-	IsPinned  bool     `json:"is_pinned"`
+	Title    string   `json:"title"`
+	Org      string   `json:"org"`
+	Pages    []string `json:"pages"`
+	Thumb    string   `json:"thumb"`
+	IsPinned bool     `json:"is_pinned"`
 }
 
 var yearInTitle = regexp.MustCompile(`20\d{2}`)
@@ -71,12 +71,12 @@ func FetchPortfolio() ([]Project, []CaseStudy, []Certificate, error) {
 	defer cancel()
 
 	var (
-		wg          sync.WaitGroup
-		mu          sync.Mutex
-		projects    []Project
-		caseStudies []CaseStudy
+		wg           sync.WaitGroup
+		mu           sync.Mutex
+		projects     []Project
+		caseStudies  []CaseStudy
 		certificates []Certificate
-		fetchErr    error
+		fetchErr     error
 	)
 
 	setErr := func(err error) {
