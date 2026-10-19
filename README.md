@@ -1,5 +1,9 @@
 # habibiahmada-terminal
 
+[![npm version](https://img.shields.io/npm/v/habibiahmada?logo=npm&color=cb3837)](https://www.npmjs.com/package/habibiahmada)
+[![npm downloads](https://img.shields.io/npm/dm/habibiahmada?logo=npm)](https://www.npmjs.com/package/habibiahmada)
+[![license](https://img.shields.io/npm/l/habibiahmada)](LICENSE)
+
 Interactive CLI portfolio untuk **Habibi Ahmad Aziz** — Full-Stack Web Developer.
 
 ![habibiahmada terminal preview](assets/preview.png)
