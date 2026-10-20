@@ -362,6 +362,7 @@ func TestViewRendersScreens(t *testing.T) {
 		ScreenAbout,
 		ScreenProjects,
 		ScreenProjectDetail,
+		ScreenOpenSource,
 		ScreenSkills,
 		ScreenExperience,
 		ScreenCertificates,
@@ -428,6 +429,7 @@ func TestMenuItemsOrder(t *testing.T) {
 		ScreenHome,
 		ScreenAbout,
 		ScreenProjects,
+		ScreenOpenSource,
 		ScreenSkills,
 		ScreenExperience,
 		ScreenCertificates,
@@ -446,7 +448,8 @@ func TestSelectEntersServices(t *testing.T) {
 		index int
 		want  Screen
 	}{
-		{6, ScreenServices},
+		{3, ScreenOpenSource},
+		{7, ScreenServices},
 	}
 	for _, c := range cases {
 		m := newTestApp()

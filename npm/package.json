@@ -1,6 +1,6 @@
 {
   "name": "habibiahmada",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Interactive CLI portfolio — Go Bubble Tea TUI via npx (habibiahmada.dev)",
   "main": "index.js",
   "bin": {

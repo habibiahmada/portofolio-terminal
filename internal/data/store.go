@@ -17,6 +17,7 @@ var (
 	liveProjects     []Project
 	liveCaseStudies  map[string]CaseStudy
 	liveCertificates []Certificate
+	liveOpenSource   []OpenSourceProject
 	liveSource       Source = SourceBundled
 )
 
@@ -85,5 +86,29 @@ func liveCertificatesCopy() ([]Certificate, bool) {
 	}
 	out := make([]Certificate, len(liveCertificates))
 	copy(out, liveCertificates)
+	return out, true
+}
+
+// SetLiveOpenSource replaces the open source list from the API. It is kept
+// apart from SetLiveData so an older portfolio without the endpoint does not
+// block the project sync.
+func SetLiveOpenSource(projects []OpenSourceProject) {
+	if len(projects) == 0 {
+		return
+	}
+	storeMu.Lock()
+	defer storeMu.Unlock()
+	liveOpenSource = make([]OpenSourceProject, len(projects))
+	copy(liveOpenSource, projects)
+}
+
+func liveOpenSourceCopy() ([]OpenSourceProject, bool) {
+	storeMu.RLock()
+	defer storeMu.RUnlock()
+	if len(liveOpenSource) == 0 {
+		return nil, false
+	}
+	out := make([]OpenSourceProject, len(liveOpenSource))
+	copy(out, liveOpenSource)
 	return out, true
 }

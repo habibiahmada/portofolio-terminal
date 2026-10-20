@@ -18,6 +18,7 @@ const (
 	terminalProjectsPath = "/api/public/terminal/projects"
 	caseStudiesPath      = "/api/public/case-studies"
 	certificatesPath     = "/api/public/certificates?page_size=100"
+	openSourcePath       = "/api/public/terminal/open-source"
 )
 
 type apiEnvelope struct {
@@ -53,6 +54,21 @@ type apiCertificate struct {
 	Pages    []string `json:"pages"`
 	Thumb    string   `json:"thumb"`
 	IsPinned bool     `json:"is_pinned"`
+}
+
+type apiOpenSource struct {
+	Slug        string   `json:"slug"`
+	Name        string   `json:"name"`
+	Kind        string   `json:"kind"`
+	Description string   `json:"description"`
+	Facts       []string `json:"facts"`
+	Language    string   `json:"language"`
+	License     string   `json:"license"`
+	Install     string   `json:"install"`
+	RepoURL     string   `json:"repo_url"`
+	SiteURL     string   `json:"site_url"`
+	SiteLabel   string   `json:"site_label"`
+	ForkOf      string   `json:"fork_of"`
 }
 
 var yearInTitle = regexp.MustCompile(`20\d{2}`)
@@ -239,4 +255,40 @@ func extractCertYear(title string) string {
 		return match
 	}
 	return ""
+}
+
+// FetchOpenSource loads the open source list. Callers treat an error as
+// "keep the bundled copy".
+func FetchOpenSource() ([]OpenSourceProject, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), fetchTimeout)
+	defer cancel()
+
+	var rows []apiOpenSource
+	if err := getJSON(ctx, openSourcePath, &rows); err != nil {
+		return nil, fmt.Errorf("open source: %w", err)
+	}
+	out := make([]OpenSourceProject, 0, len(rows))
+	for _, row := range rows {
+		if row.Name == "" || row.RepoURL == "" {
+			continue
+		}
+		out = append(out, OpenSourceProject{
+			Slug:        row.Slug,
+			Name:        row.Name,
+			Kind:        row.Kind,
+			Description: row.Description,
+			Facts:       append([]string(nil), row.Facts...),
+			Language:    row.Language,
+			License:     row.License,
+			Install:     row.Install,
+			RepoURL:     row.RepoURL,
+			SiteURL:     row.SiteURL,
+			SiteLabel:   row.SiteLabel,
+			ForkOf:      row.ForkOf,
+		})
+	}
+	if len(out) == 0 {
+		return nil, fmt.Errorf("open source: empty response")
+	}
+	return out, nil
 }

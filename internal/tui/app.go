@@ -29,6 +29,7 @@ const (
 	ScreenAbout
 	ScreenProjects
 	ScreenProjectDetail
+	ScreenOpenSource
 	ScreenSkills
 	ScreenExperience
 	ScreenCertificates
@@ -42,6 +43,7 @@ var ScreenNames = map[Screen]string{
 	ScreenAbout:         "About",
 	ScreenProjects:      "Projects",
 	ScreenProjectDetail: "Project Detail",
+	ScreenOpenSource:    "Open Source",
 	ScreenSkills:        "Skills",
 	ScreenExperience:    "Experience",
 	ScreenCertificates:  "Certificates",
@@ -54,6 +56,7 @@ var menuItems = []Screen{
 	ScreenHome,
 	ScreenAbout,
 	ScreenProjects,
+	ScreenOpenSource,
 	ScreenSkills,
 	ScreenExperience,
 	ScreenCertificates,
@@ -146,6 +149,7 @@ type App struct {
 	services     []data.Service
 	process      []data.ProcessStep
 	press        []data.Press
+	openSource   []data.OpenSourceProject
 
 	// View state.
 	contentOffset int
@@ -209,6 +213,7 @@ func New() *App {
 		services:      sanitize.Services(data.GetServices()),
 		process:       sanitize.ProcessSteps(data.GetProcessSteps()),
 		press:         sanitize.PressItems(data.GetPress()),
+		openSource:    sanitize.OpenSourceProjects(data.GetOpenSourceProjects()),
 		portfolioSync: PortfolioSyncPending,
 	}
 }
@@ -227,6 +232,10 @@ func (m *App) Init() tea.Cmd {
 
 func (m *App) fetchPortfolioCmd() tea.Cmd {
 	return func() tea.Msg {
+		// Optional: a failure keeps the bundled open source list.
+		if openSource, err := data.FetchOpenSource(); err == nil {
+			data.SetLiveOpenSource(openSource)
+		}
 		projects, caseStudies, certificates, err := data.FetchPortfolio()
 		if err != nil {
 			return portfolioLoadedMsg{err: err}
@@ -277,6 +286,8 @@ func (m *App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nextFooterTick()
 
 	case portfolioLoadedMsg:
+		// Fetched separately, so it may be live even when projects are not.
+		m.openSource = sanitize.OpenSourceProjects(data.GetOpenSourceProjects())
 		if msg.err != nil {
 			m.portfolioSync = PortfolioSyncCached
 		} else {
@@ -1022,6 +1033,8 @@ func navLabel(s Screen, termWidth int) string {
 			return "Ab"
 		case ScreenProjects:
 			return "Pr"
+		case ScreenOpenSource:
+			return "OS"
 		case ScreenSkills:
 			return "Sk"
 		case ScreenExperience:
@@ -1037,6 +1050,8 @@ func navLabel(s Screen, termWidth int) string {
 		switch s {
 		case ScreenProjects:
 			return "Proj"
+		case ScreenOpenSource:
+			return "OSS"
 		case ScreenSkills:
 			return "Skill"
 		case ScreenExperience:
@@ -1106,6 +1121,8 @@ func (m *App) renderContentRaw() string {
 		content = m.renderProjectsContent()
 	case ScreenProjectDetail:
 		content = m.renderProjectDetailContent()
+	case ScreenOpenSource:
+		content = m.renderOpenSourceContent()
 	case ScreenSkills:
 		content = m.renderSkillsContent()
 	case ScreenExperience:

@@ -36,6 +36,7 @@ func TestMatrixSizes(t *testing.T) {
 		ScreenAbout,
 		ScreenProjects,
 		ScreenProjectDetail,
+		ScreenOpenSource,
 		ScreenSkills,
 		ScreenExperience,
 		ScreenCertificates,
@@ -94,6 +95,10 @@ func TestScreensContentCompleteness(t *testing.T) {
 			expected: []string{"Services & Solutions", "How I Ship", "Web Design & Mobile-First", "Frontend Development"},
 		},
 		{
+			screen:   ScreenOpenSource,
+			expected: []string{"Built in public", "autumnnote-plus", "npx habibiahmada", "emoji-picker"},
+		},
+		{
 			screen:   ScreenContact,
 			expected: []string{"Contact Methods", "Socials", "Email", "Website"},
 		},
@@ -115,6 +120,8 @@ func TestScreensContentCompleteness(t *testing.T) {
 			raw = m.renderCertificatesContent()
 		case ScreenServices:
 			raw = m.renderServicesContent()
+		case ScreenOpenSource:
+			raw = m.renderOpenSourceContent()
 		case ScreenContact:
 			raw = m.renderContactContent()
 		}
@@ -179,7 +186,7 @@ func TestMatrixNoHorizontalOverflow(t *testing.T) {
 	}
 	screens := []Screen{
 		ScreenAbout, ScreenProjects, ScreenProjectDetail,
-		ScreenServices, ScreenContact,
+		ScreenOpenSource, ScreenServices, ScreenContact,
 	}
 	for _, size := range sizes {
 		for _, s := range screens {

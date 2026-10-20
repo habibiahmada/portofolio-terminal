@@ -63,3 +63,15 @@ func TestGetCaseStudiesCoverAllProjects(t *testing.T) {
 		}
 	}
 }
+
+func TestGetOpenSourceProjects(t *testing.T) {
+	projects := GetOpenSourceProjects()
+	if len(projects) == 0 {
+		t.Fatal("expected bundled open source projects")
+	}
+	for _, p := range projects {
+		if p.Name == "" || p.RepoURL == "" || p.Description == "" {
+			t.Errorf("open source project %q is missing name, repo, or description", p.Slug)
+		}
+	}
+}

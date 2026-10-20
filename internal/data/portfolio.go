@@ -130,3 +130,19 @@ type Press struct {
 	CTALabel string
 	URL      string
 }
+
+// OpenSourceProject is a public repository shown on the Open Source screen.
+type OpenSourceProject struct {
+	Slug        string
+	Name        string
+	Kind        string // e.g. "npm package"
+	Description string
+	Facts       []string
+	Language    string
+	License     string
+	Install     string // shell command; empty when there is none
+	RepoURL     string
+	SiteURL     string
+	SiteLabel   string
+	ForkOf      string // credit line for forks, e.g. "Autumn Note 3.1.0 (url)"
+}

@@ -159,3 +159,28 @@ func CaseStudy(cs data.CaseStudy) data.CaseStudy {
 	}
 	return cs
 }
+
+func OpenSourceProjects(ps []data.OpenSourceProject) []data.OpenSourceProject {
+	out := make([]data.OpenSourceProject, len(ps))
+	for i, p := range ps {
+		facts := make([]string, len(p.Facts))
+		for j, f := range p.Facts {
+			facts[j] = Plain(f)
+		}
+		out[i] = data.OpenSourceProject{
+			Slug:        Plain(p.Slug),
+			Name:        Plain(p.Name),
+			Kind:        Plain(p.Kind),
+			Description: Plain(p.Description),
+			Facts:       facts,
+			Language:    Plain(p.Language),
+			License:     Plain(p.License),
+			Install:     Plain(p.Install),
+			RepoURL:     Plain(p.RepoURL),
+			SiteURL:     Plain(p.SiteURL),
+			SiteLabel:   Plain(p.SiteLabel),
+			ForkOf:      Plain(p.ForkOf),
+		}
+	}
+	return out
+}

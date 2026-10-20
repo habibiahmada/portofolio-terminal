@@ -43,6 +43,7 @@ cmd/ssh/main.go        →  ssh ssh.habibiahmada.dev  →  internal/tui (sama)
 | Root / Home | `internal/tui/app.go`, `home.go` |
 | About | `internal/tui/about.go` |
 | Projects | `internal/tui/projects.go`, `project_detail.go` |
+| Open Source | `internal/tui/open_source.go` |
 | Skills | `internal/tui/skills.go` |
 | Experience | `internal/tui/experience.go` |
 | Certificates | `internal/tui/certificates.go` |

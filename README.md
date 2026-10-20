@@ -137,11 +137,12 @@ habibiahmada-terminal/
 1. **Home**: Hero banner `HABIBI`, availability badge, deskripsi, 4 featured project cards interaktif, trusted partners, dan quick actions.
 2. **About**: Bio perjalanan karir, filosofi rekayasa perangkat lunak, fokus keahlian, dan statistik.
 3. **Projects**: Arsip seluruh proyek dengan indikator seleksi tebal `▌`, badge `★ Featured`, tag pills, serta halaman case study detail (`←`/`→` prev/next, `Esc` back).
-4. **Skills**: Skill teknis per domain (Frontend, Backend, DevOps, AI/Data) dengan visualisasi proficiency.
-5. **Experience**: Riwayat pekerjaan, peranan, pencapaian kunci, serta riwayat edukasi formal.
-6. **Certificates**: Sertifikasi profesional terverifikasi dengan link kredensial.
-7. **Services**: Solusi dan layanan web engineering end-to-end yang ditawarkan.
-8. **Contact**: Saluran kontak langsung (Email, GitHub, LinkedIn, Website) dan ketersediaan freelance/full-time.
+4. **Open Source**: Repo publik (autumnnote-plus, CLI ini, emoji-picker) dengan fakta singkat, perintah install, dan link source. Data diambil dari `/api/public/terminal/open-source`, dengan salinan bawaan saat offline.
+5. **Skills**: Skill teknis per domain (Frontend, Backend, DevOps, AI/Data) dengan visualisasi proficiency.
+6. **Experience**: Riwayat pekerjaan, peranan, pencapaian kunci, serta riwayat edukasi formal.
+7. **Certificates**: Sertifikasi profesional terverifikasi dengan link kredensial.
+8. **Services**: Solusi dan layanan web engineering end-to-end yang ditawarkan.
+9. **Contact**: Saluran kontak langsung (Email, GitHub, LinkedIn, Website) dan ketersediaan freelance/full-time.
 
 ---
 
