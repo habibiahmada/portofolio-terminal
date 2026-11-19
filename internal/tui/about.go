@@ -32,9 +32,9 @@ func (m *App) renderAboutHero(cw int) string {
 
 	bio := "I am a full-stack web developer passionate about building scalable, " +
 		"user-centric applications and solid architectural foundations. Having graduated " +
-		"in Software Engineering from SMKN 1 Karawang, I currently build web applications " +
-		"at PT Webekspres Teknologi Indonesia. My experience spans crafting responsive client " +
-		"interfaces, architecting custom CMS platforms, and deploying production-ready full-stack features."
+		"in Software Engineering from SMKN 1 Karawang in 2026, I spent May to November 2026 " +
+		"as a Web Developer at PT Webekspres Teknologi Indonesia, shipping client sites and my part " +
+		"of platforms with a mobile app and an API behind them. I am now looking for a full-time role."
 
 	lines := []string{name, title, "", badge, ""}
 	lines = append(lines, components.WrapText(bio, cw-2)...)
