@@ -1243,7 +1243,7 @@ func (m *App) renderCVOverlay(layout string) string {
 		styles.NormalStyle.Render("Web:   " + styles.LinkStyle.Render(m.profile.Website)),
 		"",
 		styles.SubtitleStyle.Render("Recent role"),
-		styles.NormalStyle.Render("Web Developer at " + m.profile.Employer),
+		styles.NormalStyle.Render("Web Developer at " + m.profile.Employer + " (May to Nov 2026)"),
 		"",
 		styles.MutedStyle.Render("(V opens this viewer · ← / Esc closes)"),
 	}

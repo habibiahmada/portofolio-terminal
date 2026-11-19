@@ -4,14 +4,13 @@ package data
 func GetWorkExperience() []ExperienceWork {
 	return []ExperienceWork{
 		{
-			Period:   "May 2026 - Now",
+			Period:   "May - Nov 2026",
 			Role:     "Web Developer",
-			Company:  "PT Webekspres Technology Indonesia",
+			Company:  "PT Webekspres Teknologi Indonesia",
 			Location: "Karawang · On site",
-			Badge:    "Current",
 			Details: []string{
-				"Client and internal web work on WordPress, CMS platforms, and modern stacks.",
-				"I own features end to end, from brief to deploy.",
+				"Client sites, news portals, and catalogs, plus my part in MIRU, HK GOLD VIP, and JepangKu.",
+				"Owned features end to end, from brief to deploy, and built the team's shared CI/CD platform.",
 			},
 		},
 		{
