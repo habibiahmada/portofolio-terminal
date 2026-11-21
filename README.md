@@ -11,8 +11,7 @@ Interactive CLI portfolio untuk **Habibi Ahmad Aziz** — Full-Stack Web Develop
 Proyek ini adalah **satu Go TUI** (Bubble Tea + Lip Gloss) yang dijalankan melalui dua jalur distribusi:
 
 ```bash
-npx habibiahmada          # local experience (Go binary via npm wrapper)
-ssh ssh.habibiahmada.dev      # remote experience (EC2 via Wish server)
+npx habibiahmada          # jalankan TUI portfolio (Go binary via npm wrapper)
 ```
 
 Website portfolio (`https://habibiahmada.dev`) dan terminal portfolio berbagi identitas visual yang sama, namun merupakan presentation layer terpisah.
@@ -24,7 +23,6 @@ Website portfolio (`https://habibiahmada.dev`) dan terminal portfolio berbagi id
 | Pengguna | Perintah | Keterangan |
 |---|---|---|
 | **Pengguna** | `npx habibiahmada` | Jalankan langsung di laptop Anda (local binary) |
-| **Pengguna** | `ssh ssh.habibiahmada.dev` | TUI interaktif via SSH (remote server) |
 | **Developer** | `make dev` | Jalankan development mode |
 | **Developer** | `make test` | Jalankan unit test |
 
@@ -66,7 +64,6 @@ Website portfolio (`https://habibiahmada.dev`) dan terminal portfolio berbagi id
   - **Klik 1–2x (`M`)**: Mengedipkan mata gembira (`─ ─`, `^ ^`, `★ ★`) dan tersenyum (`╰▽╯`).
   - **Klik berkali-kali**: Menjadi marah dengan mata tajam (`◣ ◢`), border merah, dan tanda urat kemarahan **`╬` / `⑊`** (simbol anime vein tanpa emoji).
 - **📄 In-App CV Modal Viewer**: Tekan `V` dari halaman Home untuk melihat ringkasan CV lengkap langsung di dalam terminal.
-- **⚡ Dual Transport Core**: Satu codebase Go TUI inti yang melayani `npx` dan `ssh`.
 
 ---
 
@@ -90,7 +87,6 @@ Website portfolio (`https://habibiahmada.dev`) dan terminal portfolio berbagi id
 |---|---|---|---|
 | **Website** | `https://habibiahmada.dev` | Browser → Cloudflare → Vercel → Next.js | Supabase |
 | **CLI (local)** | `npx habibiahmada` | Laptop user → Go binary → Bubble Tea | Node.js (hanya wrapper unduhan) |
-| **SSH (remote)** | `ssh ssh.habibiahmada.dev` | EC2 → Wish → Go TUI | Server EC2 |
 
 ---
 
@@ -101,9 +97,7 @@ Website portfolio (`https://habibiahmada.dev`) dan terminal portfolio berbagi id
 | **Runtime** | Go 1.22+ | Aplikasi TUI inti |
 | **TUI Engine** | [Bubble Tea](https://github.com/charmbracelet/bubbletea) | State management & terminal event loop |
 | **Styling** | [Lip Gloss](https://github.com/charmbracelet/lipgloss) | Layout, border, warna, dan rendering ANSI |
-| **SSH Server** | [Wish](https://github.com/charmbracelet/wish) | SSH server application layer |
 | **Distribusi** | npm | Binary distribution wrapper untuk `npx habibiahmada` |
-| **Hosting SSH** | AWS EC2 | Server SSH remote |
 
 ---
 
@@ -114,7 +108,7 @@ habibiahmada-terminal/
 ├── assets/                   # Screenshot preview & gambar
 ├── cmd/
 │   ├── portfolio/main.go     # Entry point local / npx
-│   └── ssh/main.go           # Entry point SSH server
+│   └── ssh/main.go           # Entry point SSH server (tidak di-deploy sejak 21 Nov 2026)
 ├── internal/
 │   ├── animation/            # Framework animasi & ticker
 │   ├── components/           # UI Reusable (Header, NavRail, Footer, Cards, Mascot, dll.)
@@ -150,7 +144,7 @@ habibiahmada-terminal/
 
 | Dokumen | Isi |
 |---|---|
-| [docs/user-guide.md](docs/user-guide.md) | Panduan lengkap akses terminal (`npx`, `ssh`) & troubleshooting |
+| [docs/user-guide.md](docs/user-guide.md) | Panduan lengkap akses terminal (`npx`) & troubleshooting |
 | [docs/getting-started.md](docs/getting-started.md) | Panduan setup proyek untuk developer baru |
 | [docs/development-guide.md](docs/development-guide.md) | Workflow pengembangan, penambahan data, dan testing |
 | [docs/design-system.md](docs/design-system.md) | Spesifikasi warna, tipografi, dan komponen Lip Gloss |

@@ -7,7 +7,7 @@ Panduan untuk AI coding assistant yang bekerja pada proyek terminal portfolio in
 Membangun **satu Go TUI** (Bubble Tea + Lip Gloss) yang dijalankan melalui:
 
 1. **`npx habibiahmada`** — TUI berjalan di laptop user (local experience)
-2. **`ssh ssh.habibiahmada.dev`** — TUI berjalan di AWS EC2 via Wish (remote experience)
+2. ~~`ssh ssh.habibiahmada.dev`~~: dihentikan 21 November 2026 bersama instance EC2-nya. Jangan membangun ulang server SSH atau menambah `deploy.yml` tanpa permintaan pemilik.
 
 Jangan membuat dua TUI terpisah. Satu TUI core, dua transport/runtime.
 
@@ -93,7 +93,7 @@ npx habibiahmada
 
 Binaries target: linux-x64, linux-arm64, darwin-x64, darwin-arm64, win-x64.
 
-## SSH Deployment (EC2)
+## SSH Deployment (EC2): dihentikan 21 November 2026, hanya riwayat
 
 ```
 /opt/habibiahmada/habibiahmada-ssh

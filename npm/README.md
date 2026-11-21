@@ -8,12 +8,6 @@ Run the Bubble Tea TUI locally without cloning the Go repo:
 npx habibiahmada
 ```
 
-Remote SSH experience (same UI, runs on EC2):
-
-```bash
-ssh ssh.habibiahmada.dev
-```
-
 Website: [habibiahmada.dev](https://habibiahmada.dev)
 
 ## What you get

@@ -5,14 +5,10 @@ Cara mengakses portfolio **Habibi Ahmad Aziz** di terminal Anda — tanpa perlu 
 ## Ringkasan Cepat
 
 ```bash
-# Jalankan di laptop Anda (local)
 npx habibiahmada
-
-# Atau hubungkan ke server (remote)
-ssh ssh.habibiahmada.dev
 ```
 
-Kedua perintah di atas menampilkan **TUI portfolio interaktif yang sama**.
+Perintah di atas menampilkan **TUI portfolio interaktif** langsung di laptop Anda. Server SSH (`ssh ssh.habibiahmada.dev`) dihentikan pada 21 November 2026.
 
 ---
 
@@ -54,54 +50,12 @@ Tidak. Binary sudah dikompilasi. Anda hanya perlu Node.js untuk `npx`.
 **Apakah perlu internet setiap kali?**
 Tidak selalu. Setelah package di-cache oleh npm, bisa dijalankan tanpa unduh ulang.
 
-**Apakah EC2/server harus hidup?**
-Tidak. npx berjalan 100% di laptop Anda.
-
 **Berapa ukuran download?**
 Sekitar ~10–20 MB (tergantung platform).
 
 ---
 
-## Opsi 2: ssh ssh.habibiahmada.dev (Remote Experience)
-
-TUI berjalan di server AWS EC2. Laptop Anda hanya mengirim input keyboard dan menerima output tampilan.
-
-### Persyaratan
-
-- SSH client (sudah tersedia di Linux/macOS; Windows 10+ punya OpenSSH bawaan)
-- Koneksi internet
-- **Server EC2 harus dalam keadaan ON**
-
-### Cara Menjalankan
-
-```bash
-ssh ssh.habibiahmada.dev
-```
-
-Setelah terhubung, TUI portfolio langsung terbuka — tidak perlu mengetik perintah tambahan.
-
-### Hostname
-
-Perintah publik: **`ssh ssh.habibiahmada.dev`**
-
-Apex `habibiahmada.dev` dipakai website (Vercel), jadi SSH memakai subdomain `ssh.` yang mengarah langsung ke EC2. Lihat `docs/deployment.md` untuk setup DNS Cloudflare.
-
-### Kapan Memilih SSH?
-
-| Situasi | Rekomendasi |
-|---------|-------------|
-| Tidak punya Node.js | SSH |
-| Ingin demo "server-side TUI" | SSH |
-| EC2 sedang mati | Gunakan npx |
-| Butuh offline | Gunakan npx (setelah cache) |
-
-### Catatan Ketersediaan
-
-SSH portfolio menumpang pada EC2 yang juga menjalankan Telegram Agent. EC2 dinyalakan **3× sehari** via scheduler. Jika SSH gagal connect, kemungkinan EC2 sedang STOPPED — gunakan `npx habibiahmada` sebagai alternatif.
-
----
-
-## Opsi 3: Website
+## Opsi 2: Website
 
 ```bash
 # Buka di browser
@@ -175,17 +129,13 @@ Website dan terminal portfolio menampilkan informasi yang sama, dengan presentat
 
 ## Perbandingan Jalur Akses
 
-| | npx | SSH | Website |
-|---|-----|-----|---------|
-| Perintah | `npx habibiahmada` | `ssh ssh.habibiahmada.dev` | Browser → `habibiahmada.dev` |
-| Butuh Node.js | Ya | Tidak | Tidak |
-| Butuh SSH client | Tidak | Ya | Tidak |
-| Butuh browser | Tidak | Tidak | Ya |
-| TUI interaktif | Ya | Ya | Tidak |
-| Offline | Bisa (setelah cache) | Tidak | Tidak |
-| Bergantung EC2 | Tidak | Ya | Tidak |
-
-Detail teknis perbandingan npx vs SSH: [npx-vs-ssh.md](npx-vs-ssh.md).
+| | npx | Website |
+|---|-----|---------|
+| Perintah | `npx habibiahmada` | Browser → `habibiahmada.dev` |
+| Butuh Node.js | Ya | Tidak |
+| Butuh browser | Tidak | Ya |
+| TUI interaktif | Ya | Tidak |
+| Offline | Bisa (setelah cache) | Tidak |
 
 ---
 
@@ -207,14 +157,6 @@ brew install node
 
 Package mungkin belum ter-publish atau versi lokal belum di-build. Untuk development, lihat [getting-started.md](getting-started.md).
 
-### ssh: Connection refused / timed out
-
-EC2 kemungkinan sedang STOPPED. Alternatif:
-
-```bash
-npx habibiahmada
-```
-
 ### TUI tampilan rusak / karakter aneh
 
 Pastikan terminal Anda mendukung:
@@ -230,14 +172,11 @@ Pastikan fokus ada di jendela terminal (bukan di panel lain). Tekan `Ctrl+C` unt
 
 ## Untuk Recruiter / Hiring Manager
 
-Tiga cara cepat melihat portfolio:
+Dua cara cepat melihat portfolio:
 
 ```bash
-# Terminal (local) — paling mudah
+# Terminal
 npx habibiahmada
-
-# Terminal (remote) — demo server-side
-ssh ssh.habibiahmada.dev
 
 # Web
 open https://habibiahmada.dev

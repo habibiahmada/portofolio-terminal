@@ -9,9 +9,8 @@ Satu aplikasi TUI (Terminal User Interface) portfolio interaktif yang dibuat den
 | Jalur | Perintah | Keterangan |
 |-------|----------|------------|
 | **Local** | `npx habibiahmada` | Binary Go dijalankan di laptop Anda |
-| **Remote** | `ssh ssh.habibiahmada.dev` | TUI yang sama berjalan di server EC2 |
 
-Kedua jalur memakai **TUI core yang sama** (`internal/tui/`). Perbedaannya hanya di transport layer.
+Server SSH remote dihentikan pada 21 November 2026, jadi `npx` adalah satu-satunya jalur. Kode `cmd/ssh` masih ada di repo tetapi tidak di-deploy.
 
 ## Prasyarat
 
@@ -20,7 +19,6 @@ Kedua jalur memakai **TUI core yang sama** (`internal/tui/`). Perbedaannya hanya
 | Jalur | Yang dibutuhkan |
 |-------|-----------------|
 | npx | Node.js ≥ 14, terminal modern |
-| SSH | SSH client (sudah ada di Linux/macOS, Windows 10+) |
 
 ### Untuk development (kontributor)
 
@@ -115,7 +113,7 @@ Setelah TUI terbuka:
 habibiahmada-terminal/
 ├── cmd/
 │   ├── portfolio/main.go     # Entry point local / npx
-│   └── ssh/main.go            # Entry point SSH server
+│   └── ssh/main.go            # Entry point SSH server (tidak di-deploy)
 ├── internal/
 │   ├── tui/
 │   │   ├── app.go             # TUI core (semua screen)
@@ -151,4 +149,4 @@ habibiahmada-terminal/
 | Development sehari-hari | [development-guide.md](development-guide.md) |
 | Lihat task & progress | [task-list.md](task-list.md) |
 | Arsitektur lengkap | [architecture.md](architecture.md) |
-| Deploy ke npm / EC2 | [deployment.md](deployment.md) |
+| Rilis ke npm | [deployment.md](deployment.md) |
