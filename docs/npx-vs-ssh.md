@@ -1,5 +1,7 @@
 # npx vs SSH
 
+> **Catatan:** server SSH (`ssh ssh.habibiahmada.dev`) dihentikan pada 21 November 2026 bersama instance EC2-nya. Satu-satunya jalur terminal sekarang `npx habibiahmada`. Bagian SSH di bawah disimpan sebagai riwayat desain; kode `cmd/ssh` masih ada tetapi tidak di-deploy.
+
 Perbandingan dua jalur akses terminal portfolio.
 
 ## Ringkasan

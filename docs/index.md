@@ -6,7 +6,7 @@ Indeks dokumentasi resmi proyek habibiahmada-terminal.
 
 | Dokumen | Untuk siapa | Isi |
 |---------|-------------|-----|
-| [user-guide.md](user-guide.md) | **Pengguna / recruiter** | Cara akses portfolio di terminal (`npx`, `ssh`) |
+| [user-guide.md](user-guide.md) | **Pengguna / recruiter** | Cara akses portfolio di terminal (`npx`) |
 | [getting-started.md](getting-started.md) | **Developer baru** | Clone, setup, jalankan TUI pertama kali |
 | [development-guide.md](development-guide.md) | **Kontributor** | Workflow harian, edit data/TUI, build, release |
 | [task-list.md](task-list.md) | **Semua** | Roadmap, task list, progress proyek |
@@ -21,7 +21,7 @@ Indeks dokumentasi resmi proyek habibiahmada-terminal.
 | [tech-stack.md](tech-stack.md) | Teknologi per layer |
 | [folder-structure.md](folder-structure.md) | Struktur repo, fase 1 vs target |
 | [tui-illustration.md](tui-illustration.md) | Ilustrasi ASCII, signature art, animasi splash, responsive |
-| [npx-vs-ssh.md](npx-vs-ssh.md) | Perbandingan local vs remote experience |
+| [npx-vs-ssh.md](npx-vs-ssh.md) | Perbandingan local vs remote experience (SSH dihentikan 21 Nov 2026) |
 | [data-strategy.md](data-strategy.md) | Bundled data v1, Supabase untuk website |
 | [versioning.md](versioning.md) | Semantic versioning guide |
 
@@ -29,7 +29,7 @@ Indeks dokumentasi resmi proyek habibiahmada-terminal.
 
 | Dokumen | Topik |
 |---------|-------|
-| [deployment.md](deployment.md) | npm publish, EC2, GitHub Actions |
+| [deployment.md](deployment.md) | npm publish, GitHub Actions (bagian EC2 hanya riwayat) |
 
 ## Dokumen Lain
 
@@ -43,7 +43,6 @@ Indeks dokumentasi resmi proyek habibiahmada-terminal.
 ```bash
 # Pengguna — akses portfolio
 npx habibiahmada
-ssh ssh.habibiahmada.dev
 
 # Developer — jalankan lokal
 go run ./cmd/portfolio
